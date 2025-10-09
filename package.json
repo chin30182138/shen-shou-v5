@@ -2,8 +2,10 @@
   "name": "shen-shou-v5",
   "version": "1.0.0",
   "private": true,
-  "scripts": {
-    "build": "echo 'no build needed'"
+  "engines": {
+    "node": ">=18"
   },
-  "dependencies": {}
+  "scripts": {
+    "start": "echo 'no build needed'"
+  }
 }
