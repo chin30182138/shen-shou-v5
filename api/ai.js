@@ -6,8 +6,45 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+// 添加 CORS 中間件
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(200);
+  }
+  next();
+});
+
+// 檢查 API Key
+console.log('檢查環境變數...');
+console.log('OPENAI_API_KEY 存在:', !!process.env.OPENAI_API_KEY);
+console.log('DEEPSEEK_API_KEY 存在:', !!process.env.DEEPSEEK_API_KEY);
+
+if (!process.env.OPENAI_API_KEY) {
+  console.warn('⚠️  OPENAI_API_KEY 未設定！');
+}
+
+if (!process.env.DEEPSEEK_API_KEY) {
+  console.warn('⚠️  DEEPSEEK_API_KEY 未設定！');
+}
+
+const openai = new OpenAI({ 
+  apiKey: process.env.OPENAI_API_KEY || 'dummy-key-for-initialization'
+});
+
 const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
+
+// 健康檢查端點
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: '服務正常運行', 
+    timestamp: new Date().toISOString(),
+    openai: !!process.env.OPENAI_API_KEY,
+    deepseek: !!process.env.DEEPSEEK_API_KEY
+  });
+});
 
 // 重試 + 多模型支持
 async function retryRequest(fn, maxRetries = 3, delay = 15000) {
@@ -88,26 +125,35 @@ async function callDeepSeek(prompt) {
     max_tokens: 800,
     temperature: 0.9,
   };
-  console.log('發送 DeepSeek 請求...', data);
-  const response = await axios.post(url, data, { headers });
-  console.log('DeepSeek 回應：', response.data);
-  if (!response.data.choices || !response.data.choices[0].message.content) throw new Error('DeepSeek 回應空空！😿');
+  console.log('發送 DeepSeek 請求...');
+  const response = await axios.post(url, data, { headers, timeout: 30000 });
+  console.log('DeepSeek 回應狀態:', response.status);
+  if (!response.data.choices || !response.data.choices[0].message.content) {
+    throw new Error('DeepSeek 回應空空！😿');
+  }
   return response.data;
 }
 
 app.post('/api/ai', async (req, res) => {
-  const { scores, summary } = req.body;
-  if (!summary) {
-    return res.status(400).send('哎喲！測驗資料不見啦！😿 小萌物再試一次～');
-  }
+  console.log('收到 AI 分析請求...');
+  
+  try {
+    const { scores, summary } = req.body;
+    
+    if (!summary) {
+      console.log('錯誤：缺少測驗資料');
+      return res.status(400).json({ error: '哎喲！測驗資料不見啦！😿 小萌物再試一次～' });
+    }
 
-  const topBeast = summary.top;
-  const dual = summary.dual ? `雙獸: ${summary.dual.join(' x ')}` : '';
-  const variant = summary.variant;
-  const scoreStr = Object.entries(scores).map(([b, s]) => `${b}: ${s}/25`).join(', ');
-  const branchTraits = `子: 機敏、智慧、水; 丑: 穩重、耐心、土; 寅: 勇敢、積極、木; 卯: 溫柔、敏捷、木; 辰: 堅韌、領導、土; 巳: 智慧、神秘、火; 午: 熱情、自由、火; 未: 溫和、藝術、土; 申: 機智、靈活、金; 酉: 精準、美麗、金; 戌: 忠誠、守護、土; 亥: 寬容、想像、水`;
+    console.log('分析資料:', { topBeast: summary.top, variant: summary.variant, scores });
 
-  const prompt = `
+    const topBeast = summary.top;
+    const dual = summary.dual ? `雙獸: ${summary.dual.join(' x ')}` : '';
+    const variant = summary.variant;
+    const scoreStr = Object.entries(scores).map(([b, s]) => `${b}: ${s}/25`).join(', ');
+    const branchTraits = `子: 機敏、智慧、水; 丑: 穩重、耐心、土; 寅: 勇敢、積極、木; 卯: 溫柔、敏捷、木; 辰: 堅韌、領導、土; 巳: 智慧、神秘、火; 午: 熱情、自由、火; 未: 溫和、藝術、土; 申: 機智、靈活、金; 酉: 精準、美麗、金; 戌: 忠誠、守護、土; 亥: 寬容、想像、水`;
+
+    const prompt = `
 你是超級韓風 MBTI 小仙女，專聊「神獸七十二型人格」！😽💕 融合神獸、五行、金錢卦、地支、心理學，超粉紅好玩！用戶分數：${scoreStr}。主神獸：${topBeast} ${dual}。變體：${variant}。
 
 地支特質：${branchTraits}。
@@ -124,47 +170,87 @@ app.post('/api/ai', async (req, res) => {
 
 500-800字，繁體中文，少女風到融化！讓 ${topBeast}${variant}型超獨特可愛！🌈💖😺`;
 
-  try {
-    console.log('嘗試呼叫 OpenAI，模型: gpt-4o-mini...');
+    console.log('嘗試呼叫 AI 服務...');
+
     let completion;
+    let usedService = '';
+
     try {
-      completion = await retryRequest(() =>
-        openai.chat.completions.create({
-          model: 'gpt-4o-mini',
-          messages: [{ role: 'user', content: prompt }],
-          max_tokens: 800,
-          temperature: 0.9,
-        })
-      );
-    } catch (fallbackErr) {
-      console.log('gpt-4o-mini 失敗，切換 gpt-3.5-turbo...');
-      try {
+      // 先嘗試 OpenAI
+      if (process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'dummy-key-for-initialization') {
+        console.log('嘗試 OpenAI gpt-4o-mini...');
         completion = await retryRequest(() =>
           openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
+            model: 'gpt-4o-mini',
             messages: [{ role: 'user', content: prompt }],
             max_tokens: 800,
             temperature: 0.9,
           })
         );
-      } catch (instructErr) {
-        console.log('OpenAI 都壞，切換 DeepSeek...');
-        if (!deepseekApiKey) throw new Error('DeepSeek API Key 沒填！😿 檢查 .env 吧～');
-        const deepseekResp = await retryRequest(() => callDeepSeek(prompt));
-        completion = { choices: [{ message: { content: deepseekResp.choices[0].message.content } }] };
+        usedService = 'OpenAI GPT-4o-mini';
+      } else {
+        throw new Error('OpenAI API Key 未設定');
+      }
+    } catch (openaiErr) {
+      console.log('OpenAI 失敗:', openaiErr.message);
+      
+      // 嘗試 DeepSeek
+      if (deepseekApiKey) {
+        console.log('嘗試 DeepSeek...');
+        try {
+          const deepseekResp = await retryRequest(() => callDeepSeek(prompt));
+          completion = { choices: [{ message: { content: deepseekResp.choices[0].message.content } }] };
+          usedService = 'DeepSeek';
+        } catch (deepseekErr) {
+          console.log('DeepSeek 也失敗:', deepseekErr.message);
+          throw new Error('所有 AI 服務都暫時不可用');
+        }
+      } else {
+        throw new Error('沒有可用的 AI 服務 API Key');
       }
     }
-    console.log('AI 回應內容：', completion.choices[0].message.content);
-    if (!completion.choices[0].message.content) throw new Error('AI 回應空空！😿');
-    res.json({ text: completion.choices[0].message.content });
+
+    console.log(`${usedService} 回應成功`);
+    
+    if (!completion.choices[0].message.content) {
+      throw new Error('AI 回應空空！😿');
+    }
+    
+    const responseText = completion.choices[0].message.content;
+    console.log('AI 回應長度:', responseText.length);
+    
+    res.json({ 
+      text: responseText,
+      service: usedService
+    });
+    
   } catch (err) {
-    console.error('AI 小仙女日誌：', err);
+    console.error('AI 分析錯誤:', err);
+    
+    // 即使錯誤也要返回 fallback 報告
+    const { scores = {}, summary = {} } = req.body || {};
     const fallbackText = generateFallbackReport(summary, scores);
-    console.log('使用 fallback 報告：', fallbackText);
-    res.json({ text: fallbackText });
+    
+    res.json({ 
+      text: fallbackText,
+      error: err.message,
+      service: 'fallback'
+    });
   }
 });
 
-app.listen(3000, () => {
-  console.log('伺服器粉紅開跑～ port 3000 等你來玩喵！😺🌸');
+// 錯誤處理中間件
+app.use((err, req, res, next) => {
+  console.error('未處理的錯誤:', err);
+  res.status(500).json({ 
+    error: '伺服器內部錯誤',
+    message: err.message 
+  });
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(`🌸 伺服器粉紅開跑～ port ${PORT} 等你來玩喵！😺✨`);
+  console.log(`🔗 本地訪問: http://localhost:${PORT}`);
+  console.log(`❤️  健康檢查: http://localhost:${PORT}/health`);
 });
