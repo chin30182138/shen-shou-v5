@@ -1,11 +1,14 @@
 {
   "version": 2,
+  "public": true,
   "builds": [
     { "src": "index.html", "use": "@vercel/static" },
+    { "src": "img/**/*", "use": "@vercel/static" },
     { "src": "api/ai.js", "use": "@vercel/node" }
   ],
   "routes": [
-    { "src": "/api/(.*)", "dest": "api/$1.js" },
+    { "src": "/api/(.*)", "dest": "/api/$1.js" },
+    { "src": "/img/(.*)", "dest": "/img/$1" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
