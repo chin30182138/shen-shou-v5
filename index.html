@@ -14,11 +14,12 @@
     .brand { color: var(--brand); }
     .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     .slider { accent-color: var(--brand); }
-    @media print { .no-print {display:none!important;} }
+    .spinner { animation: spin 1s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media print { .no-print { display: none !important; } }
   </style>
 </head>
 <body class="text-slate-800">
-
 <main class="max-w-5xl mx-auto p-4 sm:p-6">
   <header class="mb-4 flex justify-between items-center">
     <div class="flex items-center gap-3">
@@ -36,7 +37,7 @@
     <ol id="qWrap" class="space-y-3"></ol>
     <div class="mt-4 flex gap-3">
       <button type="submit" class="bg-amber-600 text-white px-5 py-2 rounded">送出測驗</button>
-      <button type="button" id="btnFillMid" class="border px-3 py-2 rounded">全部填3</button>
+      <button type="button" id="btnFillMid" class="border px-3 py-2 rounded no-print">全部填3</button>
     </div>
   </form>
 
@@ -110,20 +111,19 @@ const BANK = [
   {t:"我習慣冷靜看待問題。",b:"玄武"},
 ];
 
-// 隨機shuffle題目
+// 隨機題目
 BANK.sort(() => Math.random() - 0.5);
-
 const qWrap = document.getElementById("qWrap");
 BANK.forEach((q, i) => {
   qWrap.innerHTML += `<li><p>${i+1}. ${q.t}</p><input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'></li>`;
 });
 
-// 加進度顯示
+// 進度條
 qWrap.innerHTML += `<div id="progress" class="text-right text-sm">0/30</div>`;
-document.querySelectorAll('input[type="range"]').forEach((s) => {
+document.querySelectorAll('input[type="range"]').forEach(s => {
   s.onchange = () => {
     const filled = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== '3').length;
-    document.getElementById('progress').textContent = `${filled}/30`;
+    document.getElementById("progress").textContent = `${filled}/30`;
   };
 });
 
@@ -155,14 +155,18 @@ function summarize(scores) {
   const variantIdx = total % 12;
   const variants = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
   const variant = variants[variantIdx];
-  return { top: top[0], dual, ranking: arr, variant };
+  return { top: top[0], dual, ranking: arr, variant, total };
 }
 
 let radarChart = null;
 function renderRadar(scores) {
   const ctx = document.getElementById("radar");
   if (radarChart) radarChart.destroy();
-  radarChart = new Chart(ctx, { type: "radar", data: { labels: Object.keys(scores), datasets: [{ label: "六獸能量", data: Object.values(scores), backgroundColor: "rgba(182,130,43,0.15)", borderColor: "#b6822b" }] }, options: { scales: { r: { suggestedMin: 0, suggestedMax: 25, ticks: { stepSize: 5 } } }, plugins: { legend: { display: false } } } });
+  radarChart = new Chart(ctx, {
+    type: "radar",
+    data: { labels: Object.keys(scores), datasets: [{ label: "六獸能量", data: Object.values(scores), backgroundColor: "rgba(182,130,43,0.15)", borderColor: "#b6822b" }] },
+    options: { scales: { r: { suggestedMin: 0, suggestedMax: 25, ticks: { stepSize: 5 } } }, plugins: { legend: { display: false } } }
+  });
 }
 
 function renderReport(summary, scores) {
@@ -170,18 +174,18 @@ function renderReport(summary, scores) {
   const mainType = `${summary.top}${summary.variant}型`;
   document.getElementById("mainBeastTitle").textContent = summary.dual ? `雙獸${summary.variant}型：${summary.top} × ${summary.dual[1]}` : `主${summary.variant}型：${summary.top}`;
   document.getElementById("dualHint").textContent = summary.dual ? `第二主導能量：${summary.dual[1]}` : '';
-  document.getElementById("mainBeastSummary").textContent = `你的主型為 ${mainType}，代表核心特質融合${summary.top}能量與${summary.variant}地支變體。`;
+  document.getElementById("mainBeastSummary").textContent = `你的主型為 ${mainType}，融合${summary.top}能量與${summary.variant}地支特質。`;
 
   const col = (t, a) => `<div class='border rounded p-2'><b>${t}</b><ul class='list-disc pl-5'>${a.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
   const ADVICE_DB = {
-    青龍: { 職場: ["擁抱變化，創新項目領頭。", "避免衝動，評估風險。"], 感情: ["浪漫冒險，但需穩定。"], 養生: ["戶外活動釋放能量。"] },
-    朱雀: { 職場: ["團隊溝通王，激勵他人。"], 感情: ["熱情表達愛。"], 養生: ["藝術療法減壓。"] },
+    青龍: { 職場: ["創新領頭，勇於嘗試新方法。", "注意風險評估，避免衝動。"], 感情: ["浪漫冒險，需穩定表達。"], 養生: ["戶外運動釋放能量。"] },
+    朱雀: { 職場: ["激勵團隊，擅長溝通。"], 感情: ["熱情表達愛，保持真誠。"], 養生: ["藝術創作減壓。"] },
     勾陳: { 職場: ["穩定執行，注重細節。"], 感情: ["忠誠可靠，建立信任。"], 養生: ["規律作息，均衡飲食。"] },
-    螣蛇: { 職場: ["協調專家，化解衝突。"], 感情: ["敏感體貼，深入溝通。"], 養生: ["冥想練習，調節情緒。"] },
+    螣蛇: { 職場: ["協調衝突，善於傾聽。"], 感情: ["敏感體貼，深入溝通。"], 養生: ["冥想練習，調節情緒。"] },
     白虎: { 職場: ["決斷領導，追求效率。"], 感情: ["直接表達，勇於承諾。"], 養生: ["高強度運動，釋放壓力。"] },
     玄武: { 職場: ["策略規劃，長遠視野。"], 感情: ["理性分析，穩健關係。"], 養生: ["靜坐閱讀，養成內省。"] },
   };
-  const beastAdvice = ADVICE_DB[summary.top] || { 職場: ["重視角色定位與節奏。", "建立團隊信任感。", "學會授權與合作。"], 感情: ["真誠表達需求。", "平衡理性與感性。", "學習傾聽他人。"], 養生: ["早睡早起、節制飲食。", "保持運動習慣。", "用呼吸冥想穩定能量。"] };
+  const beastAdvice = ADVICE_DB[summary.top] || { 職場: ["重視角色定位。"], 感情: ["真誠表達需求。"], 養生: ["早睡早起，穩定能量。"] };
   document.getElementById("adviceCols").innerHTML = col("職場建議", beastAdvice.職場) + col("感情建議", beastAdvice.感情) + col("養生建議", beastAdvice.養生);
 }
 
@@ -189,8 +193,8 @@ document.getElementById("form").addEventListener("submit", e => {
   e.preventDefault();
   const scores = { 青龍: 0, 朱雀: 0, 勾陳: 0, 螣蛇: 0, 白虎: 0, 玄武: 0 };
   BANK.forEach((q, i) => scores[q.b] += parseInt(document.getElementById(`q${i}`).value));
-  const summary = summarize(scores); 
-  renderRadar(scores); 
+  const summary = summarize(scores);
+  renderRadar(scores);
   renderReport(summary, scores);
   localStorage.setItem("shen-shou-v7", JSON.stringify({ scores, summary }));
 });
@@ -212,13 +216,15 @@ document.getElementById("btnAI").addEventListener("click", async () => {
   const saved = JSON.parse(localStorage.getItem("shen-shou-v7") || "null");
   const out = document.getElementById("aiOut");
   if (!saved) { out.textContent = "⚠️請先完成測驗。"; return; }
-  out.textContent = "🪶 AI 正在分析中，約5~10秒...";
+  out.innerHTML = "🪶 AI 正在分析中，約5~10秒... <span class='spinner'>⏳</span>";
   try {
     const resp = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(saved) });
     if (!resp.ok) throw new Error(await resp.text());
     const data = await resp.json();
     out.textContent = data.text.trim();
-  } catch (err) { out.textContent = "❌分析失敗：" + err.message; }
+  } catch (err) {
+    out.textContent = `❌分析失敗：${err.message}（請檢查網路或稍後重試）`;
+  }
 });
 </script>
 </body>
