@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>神獸七十二型人格 測驗＋智能報表（V5 專業版）</title>
-  <meta name="description" content="30題量表｜六獸雷達圖｜主神獸＋雙獸型｜三欄建議（職場／感情／養生）｜品牌Logo｜分析師卡｜一鍵列印／PNG下載｜Vercel API 安全串接" />
+  <meta name="description" content="30題量表｜六獸雷達圖｜主神獸＋雙獸型｜三欄建議（職場／感情／養生）｜品牌Logo｜分析師卡｜一鍵列印／PNG下載｜Vercel/GitHub Pages 皆可用" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -26,17 +26,17 @@
     .print-landscape @page{size:A4 landscape}
   </style>
 </head>
-
 <body class="bg-[#f6f7fb] text-slate-800">
   <main class="max-w-6xl mx-auto p-4 sm:p-6">
-    <!-- 抬頭 -->
+    <!-- 抬頭：Logo + 標題 + 列印方向 -->
     <header class="mb-4 sm:mb-6">
       <div class="flex items-center justify-between gap-3">
         <div class="flex items-center gap-3">
-          <img src="img/logo.png" alt="仙人指路 Logo" class="h-10 w-auto rounded" onerror="this.outerHTML='<span class=\'text-sm text-slate-500\'>Logo</span>'" />
+          <!-- 這裡不直接寫 src，交給 JS 自動帶入正確路徑 -->
+          <img data-logo alt="仙人指路 Logo" class="h-10 w-auto rounded" onerror="this.outerHTML='<span class=&quot;text-sm text-slate-500&quot;>Logo</span>'" />
           <div>
             <h1 class="text-2xl sm:text-3xl font-extrabold brand">神獸七十二型人格 測驗＋智能報表</h1>
-            <p class="text-slate-600 text-sm">30題量表・六獸雷達圖・主神獸解析・三欄建議（職場／感情／養生）・分析師卡・列印/PNG・Vercel API</p>
+            <p class="text-slate-600 text-sm">30題量表・六獸雷達圖・主神獸解析・三欄建議（職場／感情／養生）・分析師卡・列印/PNG・AI 建議</p>
           </div>
         </div>
         <div class="no-print text-right space-y-2">
@@ -71,6 +71,7 @@
 
     <!-- 結果＋報表 -->
     <section id="result" class="mt-6 grid lg:grid-cols-2 gap-4">
+      <!-- 雷達圖 -->
       <div class="card p-4 sm:p-5 page">
         <h2 class="text-lg font-bold mb-3">六獸能量雷達圖</h2>
         <canvas id="radar"></canvas>
@@ -81,10 +82,12 @@
         </div>
       </div>
 
+      <!-- 報表卡（會被下載＆列印） -->
       <div class="card p-4 sm:p-5 page report" id="resultCard">
         <div class="flex items-center justify-between">
           <h2 class="text-lg font-bold">主神獸結果與三欄建議</h2>
-          <img src="img/logo.png" alt="Logo" class="h-8 w-auto" onerror="this.style.display='none'" />
+          <!-- 下方報表的 Logo 也走 data-logo -->
+          <img data-logo alt="Logo" class="h-8 w-auto" onerror="this.style.display='none'" />
         </div>
 
         <div class="grid grid-cols-3 gap-3 items-start mt-2">
@@ -104,9 +107,10 @@
         <div id="scoreList" class="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-1 text-sm"></div>
 
         <hr class="my-3" />
-        <h3 class="text-base font-bold mb-1">👤 分析師資料</h3>
+        <!-- 分析師卡 -->
         <div class="grid md:grid-cols-3 gap-3">
           <div class="md:col-span-2">
+            <h3 class="text-base font-bold mb-1">👤 分析師資料</h3>
             <div class="grid sm:grid-cols-2 gap-2">
               <div><div class="text-xs text-slate-500">姓名</div><div id="instName" class="font-medium">林蔚青 阿青師</div></div>
               <div><div class="text-xs text-slate-500">聯絡方式</div><div id="instContact" class="font-medium">LINE：@chin573365</div></div>
@@ -125,14 +129,49 @@
         </div>
 
         <hr class="my-3" />
+        <!-- 底部：官方 QR + 授權語 -->
         <div class="grid grid-cols-3 items-center">
           <div class="text-xs text-slate-500">仙人指路占卜研究學會</div>
           <div class="text-center text-xs brand">本分析報表由仙人指路占卜研究學會授權分析師出具</div>
           <div class="text-right">
-            <img src="img/line-qr.jpg" alt="LINE QR" class="h-16 w-16 inline-block border rounded" onerror="this.outerHTML='<span class=\'text-xs text-slate-400\'>QR 無法載入</span>'" />
+            <img data-qr alt="LINE QR" class="h-16 w-16 inline-block border rounded" onerror="this.outerHTML='<span class=&quot;text-xs text-slate-400&quot;>QR 無法載入</span>'" />
           </div>
         </div>
       </div>
+    </section>
+
+    <!-- 分析師輸入區（不列印） -->
+    <section class="card p-4 sm:p-5 mt-4 no-print">
+      <h2 class="text-lg font-bold mb-2">分析師資訊輸入（會顯示在報表上）</h2>
+      <div class="grid sm:grid-cols-3 gap-3">
+        <div>
+          <label class="text-xs text-slate-500">姓名</label>
+          <input id="fName" class="w-full px-3 py-2 border rounded-lg" value="林蔚青 阿青師" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">聯絡方式</label>
+          <input id="fContact" class="w-full px-3 py-2 border rounded-lg" value="LINE：@chin573365" />
+        </div>
+        <div>
+          <label class="text-xs text-slate-500">自我介紹（最多三行）</label>
+          <input id="fBio" class="w-full px-3 py-2 border rounded-lg" value="以金錢卦為核心，融合中醫五行，指引人生方向。" />
+        </div>
+      </div>
+      <div class="mt-3">
+        <label class="text-xs text-slate-500 block mb-1">上傳分析師個人 QR（可選）</label>
+        <input id="fQR" type="file" accept="image/*" class="block" />
+        <div class="text-xs text-slate-500 mt-1">（僅存於本機瀏覽器，不上傳伺服器）</div>
+      </div>
+      <div class="mt-3">
+        <button id="btnSaveInst" class="px-4 py-2 border rounded-lg">儲存分析師資訊</button>
+      </div>
+    </section>
+
+    <section class="card p-4 sm:p-5 mt-4 no-print">
+      <h2 class="text-lg font-bold mb-2">OpenAI 智能個人化補運建議</h2>
+      <p class="text-sm text-slate-600 mb-2">此功能會呼叫 <code>/api/ai</code>（Vercel 後端代呼 OpenAI）。若在 GitHub Pages，請忽略此區。</p>
+      <button id="btnAI" class="px-4 py-2 border rounded-lg">產生補運建議</button>
+      <pre id="aiOut" class="mt-3 text-sm bg-slate-50 p-3 rounded-lg whitespace-pre-wrap"></pre>
     </section>
 
     <footer class="text-center text-xs text-slate-500 mt-8">
@@ -140,12 +179,253 @@
     </footer>
   </main>
 
-  <!-- ========================= -->
-  <!-- JS 區塊 -->
-  <!-- ========================= -->
-  <script>
-    // 這裡直接貼上你原本的 JS（題庫、ADVICES、AI fetch、localStorage）
-    // 保持不變，只需確認圖片路徑是相對的
-  </script>
+<script>
+/* ========= 自動設定圖片路徑（同時支援 GitHub Pages 與 Vercel） ========= */
+(function setAssetPaths(){
+  // 若在 GitHub Pages：host 會是 *.github.io，且第一層路徑為 repo 名（例如 shen-shou-v5）
+  const parts = location.pathname.split('/').filter(Boolean);
+  const base = location.host.endsWith('github.io') ? ('/' + (parts[0] || '')) : '';
+  const logoUrl = `${base}/img/logo.png`;
+  const qrUrl   = `${base}/img/line-qr.jpg`;
+
+  document.querySelectorAll('[data-logo]').forEach(el => el.src = logoUrl);
+  document.querySelectorAll('[data-qr]').forEach(el => el.src = qrUrl);
+})();
+
+/* =========================
+   題庫：6獸 × 5題 = 30題
+========================= */
+const BANK = [
+  {t:"我常有突如其來的靈感並想立即嘗試。",b:"青龍"},{t:"我喜歡打破常規尋找新方法。",b:"青龍"},{t:"遇阻力時我會靈活轉向。",b:"青龍"},{t:"我富想像力，喜歡創新思考。",b:"青龍"},{t:"我熱愛探索未知事物。",b:"青龍"},
+  {t:"我喜歡在人群中表達自己。",b:"朱雀"},{t:"我用情緒帶動他人。",b:"朱雀"},{t:"別人的反應會影響我。",b:"朱雀"},{t:"我擅長說服與演說。",b:"朱雀"},{t:"我重視被傾聽與關注。",b:"朱雀"},
+  {t:"我喜歡按計畫行事。",b:"勾陳"},{t:"我重視安全感與穩定。",b:"勾陳"},{t:"我責任感強。",b:"勾陳"},{t:"我傾向維持現狀。",b:"勾陳"},{t:"我注重細節與程序。",b:"勾陳"},
+  {t:"我對他人情緒很敏感。",b:"螣蛇"},{t:"我擅長觀察與傾聽。",b:"螣蛇"},{t:"我思考事情會考量時機與人心。",b:"螣蛇"},{t:"我常思考背後的動機。",b:"螣蛇"},{t:"我善於協調不同觀點。",b:"螣蛇"},
+  {t:"我講求效率與結果。",b:"白虎"},{t:"我會主動做決策。",b:"白虎"},{t:"我以數據與成果為導向。",b:"白虎"},{t:"我願意承擔壓力以完成任務。",b:"白虎"},{t:"我偏好明確的規範與標準。",b:"白虎"},
+  {t:"我喜歡獨自思考。",b:"玄武"},{t:"我傾向謹慎評估後行動。",b:"玄武"},{t:"我擅長規劃長遠目標。",b:"玄武"},{t:"我重視邏輯與分析。",b:"玄武"},{t:"我習慣冷靜看待問題。",b:"玄武"}
+];
+
+/* =========================
+   三欄式建議資料庫
+========================= */
+const ADVICES = {
+  青龍:{title:"青龍（木）— 創意／變通",summary:"你的木行能量旺盛，擅長打破框架、激發新路。關鍵在於聚焦與落地。",
+    workplace:["把創意化為 1 個『本月 MVP 小專案』並設定時程表。","找 1 位『勾陳夥伴』做流程把關，避免理想飛走。","每次提案先給 1 張『一頁企劃圖』，讓主管看見落地路徑。"],
+    love:["主動邀約伴侶參與你的新點子，讓對方成為共同創作者。","練習 2/3 聽、1/3 說，避免只講願景。","每週固定『儀式感時刻』，降低忽冷忽熱。"],
+    health:["疏肝理氣：早晨深呼吸＋快走 20 分鐘。","飲食：綠豆芽、花椰菜、金桔；少酒精熬夜。","卡住時做『書寫傾倒』，清出腦中未竟事項。"]},
+  朱雀:{title:"朱雀（火）— 表達／感染力",summary:"外放火行強，擅長溝通帶動氣氛。關鍵在於節奏與界線。",
+    workplace:["會議前列 3 點核心訊息，避免過度延伸。","『肯定→建議→承諾』三步驟提升說服力。","設定『冷卻時間』再決策，避免情緒性承諾。"],
+    love:["用『我訊息』描述感受，避免指責語氣。","安排共同社交活動，滿足連結需求。","情緒高峰先暫停 10 分鐘再溝通。"],
+    health:["心火旺者做 4-7-8 呼吸法鎮定神經。","飲食：蓮子、百合、蓮藕；少辛辣與咖啡因。","每週 2 次緩和有氧或瑜伽，穩定火氣。"]},
+  勾陳:{title:"勾陳（土）— 穩定／維運",summary:"土行沉穩可靠，擅長流程與風險控管。關鍵在於擴張舒適圈。",
+    workplace:["每季主動提 1 項流程優化，練習小幅創新。","與『青龍夥伴』結對，讓新點子在你手中落地。","待辦拆成 25 分鐘番茄鐘，避免壓力堆積。"],
+    love:["主動說出你的需要，別以為沉默就能被理解。","每月安排 1 次『新鮮體驗約會』，活絡情感。","練習表達讚美，增加關係溫度。"],
+    health:["脾胃調理：早睡早起、少晚食。","飲食：南瓜、山藥、薏仁，減少冰冷生食。","每日 10 分鐘腹式呼吸，增強中氣。"]},
+  螣蛇:{title:"螣蛇（火木）— 洞察／策略",summary:"高敏覺察與人心洞悉，善於抓時機。關鍵在於止觀與行動。",
+    workplace:["把洞察寫成『決策備忘錄』，讓團隊跟上直覺。","設定『72 小時內最小行動』，避免想太多不動。","建立界線：不可救的議題，學會轉交或終止。"],
+    love:["說出你的擔心而非迴避，讓伴侶知道你在乎。","練習請求而非試探，減少錯頻。","安排靜心散步，安定高敏度。"],
+    health:["漸進式肌肉放鬆或瑜伽尼德拉。","飲食：菊花、決明子茶助清肝明目。","避免長時間螢幕，保護神經系統。"]},
+  白虎:{title:"白虎（金）— 行動／效率",summary:"果決迅速與結果導向。關鍵在於同理與耐心。",
+    workplace:["每次指令附『為什麼』，提升內在動機。","設置『緩衝日』避免流失。","『戰術會＋回顧會』平衡短打與學習。"],
+    love:["以關心句開頭再談問題。","每週 1 次無手機晚餐，練習專注陪伴。","多用觸碰與肯定語，不只靠安排與指令。"],
+    health:["胸背伸展＋深呼吸，釋放肩頸。","飲食：白蘿蔔、梨、枇杷潤肺；少菸酒重口味。","每週 2 次中低強度有氧，放慢交感。"]},
+  玄武:{title:"玄武（水）— 思辨／佈局",summary:"冷靜理性、長遠視角。關鍵在於輸出與互信。",
+    workplace:["把策略畫成『一頁路線圖』讓他人看見全局。","為研究設定『交付物』避免拖延。","練習即席簡報，降低輸出焦慮。"],
+    love:["每日 10 分鐘情感日記，練習描述感受。","與伴侶設『每週議題時間』。","安排共同計畫（旅行／學習）增進連結。"],
+    health:["腎水調養：規律作息與足浴暖腎。","飲食：黑芝麻、山藥、枸杞；少熬夜咖啡。","太極或平衡訓練，增強穩定感。"]}
+};
+
+/* =========================
+   Inline 神獸 SVG（品牌金棕）
+========================= */
+function beastSVG(name){
+  const stroke = '#B6822B', fill='none';
+  const base = (d)=>`<svg viewBox='0 0 100 100' class='w-full h-auto' xmlns='http://www.w3.org/2000/svg'>
+    <defs><radialGradient id='g' cx='50%' cy='50%' r='60%'><stop offset='0%' stop-color='rgba(182,130,43,0.25)'/><stop offset='100%' stop-color='rgba(182,130,43,0)'/></radialGradient></defs>
+    <rect x='0' y='0' width='100' height='100' fill='url(#g)'/>
+    ${d}
+  </svg>`;
+  const s=(d)=>`<path d='${d}' fill='${fill}' stroke='${stroke}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>`;
+  switch(name){
+    case '青龍': return base(s("M15 60 C25 40, 45 35, 55 45 C65 55, 75 35, 85 45 M45 45 q5 -12 16 -10 m-6 6 l6 4 m-36 20 q10 -6 18 2 m12 -2 q8 -6 18 2")+s("M30 70 q10 8 20 0 q10 -8 20 0"));
+    case '朱雀': return base(s("M20 60 q15 -30 30 -30 q15 0 30 30 M50 30 l0 12 M35 55 q15 -8 30 0 M25 62 q10 8 25 8 q15 0 25 -8"));
+    case '勾陳': return base(s("M20 70 h60 v-20 h-60 v20 z M30 50 v-10 h40 v10 M35 65 h10 M55 65 h10"));
+    case '螣蛇': return base(s("M20 70 q20 -30 40 -10 q10 8 20 -2 q-10 20 -30 10 q-10 -6 -30 2 M60 48 q6 -6 12 0"));
+    case '白虎': return base(s("M20 65 q15 -20 30 -20 q15 0 30 20 M30 60 h40 M35 70 h30 M38 52 l4 6 M58 52 l-4 6"));
+    case '玄武': return base(s("M30 65 q20 15 40 0 q5 -12 -15 -22 q-20 10 -25 22 M55 50 q10 -8 20 2 M25 55 q-8 -6 -10 6"));
+    default: return base('');
+  }
+}
+
+/* =========================
+   問卷渲染與互動
+========================= */
+const qWrap = document.getElementById('qWrap');
+function renderQuestions(){
+  qWrap.innerHTML='';
+  BANK.forEach((q,i)=>{
+    qWrap.innerHTML += `<li class='p-3 border rounded-xl'><p>${i+1}. ${q.t}</p><input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'></li>`;
+  });
+}
+renderQuestions();
+
+// 控制按鈕
+document.getElementById('btnFillMid').onclick=()=>document.querySelectorAll('.slider').forEach(s=>s.value=3);
+document.getElementById('btnReset').onclick=()=>{document.querySelectorAll('.slider').forEach(s=>s.value=3);clearResult();};
+document.getElementById('btnRandomize').onclick=()=>{BANK.sort(()=>Math.random()-0.5);renderQuestions();};
+
+// 分數與結果
+let radarChart=null;
+function clearResult(){
+  if(radarChart){radarChart.destroy();radarChart=null}
+  document.getElementById('scoreList').innerHTML='';
+  document.getElementById('mainBeastTitle').textContent='';
+  document.getElementById('mainBeastSummary').textContent='';
+  document.getElementById('adviceCols').innerHTML='';
+  document.getElementById('beastSVG').innerHTML='';
+  document.getElementById('dualHint').textContent='';
+}
+
+function summarize(scores){
+  const arr=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
+  const top=arr[0], second=arr[1];
+  const dual = (top[1]-second[1] <= 1) ? [top[0], second[0]] : null;
+  return {top:top[0], dual, ranking:arr};
+}
+
+function renderRadar(scores){
+  const ctx=document.getElementById('radar');
+  if(radarChart) radarChart.destroy();
+  radarChart=new Chart(ctx,{type:'radar',data:{labels:Object.keys(scores),datasets:[{label:'六獸能量',data:Object.values(scores),backgroundColor:'rgba(182,130,43,0.15)',borderColor:'rgba(182,130,43,1)',pointBackgroundColor:'rgba(182,130,43,1)'}]},options:{scales:{r:{suggestedMin:0,suggestedMax:25,ticks:{stepSize:5}}},plugins:{legend:{display:false}}}});
+}
+
+function renderReport({top,dual,ranking}, scores){
+  const info=ADVICES[top];
+  document.getElementById('beastSVG').innerHTML=beastSVG(top);
+  document.getElementById('mainBeastTitle').textContent = dual ? `雙獸型：${top} × ${dual[1]}` : `主神獸：${top}`;
+  document.getElementById('dualHint').textContent = dual ? `提示：第二主導能量為「${dual[1]}」，可作為輔修線。` : '';
+  document.getElementById('mainBeastSummary').textContent = info.summary;
+
+  // 三欄建議
+  const cols=document.getElementById('adviceCols');
+  const col = (title, items)=>`<div class='p-3 border rounded-lg'><div class='font-semibold mb-1'>${title}</div><ul class='list-disc pl-5 space-y-1'>${items.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+  cols.innerHTML = col('職場建議', info.workplace) + col('感情建議', info.love) + col('養生建議', info.health);
+
+  // 分數清單
+  const list=document.getElementById('scoreList');
+  list.innerHTML='';
+  ranking.forEach(([k,v])=>{list.innerHTML += `<div class='flex items-center justify-between'><span>${k}</span><b>${v}</b></div>`});
+}
+
+// 問卷提交
+document.getElementById('form').addEventListener('submit', (e)=>{
+  e.preventDefault();
+  const scores={青龍:0,朱雀:0,勾陳:0,螣蛇:0,白虎:0,玄武:0};
+  BANK.forEach((q,i)=>{scores[q.b]+=parseInt(document.getElementById(`q${i}`).value||'3',10)});
+  const summary=summarize(scores);
+  renderRadar(scores); renderReport(summary, scores);
+  localStorage.setItem('shen-shou-v5', JSON.stringify({scores,summary,inst:getInstFromInputs()}));
+});
+
+// 載入上次結果
+(function(){
+  try{
+    const saved=JSON.parse(localStorage.getItem('shen-shou-v5')||'null');
+    if(saved){
+      renderRadar(saved.scores); renderReport(saved.summary, saved.scores);
+      applyInstToView(saved.inst);
+      applyInstToInputs(saved.inst);
+    } else {
+      applyInstToView(getInstFromInputs());
+    }
+  }catch(_){}
+})();
+
+// 下載結果卡 PNG
+document.getElementById('btnDownloadPNG').addEventListener('click',()=>{
+  html2canvas(document.getElementById('resultCard'),{backgroundColor:'#ffffff',scale:2}).then(canvas=>{
+    const a=document.createElement('a');
+    a.download='神獸人格_分析報表.png';
+    a.href=canvas.toDataURL('image/png');
+    a.click();
+  });
+});
+
+// 列印（直/橫）
+document.getElementById('btnPrint').addEventListener('click',()=>{window.print()});
+Array.from(document.querySelectorAll('input[name="orient"]')).forEach(r=>{
+  r.addEventListener('change', (e)=>{
+    if(e.target.value==='landscape') document.documentElement.classList.add('print-landscape');
+    else document.documentElement.classList.remove('print-landscape');
+  });
+});
+
+/* =========================
+   分析師資訊：輸入/顯示/儲存
+========================= */
+const elName = document.getElementById('fName');
+const elContact = document.getElementById('fContact');
+const elBio = document.getElementById('fBio');
+const elQR = document.getElementById('fQR');
+
+function getInstFromInputs(){
+  return {
+    name: elName.value.trim(),
+    contact: elContact.value.trim(),
+    bio: elBio.value.trim(),
+    qrDataUrl: document.getElementById('instQRPreview').src || ''
+  };
+}
+function applyInstToInputs(inst){
+  if(!inst) return;
+  elName.value = inst.name || '';
+  elContact.value = inst.contact || '';
+  elBio.value = inst.bio || '';
+  if(inst.qrDataUrl) document.getElementById('instQRPreview').src = inst.qrDataUrl;
+}
+function applyInstToView(inst){
+  document.getElementById('instName').textContent = inst?.name || '';
+  document.getElementById('instContact').textContent = inst?.contact || '';
+  document.getElementById('instBio').textContent = inst?.bio || '';
+  if(inst?.qrDataUrl) document.getElementById('instQRPreview').src = inst.qrDataUrl;
+}
+
+elQR.addEventListener('change', (e)=>{
+  const file = e.target.files?.[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => { document.getElementById('instQRPreview').src = reader.result; };
+  reader.readAsDataURL(file);
+});
+
+document.getElementById('btnSaveInst').addEventListener('click', ()=>{
+  const saved=JSON.parse(localStorage.getItem('shen-shou-v5')||'{}');
+  const inst = getInstFromInputs();
+  applyInstToView(inst);
+  localStorage.setItem('shen-shou-v5', JSON.stringify({...saved, inst}));
+});
+
+/* =========================
+   OpenAI 智能建議（伺服器端）
+========================= */
+document.getElementById('btnAI').addEventListener('click', async ()=>{
+  const saved=JSON.parse(localStorage.getItem('shen-shou-v5')||'null');
+  const out=document.getElementById('aiOut');
+  if(!saved){out.textContent='請先完成測驗。';return}
+  const {scores,summary}=saved;
+  out.textContent='產生中…';
+  try{
+    const resp = await fetch('/api/ai', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({ scores, summary })
+    });
+    if(!resp.ok){throw new Error(await resp.text())}
+    const data=await resp.json();
+    out.textContent = (data.text||'').trim() || '（沒有產生內容）';
+  }catch(err){
+    out.textContent='（在 GitHub Pages 無法呼叫 /api/ai；若在 Vercel 才可使用）';
+  }
+});
+</script>
 </body>
 </html>
