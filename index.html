@@ -231,7 +231,7 @@ document.getElementById("btnAI").addEventListener("click", async () => {
     const data = await resp.json();
     out.textContent = data.text.trim();
   } catch (err) {
-    out.textContent = `❌分析失敗：${err.message}（請檢查後端或重試）`;
+    out.textContent = `❌分析失敗：後端服務暫時不可用\n\n💡 請確認：\n1. 後端服務是否運行\n2. API Key 是否正確設定\n3. 或稍後再試`;
     document.getElementById("btnRetry").style.display = "inline-block";
   }
 });
