@@ -1,189 +1,187 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>神獸七十二型人格｜分析師靈氣特效版</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-body {
-  margin: 0;
-  font-family: "Noto Sans TC","Microsoft JhengHei",sans-serif;
-  overflow-x: hidden;
-}
-canvas#energyField {
-  position: fixed;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-main { position: relative; z-index: 1; }
-.card { background: rgba(255,255,255,0.9); border-radius: 1rem; border: 1px solid #e2e8f0; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-.brand-bg { background: linear-gradient(135deg,#f59e0b,#f97316); }
-.brand { color: #b45309; }
-.no-print { display: block; }
-@media print {
-  .no-print, #adminSection, #btnGear { display:none!important; }
-  body { background:white!important; }
-}
-</style>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>仙人指路專業特效版 V7</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    :root{
+      --brand:#B6822B;
+      --ink:#1f2937;
+      --bg1:#f6f7fb;
+      --bg2:#fff;
+    }
+    body{margin:0;overflow-x:hidden;background:linear-gradient(135deg,var(--bg1),var(--bg2));transition:background 0.8s ease;}
+    canvas.bgfx{position:fixed;top:0;left:0;width:100%;height:100%;z-index:-1;}
+    #gearBtn{position:fixed;top:14px;right:14px;z-index:20;background:var(--brand);color:#fff;border-radius:9999px;padding:10px;cursor:pointer;box-shadow:0 2px 6px rgba(0,0,0,0.2);}
+    #panel{position:fixed;top:0;right:0;height:100%;width:320px;background:#fff;border-left:1px solid #ddd;box-shadow:-3px 0 12px rgba(0,0,0,0.1);transform:translateX(100%);transition:.4s;padding:18px;overflow-y:auto;z-index:30;}
+    #panel.open{transform:translateX(0);}
+    #panel label{font-size:13px;color:#555;}
+    .card{background:#fff;border:1px solid #e5e7eb;border-radius:18px;box-shadow:0 6px 20px rgba(0,0,0,.06);}
+    @media print{#gearBtn,#panel,.no-print{display:none!important}}
+  </style>
 </head>
+<body>
+<canvas id="bgfx" class="bgfx"></canvas>
 
-<body class="bg-[#f6f7fb] text-slate-800 transition-colors duration-500" id="bodyRoot">
-<canvas id="energyField"></canvas>
+<button id="gearBtn">⚙️</button>
 
-<main class="max-w-6xl mx-auto p-4 sm:p-6 relative">
-  <!-- ⚙️ 齒輪 -->
-  <button id="btnGear" title="分析師設定" class="fixed top-4 right-4 z-50 bg-white border rounded-full p-2 shadow-lg hover:rotate-90 transition-transform">⚙️</button>
-
-  <!-- 標題 -->
-  <header class="mb-4 sm:mb-6">
-    <div class="flex items-center gap-3">
-      <img data-logo alt="仙人指路 Logo" class="h-10 w-auto rounded">
-      <div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold brand">神獸七十二型人格 測驗＋智能報表</h1>
-        <p class="text-slate-600 text-sm">六獸雷達圖・主神獸解析・三欄建議・分析師卡</p>
-      </div>
+<div id="panel">
+  <h2 class="text-lg font-bold mb-2">⚙️ 設定面板</h2>
+  <div class="space-y-3">
+    <div>
+      <label>分析師姓名</label>
+      <input id="instName" class="w-full border rounded px-2 py-1" value="林蔚青 阿青師">
     </div>
+    <div>
+      <label>聯絡方式</label>
+      <input id="instContact" class="w-full border rounded px-2 py-1" value="LINE：@chin573365">
+    </div>
+    <div>
+      <label>自我介紹</label>
+      <textarea id="instBio" rows="2" class="w-full border rounded px-2 py-1">以金錢卦為核心，融合中醫五行，指引人生方向。</textarea>
+    </div>
+    <div>
+      <label>上傳個人 QR 圖片</label>
+      <input type="file" id="instQR" accept="image/*" class="w-full border rounded px-2 py-1">
+    </div>
+    <div>
+      <label>背景風格</label>
+      <select id="bgStyle" class="w-full border rounded px-2 py-1">
+        <option value="A">金棕仙氣</option>
+        <option value="B">藍紫夜空</option>
+        <option value="C">火鳳光焰</option>
+        <option value="D">玄武水流</option>
+        <option value="E">白灰禪霧</option>
+        <option value="F">自訂雙色</option>
+      </select>
+    </div>
+    <div id="customColorWrap" class="hidden">
+      <label>自訂漸層顏色1</label>
+      <input type="color" id="color1" value="#B6822B" class="w-full h-8 border rounded">
+      <label>自訂漸層顏色2</label>
+      <input type="color" id="color2" value="#fff" class="w-full h-8 border rounded">
+    </div>
+    <div>
+      <label>光點特效</label>
+      <select id="fxType" class="w-full border rounded px-2 py-1">
+        <option value="1">柔和光暈</option>
+        <option value="2" selected>道氣流轉</option>
+        <option value="3">星空閃爍</option>
+        <option value="0">無特效</option>
+      </select>
+    </div>
+    <div>
+      <label>背景圖上傳</label>
+      <input type="file" id="bgImg" accept="image/*" class="w-full border rounded px-2 py-1">
+    </div>
+    <div>
+      <label>背景透明度</label>
+      <input type="range" id="bgOpacity" min="0" max="1" step="0.05" value="0.4" class="w-full">
+    </div>
+    <button id="saveBtn" class="w-full bg-amber-600 text-white py-2 rounded">儲存設定</button>
+  </div>
+</div>
+
+<main class="max-w-6xl mx-auto p-4 sm:p-6">
+  <header class="flex items-center gap-3 mb-5">
+    <img data-logo class="h-10 w-auto rounded" alt="Logo"/>
+    <h1 class="text-2xl font-extrabold text-amber-700">神獸七十二型人格分析報表</h1>
   </header>
 
-  <!-- 報表 -->
-  <section id="result" class="mt-6 grid lg:grid-cols-2 gap-4">
-    <div class="card p-4 sm:p-5 page">
-      <h2 class="text-lg font-bold mb-3">六獸能量雷達圖</h2>
-      <canvas id="radar"></canvas>
-      <div class="flex flex-wrap gap-2 mt-4 no-print">
-        <button id="btnDownloadPNG" class="px-4 py-2 bg-amber-600 text-white rounded-lg">下載結果卡 PNG</button>
-        <button id="btnPrint" class="px-4 py-2 border rounded-lg">列印報表</button>
+  <section id="report" class="card p-5">
+    <h2 class="text-lg font-bold mb-3">主神獸結果與三欄建議</h2>
+    <canvas id="radar" height="240"></canvas>
+    <div class="grid md:grid-cols-3 gap-3 mt-4 text-sm">
+      <div class="p-3 border rounded"><b>職場建議</b><ul class="list-disc pl-5 mt-1"><li>聚焦落地行動，避免分散能量。</li><li>設定具體目標，每週檢視。</li></ul></div>
+      <div class="p-3 border rounded"><b>感情建議</b><ul class="list-disc pl-5 mt-1"><li>主動傾聽，降低誤會。</li><li>維持溫度感交流。</li></ul></div>
+      <div class="p-3 border rounded"><b>養生建議</b><ul class="list-disc pl-5 mt-1"><li>保持規律作息。</li><li>動靜平衡，早睡養氣。</li></ul></div>
+    </div>
+    <hr class="my-4">
+    <div class="grid md:grid-cols-3 gap-3 text-sm">
+      <div class="md:col-span-2">
+        <b>分析師資料</b>
+        <div class="mt-1"><span id="vName">林蔚青 阿青師</span>｜<span id="vContact">LINE：@chin573365</span></div>
+        <div id="vBio" class="mt-1 text-slate-600 text-sm">以金錢卦為核心，融合中醫五行，指引人生方向。</div>
+      </div>
+      <div class="flex justify-center items-center">
+        <img id="vQR" src="" class="h-28 w-28 border rounded object-contain"/>
       </div>
     </div>
-
-    <div class="card p-4 sm:p-5 page report" id="resultCard">
-      <div class="flex items-center justify-between">
-        <h2 class="text-lg font-bold">主神獸結果與三欄建議</h2>
-        <img data-logo alt="Logo" class="h-8 w-auto">
-      </div>
-      <div class="grid grid-cols-3 gap-3 items-start mt-2">
-        <div id="beastSVG" class="w-full aspect-square"></div>
-        <div class="col-span-2">
-          <div id="mainBeastTitle" class="text-base font-semibold brand">朱雀型</div>
-          <div id="dualHint" class="mt-1 text-sm text-slate-600">情感與表達並重的靈感型</div>
-          <div id="mainBeastSummary" class="mt-2 text-sm">以熱情與創意驅動，適合講師、行銷、顧問。</div>
-        </div>
-      </div>
-      <hr class="my-3">
-      <div id="adviceCols" class="grid md:grid-cols-3 gap-3 text-sm">
-        <div><b>優勢：</b> 熱情表達、鼓舞人心。</div>
-        <div><b>挑戰：</b> 易情緒化、需要穩定節奏。</div>
-        <div><b>建議：</b> 練習傾聽與耐心，將靈感化為實踐。</div>
-      </div>
-      <hr class="my-3">
-      <div class="grid md:grid-cols-3 gap-3">
-        <div class="md:col-span-2">
-          <h3 class="text-base font-bold mb-1">👤 分析師資料</h3>
-          <div class="grid sm:grid-cols-2 gap-2">
-            <div><div class="text-xs text-slate-500">姓名</div><div id="instName" class="font-medium">林蔚青 阿青師</div></div>
-            <div><div class="text-xs text-slate-500">聯絡</div><div id="instContact" class="font-medium">LINE：@chin573365</div></div>
-          </div>
-          <div class="mt-2">
-            <div class="text-xs text-slate-500">自我介紹</div>
-            <div id="instBio" class="text-sm">以金錢卦為核心，融合中醫五行，指引人生方向。</div>
-          </div>
-        </div>
-        <div class="flex items-center justify-center">
-          <div class="text-center">
-            <div class="text-xs text-slate-500 mb-1">分析師 QR</div>
-            <img id="instQRPreview" src="" alt="分析師QR" class="h-28 w-28 object-contain border rounded mx-auto">
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ⚙️ 設定區 -->
-  <section id="adminSection" class="hidden fixed bottom-4 right-4 bg-white/95 backdrop-blur-md p-4 rounded-xl border shadow-2xl w-[360px] max-h-[90vh] overflow-auto">
-    <h2 class="text-lg font-bold mb-2">分析師設定</h2>
-    <div class="grid sm:grid-cols-2 gap-3 text-sm">
-      <div><label class="text-xs text-slate-500">姓名</label><input id="fName" class="w-full px-2 py-1 border rounded"></div>
-      <div><label class="text-xs text-slate-500">聯絡</label><input id="fContact" class="w-full px-2 py-1 border rounded"></div>
-    </div>
-    <div class="mt-2"><label class="text-xs text-slate-500">自我介紹</label><textarea id="fBio" rows="2" class="w-full px-2 py-1 border rounded"></textarea></div>
-    <div class="mt-2"><label class="text-xs text-slate-500 block">上傳QR</label><input id="fQR" type="file" accept="image/*" class="block text-xs"></div>
-    <hr class="my-2">
-    <h3 class="text-sm font-bold">🎨 背景設定</h3>
-    <div class="flex items-center gap-2 mt-1">
-      <label class="text-xs text-slate-500">左</label><input type="color" id="gradLeft" class="w-10 h-10 border rounded">
-      <label class="text-xs text-slate-500">右</label><input type="color" id="gradRight" class="w-10 h-10 border rounded">
-    </div>
-    <div class="mt-2"><label class="text-xs text-slate-500 block">背景圖片</label><input id="bgImageInput" type="file" accept="image/*" class="block text-xs"></div>
-    <div class="flex items-center gap-2 mt-2">
-      <label class="text-xs text-slate-500">透明度</label><input type="range" id="bgOpacity" min="0.2" max="1" step="0.1" value="1" class="w-full">
-    </div>
-    <button id="btnResetBg" class="text-xs border px-2 py-1 mt-2 rounded">重設背景</button>
   </section>
 </main>
 
 <script>
-/* ⚙️ 開關設定 */
-document.getElementById('btnGear').addEventListener('click',()=>document.getElementById('adminSection').classList.toggle('hidden'));
+const gear=document.getElementById('gearBtn');
+const panel=document.getElementById('panel');
+gear.onclick=()=>panel.classList.toggle('open');
+const saveBtn=document.getElementById('saveBtn');
+const bg=document.body;
+const canvas=document.getElementById('bgfx'),ctx=canvas.getContext('2d');
+let bgImgData=null,fxType=2,points=[];
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight;}
+window.onresize=resize;resize();
 
-/* 背景設定與保存 */
-const bodyRoot=document.getElementById('bodyRoot');
-const gradL=document.getElementById('gradLeft');
-const gradR=document.getElementById('gradRight');
-const bgImg=document.getElementById('bgImageInput');
-const bgOp=document.getElementById('bgOpacity');
-const btnReset=document.getElementById('btnResetBg');
-
-let styleData=JSON.parse(localStorage.getItem('shen-shou-style')||'{}');
-applyStyle(styleData);
-
-function applyStyle(d){
-  if(d.gradL&&d.gradR) bodyRoot.style.background=`linear-gradient(135deg,${d.gradL},${d.gradR})`;
-  if(d.bgImg){ bodyRoot.style.backgroundImage=`url(${d.bgImg})`; bodyRoot.style.backgroundSize='cover'; bodyRoot.style.backgroundAttachment='fixed';}
-  bodyRoot.style.opacity=d.opacity||1;
-  gradL.value=d.gradL||'#f6f7fb'; gradR.value=d.gradR||'#ffffff'; bgOp.value=d.opacity||1;
+// 背景風格表
+const STYLES={
+  A:['#B6822B','#fff'],B:['#1e3a8a','#4c1d95'],C:['#f97316','#b91c1c'],
+  D:['#0f172a','#334155'],E:['#f8fafc','#e2e8f0']
+};
+function applyBG(){
+  const s=localStorage.getItem('bgStyle')||'A';
+  const c1=localStorage.getItem('c1')||STYLES[s]?.[0]||'#B6822B';
+  const c2=localStorage.getItem('c2')||STYLES[s]?.[1]||'#fff';
+  bg.style.background=`linear-gradient(135deg,${c1},${c2})`;
+  const op=parseFloat(localStorage.getItem('bgOpacity')||0.4);
+  if(bgImgData){bg.style.backgroundImage=`url(${bgImgData})`;bg.style.backgroundSize='cover';bg.style.opacity=op;}
 }
-function saveStyle(){ localStorage.setItem('shen-shou-style',JSON.stringify(styleData)); }
-
-gradL.oninput=e=>{styleData.gradL=e.target.value;applyStyle(styleData);saveStyle();}
-gradR.oninput=e=>{styleData.gradR=e.target.value;applyStyle(styleData);saveStyle();}
-bgImg.onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{styleData.bgImg=r.result;applyStyle(styleData);saveStyle();};r.readAsDataURL(f);}
-bgOp.oninput=e=>{styleData.opacity=e.target.value;bodyRoot.style.opacity=styleData.opacity;saveStyle();}
-btnReset.onclick=()=>{styleData={};localStorage.removeItem('shen-shou-style');bodyRoot.style.background='#f6f7fb';bodyRoot.style.backgroundImage='';bodyRoot.style.opacity=1;};
-
-/* 🪶 神獸能量光暈特效 */
-const canvas=document.getElementById('energyField');
-const ctx=canvas.getContext('2d');
-let W,H,particles=[];
-function resize(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight;}
-window.addEventListener('resize',resize);resize();
-
-for(let i=0;i<60;i++){
-  particles.push({
-    x:Math.random()*W,
-    y:Math.random()*H,
-    r:Math.random()*2+0.5,
-    dx:(Math.random()-0.5)*0.3,
-    dy:(Math.random()-0.5)*0.3,
-    color:`hsla(${Math.random()*360},80%,70%,0.6)`
-  });
+function drawFX(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  if(fxType==0)return;
+  const w=canvas.width,h=canvas.height;
+  if(fxType==1){ctx.fillStyle='rgba(255,255,255,0.1)';for(let i=0;i<20;i++){ctx.beginPath();ctx.arc(Math.random()*w,Math.random()*h,Math.random()*50,0,2*Math.PI);ctx.fill();}}
+  else if(fxType==2){points.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0)p.x=w;if(p.x>w)p.x=0;if(p.y<0)p.y=h;if(p.y>h)p.y=0;ctx.beginPath();ctx.fillStyle=`rgba(255,255,255,${p.a})`;ctx.arc(p.x,p.y,p.r,0,2*Math.PI);ctx.fill();});}
+  else if(fxType==3){ctx.fillStyle='rgba(255,255,255,0.8)';for(let i=0;i<50;i++){if(Math.random()<0.05)ctx.fillRect(Math.random()*w,Math.random()*h,1.5,1.5);}}
 }
+for(let i=0;i<80;i++){points.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,vx:(Math.random()-0.5)*0.5,vy:(Math.random()-0.5)*0.5,a:Math.random()*0.5+0.2,r:Math.random()*2+1});}
+setInterval(drawFX,40);
 
-function draw(){
-  ctx.clearRect(0,0,W,H);
-  for(let p of particles){
-    ctx.beginPath();
-    ctx.arc(p.x,p.y,p.r,0,2*Math.PI);
-    ctx.fillStyle=p.color;
-    ctx.fill();
-    p.x+=p.dx;p.y+=p.dy;
-    if(p.x<0||p.x>W)p.dx*=-1;
-    if(p.y<0||p.y>H)p.dy*=-1;
-  }
-  requestAnimationFrame(draw);
+function saveSettings(){
+  const name=instName.value,contact=instContact.value,bio=instBio.value;
+  localStorage.setItem('instName',name);
+  localStorage.setItem('instContact',contact);
+  localStorage.setItem('instBio',bio);
+  localStorage.setItem('bgStyle',bgStyle.value);
+  localStorage.setItem('fxType',fxTypeSel.value);
+  localStorage.setItem('bgOpacity',bgOpacity.value);
+  localStorage.setItem('c1',color1.value);
+  localStorage.setItem('c2',color2.value);
+  applySettings();
 }
-draw();
+function applySettings(){
+  document.getElementById('vName').textContent=localStorage.getItem('instName')||'';
+  document.getElementById('vContact').textContent=localStorage.getItem('instContact')||'';
+  document.getElementById('vBio').textContent=localStorage.getItem('instBio')||'';
+  const qr=localStorage.getItem('instQR');if(qr)document.getElementById('vQR').src=qr;
+  applyBG();
+  fxType=parseInt(localStorage.getItem('fxType')||2);
+}
+saveBtn.onclick=()=>{saveSettings();panel.classList.remove('open');};
+bgStyle.onchange=()=>{localStorage.setItem('bgStyle',bgStyle.value);applyBG();customColorWrap.classList.toggle('hidden',bgStyle.value!=='F');};
+fxTypeSel=document.getElementById('fxType');fxTypeSel.onchange=()=>{fxType=parseInt(fxTypeSel.value);localStorage.setItem('fxType',fxType);};
+bgOpacity.oninput=()=>{localStorage.setItem('bgOpacity',bgOpacity.value);applyBG();};
+color1.oninput=color2.oninput=()=>{localStorage.setItem('c1',color1.value);localStorage.setItem('c2',color2.value);applyBG();};
+instQR.onchange=e=>{const f=e.target.files[0];if(f){const r=new FileReader();r.onload=()=>{localStorage.setItem('instQR',r.result);document.getElementById('vQR').src=r.result;};r.readAsDataURL(f);}};
+bgImg.onchange=e=>{const f=e.target.files[0];if(f){const r=new FileReader();r.onload=()=>{bgImgData=r.result;applyBG();};r.readAsDataURL(f);}};
+
+(function init(){
+  const base=window.location.pathname.split('/')[1];
+  document.querySelectorAll('[data-logo]').forEach(img=>img.src=`/${base}/img/logo.png`);
+  applySettings();
+})();
 </script>
 </body>
 </html>
