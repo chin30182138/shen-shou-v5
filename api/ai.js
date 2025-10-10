@@ -1,14 +1,16 @@
 const express = require('express');
 const OpenAI = require('openai');
+const axios = require('axios');
 require('dotenv').config();
 
 const app = express();
 app.use(express.json());
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
 
-// 重試機制 + debug
-async function retryRequest(fn, maxRetries = 3, delay = 10000) {
+// 重試 + 多模型支持
+async function retryRequest(fn, maxRetries = 3, delay = 15000) {
   let lastCall = 0;
   for (let i = 0; i < maxRetries; i++) {
     const now = Date.now();
@@ -21,15 +23,13 @@ async function retryRequest(fn, maxRetries = 3, delay = 10000) {
     } catch (err) {
       console.error(`重試 ${i + 1}/${maxRetries} 失敗：${err.message} (碼: ${err.code || err.status || '無'})`);
       if (i === maxRetries - 1) {
-        let userMsg = 'AI 小仙女打盹了！😿 稍等再試～';
+        let userMsg = 'AI 小仙女在休息！😿 稍等再試～';
         if (err.code === 'invalid_api_key' || err.status === 401) {
-          userMsg = 'API Key 生氣啦！😾 檢查 .env 吧～';
+          userMsg = 'API Key 跑掉了！😾 檢查 .env 吧～';
         } else if (err.code === 'rate_limit_exceeded' || err.status === 429) {
-          userMsg = 'AI 跑太快，喘氣中！😽 等 5 分鐘哦～';
-        } else if (err.code === 'model_not_found' || err.status === 404) {
-          userMsg = '模型不見啦！😺 換 gpt-3.5-turbo 試試～';
+          userMsg = 'AI 太忙，排隊中！😽 等 10 分鐘哦～';
         } else if (err.status === 500 || err.message.includes('FUNCTION_INVOCATION_FAILED')) {
-          userMsg = 'OpenAI 伺服器小故障！⚠️ 聯繫客服或重試～';
+          userMsg = '伺服器小故障！⚠️ 聯繫支援或重試～';
         }
         throw new Error(userMsg);
       }
@@ -43,7 +43,7 @@ function generateFallbackReport(summary, scores) {
   const topBeast = summary.top;
   const variant = summary.variant;
   const mainType = `${topBeast}${variant}型`;
-  const dualHint = summary.dual ? `（還有萌助攻：${summary.dual[1]}！）` : '';
+  const dualHint = summary.dual ? `（雙萌獸：${summary.dual[1]}！）` : '';
   const branchDesc = {
     子: '機敏小貓咪，水元素靈活爆棚！😽💦',
     丑: '穩重大樹熊，土元素超靠譜！🌳🛡️',
@@ -60,7 +60,7 @@ function generateFallbackReport(summary, scores) {
   };
 
   return `
-🌸💖 哇塞！你是宇宙最閃亮的小 ${mainType}${dualHint} 寶貝！😻✨ ${topBeast} 能量像彩虹泡泡，${branchDesc[variant]} 讓你萌到爆，韓劇女主等級！🌟😽
+🌸💖 哇塞！你是宇宙最閃亮的小 ${mainType}${dualHint} 寶貝！😻✨ ${topBeast} 能量像彩虹糖，${branchDesc[variant]} 讓你萌到飛天，韓劇女主級別！🌟😽
 
 📊 能量分析：${topBeast} 超無敵 (${scores[topBeast]}/25)！🌈 你是小天才喵！低分小夥伴？嘻嘻，多玩玩就變強啦～😉 ${summary.dual ? `還有 ${summary.dual[1]} 雙倍萌力！` : '單萌也超棒！'} 😺
 
@@ -75,6 +75,21 @@ function generateFallbackReport(summary, scores) {
 
 🎉 結語：${mainType} 小可愛，你是我的心頭寶！💖 每天給自己個大抱抱，世界更粉紅！AI 小 tip：穿粉裙子，能量 UP UP！😺🌸
   `;
+}
+
+// DeepSeek API 呼叫
+async function callDeepSeek(prompt) {
+  if (!deepseekApiKey) throw new Error('DeepSeek API Key 沒填！😿 檢查 .env 吧～');
+  const url = 'https://api.deepseek.com/v1/chat/completions';
+  const headers = { 'Authorization': `Bearer ${deepseekApiKey}`, 'Content-Type': 'application/json' };
+  const data = {
+    model: 'deepseek-chat', // 常用模型，可換成 deepseek-coder 等
+    messages: [{ role: 'user', content: prompt }],
+    max_tokens: 800,
+    temperature: 0.9,
+  };
+  const response = await axios.post(url, data, { headers });
+  return response.data;
 }
 
 app.post('/api/ai', async (req, res) => {
@@ -112,7 +127,7 @@ app.post('/api/ai', async (req, res) => {
     try {
       completion = await retryRequest(() =>
         openai.chat.completions.create({
-          model: 'gpt-4o-mini', // 付費應解鎖
+          model: 'gpt-4o-mini',
           messages: [{ role: 'user', content: prompt }],
           max_tokens: 800,
           temperature: 0.9,
@@ -120,16 +135,23 @@ app.post('/api/ai', async (req, res) => {
       );
     } catch (fallbackErr) {
       console.log('gpt-4o-mini 失敗，切換 gpt-3.5-turbo...');
-      completion = await retryRequest(() =>
-        openai.chat.completions.create({
-          model: 'gpt-3.5-turbo',
-          messages: [{ role: 'user', content: prompt }],
-          max_tokens: 800,
-          temperature: 0.9,
-        })
-      );
+      try {
+        completion = await retryRequest(() =>
+          openai.chat.completions.create({
+            model: 'gpt-3.5-turbo',
+            messages: [{ role: 'user', content: prompt }],
+            max_tokens: 800,
+            temperature: 0.9,
+          })
+        );
+      } catch (instructErr) {
+        console.log('OpenAI 都壞，切換 DeepSeek...');
+        if (!deepseekApiKey) throw new Error('DeepSeek API Key 沒填！😿 檢查 .env 吧～');
+        const deepseekResp = await retryRequest(() => callDeepSeek(prompt));
+        completion = { choices: [{ message: { content: deepseekResp.choices[0].message.content } }] };
+      }
     }
-    console.log('OpenAI 成功回應！');
+    console.log('AI 成功回應！');
     res.json({ text: completion.choices[0].message.content });
   } catch (err) {
     console.error('AI 小仙女日誌：', err);
