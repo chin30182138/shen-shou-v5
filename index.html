@@ -9,13 +9,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    :root {
-      --brand: #ff6f91; /* 預設粉嫩風 */
-      --bg-main: radial-gradient(circle at top left, #fffaf4, #f6f3ea);
-      --card-bg: #fff;
-      --card-border: #e5e7eb;
-      --slider-thumb: var(--brand);
-    }
+    :root { --brand: #ff6f91; --bg-main: radial-gradient(circle at top left, #fffaf4, #f6f3ea); --card-bg: #fff; --card-border: #e5e7eb; --slider-thumb: var(--brand); }
     body { background: var(--bg-main); color: #333; transition: all 0.3s; }
     .brand { color: var(--brand); }
     .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
@@ -23,11 +17,8 @@
     .spinner { animation: spin 1s linear infinite; display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
     @media print { .no-print { display: none !important; } }
-    /* 風格 1: 粉嫩少女風 */
     .theme-pink { --brand: #ff6f91; --bg-main: radial-gradient(circle at top left, #fffaf4, #ffe4e1); --card-bg: linear-gradient(145deg, #fff, #fff0f6); --card-border: #ffb6c1; --slider-thumb: #ff6f91; }
-    /* 風格 2: 深邃星空風 */
     .theme-space { --brand: #4a90e2; --bg-main: radial-gradient(circle at top right, #1a1a2e, #16213e); --card-bg: #2b2d42; --card-border: #4a90e2; --slider-thumb: #4a90e2; color: #d3d3d3; }
-    /* 風格 3: 傳統神獸風 */
     .theme-classic { --brand: #b6822b; --bg-main: radial-gradient(circle at bottom left, #f5e8c7, #d9b38c); --card-bg: #fffcf5; --card-border: #d9b38c; --slider-thumb: #b6822b; }
     .theme-space .card, .theme-classic .card { box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
     .theme-space .slider::-webkit-slider-thumb, .theme-classic .slider::-webkit-slider-thumb { background: var(--slider-thumb); }
@@ -53,7 +44,6 @@
     </div>
   </header>
 
-  <!-- 問卷 -->
   <form id="form" class="card p-4 mb-4">
     <h2 class="font-bold mb-3">📋 請回答下列30題（1＝不同意，5＝非常同意）</h2>
     <ol id="qWrap" class="space-y-3"></ol>
@@ -63,7 +53,6 @@
     </div>
   </form>
 
-  <!-- 結果 -->
   <section id="result" class="grid lg:grid-cols-2 gap-4">
     <div class="card p-4">
       <h2 class="font-bold mb-2">六獸能量雷達圖</h2>
@@ -85,7 +74,6 @@
     </div>
   </section>
 
-  <!-- AI 智能分析 -->
   <section class="card p-4 mt-4" id="aiReport">
     <h2 class="font-bold mb-2">🤖 AI 智能個人化分析報告</h2>
     <p class="text-sm text-slate-600 mb-3">以下內容由仙人指路AI系統生成，融合金錢卦、五行、地支與心理視角。</p>
@@ -94,6 +82,7 @@
       <button id="btnRetry" class="px-4 py-2 border rounded bg-gray-200 no-print" style="display:none;">重試</button>
     </div>
     <pre id="aiOut" class="mt-3 text-sm bg-slate-50 p-3 rounded-lg whitespace-pre-wrap leading-relaxed"></pre>
+    <div id="aiStatus" class="text-sm text-red-500 mt-2" style="display:none;"></div>
   </section>
 
   <footer class="text-center text-xs text-slate-500 mt-8">
@@ -102,14 +91,14 @@
 </main>
 
 <script>
-// ========== 風格切換 ==========
+// 風格切換
 document.getElementById('themeSelect').addEventListener('change', (e) => {
   document.body.className = e.target.value;
-  if (radarChart) radarChart.destroy(); // 重置雷達圖
+  if (radarChart) radarChart.destroy();
   renderRadar(JSON.parse(localStorage.getItem('shen-shou-v7') || '{}').scores || {});
 });
 
-// ========== 題庫 ==========
+// 題庫
 const BANK = [
   {t:"我常有突如其來的靈感並想立即嘗試。",b:"青龍"},
   {t:"我喜歡打破常規尋找新方法。",b:"青龍"},
@@ -142,15 +131,11 @@ const BANK = [
   {t:"我重視邏輯與分析。",b:"玄武"},
   {t:"我習慣冷靜看待問題。",b:"玄武"},
 ];
-
-// 隨機題目
 BANK.sort(() => Math.random() - 0.5);
 const qWrap = document.getElementById("qWrap");
 BANK.forEach((q, i) => {
   qWrap.innerHTML += `<li><p>${i+1}. ${q.t}</p><input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'></li>`;
 });
-
-// 進度條
 qWrap.innerHTML += `<div id="progress" class="text-right text-sm">0/30</div>`;
 document.querySelectorAll('input[type="range"]').forEach(s => {
   s.onchange = () => {
@@ -159,7 +144,7 @@ document.querySelectorAll('input[type="range"]').forEach(s => {
   };
 });
 
-// ========== 神獸SVG ==========
+// 神獸SVG
 function beastSVG(name) {
   const stroke = '#B6822B', fill = 'none';
   const s = d => `<path d='${d}' fill='${fill}' stroke='${stroke}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>`;
@@ -178,7 +163,7 @@ function beastSVG(name) {
   }
 }
 
-// ========== 結果生成 ==========
+// 結果生成
 function summarize(scores) {
   const arr = Object.entries(scores).sort((a, b) => b[1] - a[1]);
   const top = arr[0], second = arr[1];
@@ -211,7 +196,7 @@ function renderReport(summary, scores) {
   const mainType = `${summary.top}${summary.variant}型`;
   document.getElementById("mainBeastTitle").textContent = summary.dual ? `雙獸${summary.variant}型：${summary.top} × ${summary.dual[1]}` : `主${summary.variant}型：${summary.top}`;
   document.getElementById("dualHint").textContent = summary.dual ? `第二主導能量：${summary.dual[1]}` : '';
-  document.getElementById("mainBeastSummary").textContent = `你的主型為 ${mainType}，融合${summary.top}能量與${summary.variant}地支特質。`;
+  document.getElementById("mainBeastSummary").textContent = `你的主型為 ${mainType}，融合${summary.top}能量與${summary.variant}地支特質`;
 
   const col = (t, a) => `<div class='border rounded p-2'><b>${t}</b><ul class='list-disc pl-5'>${a.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
   const ADVICE_DB = {
@@ -238,7 +223,6 @@ document.getElementById("form").addEventListener("submit", e => {
 
 document.getElementById("btnFillMid").onclick = () => document.querySelectorAll(".slider").forEach(s => s.value = 3);
 
-// 分享結果
 document.getElementById("btnShare").addEventListener("click", () => {
   html2canvas(document.getElementById("result")).then(canvas => {
     const link = document.createElement('a');
@@ -248,21 +232,34 @@ document.getElementById("btnShare").addEventListener("click", () => {
   });
 });
 
-// ========== AI智能分析 ==========
 document.getElementById("btnAI").addEventListener("click", async () => {
   const saved = JSON.parse(localStorage.getItem("shen-shou-v7") || "null");
   const out = document.getElementById("aiOut");
-  if (!saved) { out.textContent = "⚠️請先完成測驗。"; return; }
-  out.innerHTML = "🪶 AI 正在分析中，約5~10秒... <span class='spinner'>⏳</span>";
-  document.getElementById("btnRetry").style.display = "none";
+  const status = document.getElementById("aiStatus");
+  if (!saved) {
+    out.textContent = '';
+    status.textContent = '⚠️ 請先完成測驗。';
+    status.style.display = 'block';
+    return;
+  }
+  out.textContent = '';
+  status.innerHTML = '🪶 AI 正在分析中，約5~15秒... <span class="spinner">⏳</span>';
+  status.style.display = 'block';
+  document.getElementById("btnRetry").style.display = 'none';
   try {
-    const resp = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(saved) });
+    const resp = await fetch("http://localhost:3000/api/ai", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(saved)
+    });
     if (!resp.ok) throw new Error(await resp.text());
     const data = await resp.json();
     out.textContent = data.text.trim();
+    status.style.display = 'none';
   } catch (err) {
-    out.textContent = `❌分析失敗：${err.message}（請檢查網路或 API Key，試試重試）`;
-    document.getElementById("btnRetry").style.display = "inline-block";
+    out.textContent = '';
+    status.textContent = `❌ 分析失敗：${err.message}（請檢查後端或重試）`;
+    document.getElementById("btnRetry").style.display = 'inline-block';
   }
 });
 
