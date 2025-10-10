@@ -1,58 +1,6 @@
-const express = require('express');
 const OpenAI = require('openai');
-const axios = require('axios');
 
-// 創建 Express 應用
-const app = express();
-
-// 中間件
-app.use(express.json());
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
-// 從環境變數獲取 API Keys
-const openaiApiKey = process.env.OPENAI_API_KEY;
-const deepseekApiKey = process.env.DEEPSEEK_API_KEY;
-
-console.log('環境變數檢查:');
-console.log('OPENAI_API_KEY:', openaiApiKey ? '已設定' : '未設定');
-console.log('DEEPSEEK_API_KEY:', deepseekApiKey ? '已設定' : '未設定');
-
-const openai = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
-
-// 健康檢查端點
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: '服務正常運行', 
-    timestamp: new Date().toISOString(),
-    openai: !!openaiApiKey,
-    deepseek: !!deepseekApiKey,
-    platform: 'Vercel'
-  });
-});
-
-// 重試函數
-async function retryRequest(fn, maxRetries = 2, delay = 10000) {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      const result = await fn();
-      return result;
-    } catch (err) {
-      console.error(`重試 ${i + 1}/${maxRetries} 失敗：${err.message}`);
-      if (i === maxRetries - 1) throw err;
-      await new Promise(resolve => setTimeout(resolve, delay));
-    }
-  }
-}
-
-// 靜態 fallback 報告
+// 靜態 fallback 報告（超萌韓風！）
 function generateFallbackReport(summary, scores) {
   const topBeast = summary.top;
   const variant = summary.variant;
@@ -91,147 +39,68 @@ function generateFallbackReport(summary, scores) {
   `;
 }
 
-// DeepSeek API 呼叫
-async function callDeepSeek(prompt) {
-  if (!deepseekApiKey) throw new Error('DeepSeek API Key 未設定');
+// Vercel serverless 函數
+module.exports = async (req, res) => {
+  // 設置 CORS
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   
-  const url = 'https://api.deepseek.com/v1/chat/completions';
-  const headers = { 
-    'Authorization': `Bearer ${deepseekApiKey}`, 
-    'Content-Type': 'application/json' 
-  };
-  const data = {
-    model: 'deepseek-chat',
-    messages: [{ role: 'user', content: prompt }],
-    max_tokens: 800,
-    temperature: 0.9,
-  };
-  
-  const response = await axios.post(url, data, { 
-    headers, 
-    timeout: 25000 
-  });
-  
-  if (!response.data.choices || !response.data.choices[0].message.content) {
-    throw new Error('DeepSeek 回應為空');
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
   }
   
-  return response.data;
-}
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: '只支持 POST 請求' });
+  }
 
-// 主要 AI 分析端點
-app.post('/api/ai', async (req, res) => {
-  console.log('收到 AI 分析請求');
-  
   try {
     const { scores, summary } = req.body;
     
     if (!summary) {
-      return res.status(400).json({ 
-        error: '缺少測驗資料，請先完成測驗！😿' 
-      });
+      return res.status(400).json({ error: '哎喲！測驗資料不見啦！😿 小萌物再試一次～' });
     }
 
-    console.log('分析資料:', { 
-      topBeast: summary.top, 
-      variant: summary.variant,
-      scores 
+    const openai = new OpenAI({ 
+      apiKey: process.env.OPENAI_API_KEY 
     });
 
-    // 生成提示詞
     const topBeast = summary.top;
     const dual = summary.dual ? `雙獸: ${summary.dual.join(' x ')}` : '';
     const variant = summary.variant;
     const scoreStr = Object.entries(scores).map(([b, s]) => `${b}: ${s}/25`).join(', ');
-    
+    const branchTraits = `子: 機敏、智慧、水; 丑: 穩重、耐心、土; 寅: 勇敢、積極、木; 卯: 溫柔、敏捷、木; 辰: 堅韌、領導、土; 巳: 智慧、神秘、火; 午: 熱情、自由、火; 未: 溫和、藝術、土; 申: 機智、靈活、金; 酉: 精準、美麗、金; 戌: 忠誠、守護、土; 亥: 寬容、想像、水`;
+
     const prompt = `
-你是超級韓風 MBTI 小仙女，專聊「神獸七十二型人格」！😽💕 
-用戶分數：${scoreStr}。主神獸：${topBeast} ${dual}。變體：${variant}。
+你是超級韓風 MBTI 小仙女，專聊「神獸七十二型人格」！😽💕 融合神獸、五行、金錢卦、地支、心理學，超粉紅好玩！用戶分數：${scoreStr}。主神獸：${topBeast} ${dual}。變體：${variant}。
 
-生成韓劇級超萌報告！超多 emoji (🌸😻💖✨)，語氣少女爆表！
-短句、誇張撒嬌、滿滿正能量！每段至少 4 個 emoji，像跟閨蜜聊天！😘
+地支特質：${branchTraits}。
 
-**結構**：
-1. 🌟介紹：大喊歡迎+${topBeast}${variant}型萌點
-2. 📊能量分析：狂誇強項，輕鬆鼓勵弱項
-3. 🧠人格特質：MBTI 比喻+神獸特質
-4. 🌈生活應用：職場/感情/養生小 tip
-5. 💰金錢卦：財運萌建議
-6. 🎉結語：大抱抱鼓勵
+生成韓劇級超萌報告！像 KakaoTalk MBTI：超多 emoji (🌸😻💖✨)，語氣少女爆表（「哇塞！你是宇宙最萌 ${topBeast}${variant}型！」「小可愛超棒！」）。短句、誇張撒嬌、滿滿正能量！每段至少 4 個 emoji，絕不正式，像跟閨蜜聊天！😘
+
+**結構**（超可愛！）：
+1. 🌟介紹：大喊歡迎+${topBeast}${variant}型萌點（神獸+地支，像「青龍子型=創意小龍+機敏水寶貝！」😽）。
+2. 📊能量分析：狂誇強項（高分像「${topBeast} 閃到爆！」），輕鬆鼓勵弱項（「小練習就萌翻！」）。
+3. 🧠人格特質：MBTI 比喻（像 ENFP 小冒險家！），神獸+地支超萌形容（「聊天小鳥+溫柔兔兔！」🐰）。
+4. 🌈生活應用：職場/感情/養生小 tip，超個性化（分數+地支，粉紅實用！）。
+5. 💰金錢卦：財運萌建議（「子型買可愛配件賺大錢！」），加卦象。
+6. 🎉結語：大抱抱鼓勵+AI tip（「每天自拍一張，萌力滿滿！」😻）。
 
 500-800字，繁體中文，少女風到融化！讓 ${topBeast}${variant}型超獨特可愛！🌈💖😺`;
 
-    let completion;
-    let usedService = '';
-
-    try {
-      // 先嘗試 OpenAI
-      if (openai && openaiApiKey) {
-        console.log('嘗試 OpenAI...');
-        completion = await retryRequest(() =>
-          openai.chat.completions.create({
-            model: 'gpt-3.5-turbo',
-            messages: [{ role: 'user', content: prompt }],
-            max_tokens: 800,
-            temperature: 0.9,
-          })
-        );
-        usedService = 'OpenAI';
-      } else {
-        throw new Error('OpenAI 未設定');
-      }
-    } catch (openaiErr) {
-      console.log('OpenAI 失敗:', openaiErr.message);
-      
-      // 嘗試 DeepSeek
-      if (deepseekApiKey) {
-        console.log('嘗試 DeepSeek...');
-        try {
-          const deepseekResp = await retryRequest(() => callDeepSeek(prompt));
-          completion = { 
-            choices: [{ 
-              message: { 
-                content: deepseekResp.choices[0].message.content 
-              } 
-            }] 
-          };
-          usedService = 'DeepSeek';
-        } catch (deepseekErr) {
-          console.log('DeepSeek 失敗:', deepseekErr.message);
-          throw new Error('所有 AI 服務暫時不可用');
-        }
-      } else {
-        throw new Error('沒有可用的 AI 服務');
-      }
-    }
-
-    console.log(`${usedService} 回應成功`);
-    
-    if (!completion.choices[0].message.content) {
-      throw new Error('AI 回應為空');
-    }
-    
-    const responseText = completion.choices[0].message.content;
-    
-    res.json({ 
-      text: responseText,
-      service: usedService
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 800,
+      temperature: 0.9,
     });
+
+    res.json({ text: completion.choices[0].message.content });
     
   } catch (err) {
-    console.error('AI 分析錯誤:', err);
-    
-    // 返回 fallback 報告
+    console.error('AI 小仙女日誌：', err);
     const { scores = {}, summary = {} } = req.body || {};
     const fallbackText = generateFallbackReport(summary, scores);
-    
-    res.json({ 
-      text: fallbackText,
-      error: err.message,
-      service: 'fallback'
-    });
+    res.json({ text: fallbackText });
   }
-});
-
-// 導出 Vercel serverless 函數
-module.exports = app;
+};
