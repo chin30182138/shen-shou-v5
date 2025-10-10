@@ -83,12 +83,15 @@ async function callDeepSeek(prompt) {
   const url = 'https://api.deepseek.com/v1/chat/completions';
   const headers = { 'Authorization': `Bearer ${deepseekApiKey}`, 'Content-Type': 'application/json' };
   const data = {
-    model: 'deepseek-chat', // 常用模型，可換成 deepseek-coder 等
+    model: 'deepseek-chat',
     messages: [{ role: 'user', content: prompt }],
     max_tokens: 800,
     temperature: 0.9,
   };
+  console.log('發送 DeepSeek 請求...', data);
   const response = await axios.post(url, data, { headers });
+  console.log('DeepSeek 回應：', response.data);
+  if (!response.data.choices || !response.data.choices[0].message.content) throw new Error('DeepSeek 回應空空！😿');
   return response.data;
 }
 
@@ -151,11 +154,13 @@ app.post('/api/ai', async (req, res) => {
         completion = { choices: [{ message: { content: deepseekResp.choices[0].message.content } }] };
       }
     }
-    console.log('AI 成功回應！');
+    console.log('AI 回應內容：', completion.choices[0].message.content);
+    if (!completion.choices[0].message.content) throw new Error('AI 回應空空！😿');
     res.json({ text: completion.choices[0].message.content });
   } catch (err) {
     console.error('AI 小仙女日誌：', err);
     const fallbackText = generateFallbackReport(summary, scores);
+    console.log('使用 fallback 報告：', fallbackText);
     res.json({ text: fallbackText });
   }
 });
