@@ -9,187 +9,108 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    :root { 
-      --brand: #b6822b;
-      --brand-light: #d4a862;
-      --brand-dark: #8a6521;
+    :root {
+      --brand: #ff6f91; /* 預設粉嫩風 */
+      --bg-main: radial-gradient(circle at top left, #fffaf4, #f6f3ea);
+      --card-bg: #fff;
+      --card-border: #e5e7eb;
+      --slider-thumb: var(--brand);
     }
-    body { 
-      background: radial-gradient(circle at top left, #fffaf4, #f6f3ea);
-      min-height: 100vh;
-    }
+    body { background: var(--bg-main); color: #333; transition: all 0.3s; }
     .brand { color: var(--brand); }
-    .brand-gradient { 
-      background: linear-gradient(135deg, var(--brand), var(--brand-light));
-    }
-    .card { 
-      background: #fff; 
-      border: 1px solid #e5e7eb; 
-      border-radius: 16px; 
-      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-      transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-    .card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-    }
-    .slider { 
-      accent-color: var(--brand);
-      height: 6px;
-      border-radius: 3px;
-    }
-    .slider::-webkit-slider-thumb {
-      appearance: none;
-      height: 20px;
-      width: 20px;
-      border-radius: 50%;
-      background: var(--brand);
-      cursor: pointer;
-      border: 2px solid white;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-    }
-    @media print { 
-      .no-print { display: none !important; } 
-    }
-    .question-item {
-      padding: 1rem;
-      margin: 0.5rem 0;
-      border-left: 4px solid transparent;
-      transition: all 0.3s ease;
-    }
-    .question-item:hover {
-      border-left-color: var(--brand);
-      background: #faf7f0;
-    }
-    .loading-dots:after {
-      content: '';
-      animation: dots 1.5s steps(5, end) infinite;
-    }
-    @keyframes dots {
-      0%, 20% { content: ''; }
-      40% { content: '.'; }
-      60% { content: '..'; }
-      80%, 100% { content: '...'; }
-    }
+    .card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .slider { accent-color: var(--brand); }
+    .spinner { animation: spin 1s linear infinite; display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media print { .no-print { display: none !important; } }
+    /* 風格 1: 粉嫩少女風 */
+    .theme-pink { --brand: #ff6f91; --bg-main: radial-gradient(circle at top left, #fffaf4, #ffe4e1); --card-bg: linear-gradient(145deg, #fff, #fff0f6); --card-border: #ffb6c1; --slider-thumb: #ff6f91; }
+    /* 風格 2: 深邃星空風 */
+    .theme-space { --brand: #4a90e2; --bg-main: radial-gradient(circle at top right, #1a1a2e, #16213e); --card-bg: #2b2d42; --card-border: #4a90e2; --slider-thumb: #4a90e2; color: #d3d3d3; }
+    /* 風格 3: 傳統神獸風 */
+    .theme-classic { --brand: #b6822b; --bg-main: radial-gradient(circle at bottom left, #f5e8c7, #d9b38c); --card-bg: #fffcf5; --card-border: #d9b38c; --slider-thumb: #b6822b; }
+    .theme-space .card, .theme-classic .card { box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .theme-space .slider::-webkit-slider-thumb, .theme-classic .slider::-webkit-slider-thumb { background: var(--slider-thumb); }
   </style>
 </head>
-<body class="text-slate-800">
-
+<body>
 <main class="max-w-5xl mx-auto p-4 sm:p-6">
-  <header class="mb-8 text-center">
-    <div class="flex justify-center items-center gap-4 mb-4">
-      <img src="img/logo.png" class="h-16 w-auto rounded-full shadow-lg" alt="仙人指路 Logo" />
+  <header class="mb-4 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <img src="img/logo.png" class="h-10 w-auto rounded" alt="仙人指路 Logo" />
       <div>
-        <h1 class="text-3xl sm:text-4xl font-bold brand">神獸七十二型人格</h1>
-        <p class="text-lg text-slate-600 mt-2">六獸雷達圖・主神獸解析・三欄建議・AI分析報告</p>
+        <h1 class="text-2xl sm:text-3xl font-extrabold brand">神獸七十二型人格 測驗＋AI智能分析</h1>
+        <p class="text-sm text-slate-600">六獸雷達圖・主型解析・三欄建議・AI分析報告</p>
       </div>
     </div>
-    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4 max-w-2xl mx-auto">
-      <p class="text-sm text-amber-800">
-        🎯 本測驗融合易經五行、六獸象徵與現代心理學，提供全方位人格分析
-      </p>
+    <div>
+      <label for="themeSelect" class="mr-2 text-sm">選擇風格：</label>
+      <select id="themeSelect" class="border rounded p-1">
+        <option value="theme-pink">粉嫩少女風</option>
+        <option value="theme-space">深邃星空風</option>
+        <option value="theme-classic">傳統神獸風</option>
+      </select>
     </div>
   </header>
 
-  <!-- 問卷部分 -->
-  <section class="card p-6 mb-8">
-    <div class="flex items-center gap-3 mb-6">
-      <div class="brand-gradient w-8 h-8 rounded-full flex items-center justify-center text-white font-bold">1</div>
-      <h2 class="text-xl font-bold">📋 請回答下列30題人格測驗</h2>
+  <!-- 問卷 -->
+  <form id="form" class="card p-4 mb-4">
+    <h2 class="font-bold mb-3">📋 請回答下列30題（1＝不同意，5＝非常同意）</h2>
+    <ol id="qWrap" class="space-y-3"></ol>
+    <div class="mt-4 flex gap-3">
+      <button type="submit" class="bg-amber-600 text-white px-5 py-2 rounded">送出測驗</button>
+      <button type="button" id="btnFillMid" class="border px-3 py-2 rounded no-print">全部填3</button>
     </div>
-    
-    <div class="bg-slate-50 rounded-lg p-4 mb-4">
-      <div class="flex justify-between text-sm text-slate-600 mb-2">
-        <span>1＝完全不同意</span>
-        <span>3＝普通</span>
-        <span>5＝非常同意</span>
-      </div>
+  </form>
+
+  <!-- 結果 -->
+  <section id="result" class="grid lg:grid-cols-2 gap-4">
+    <div class="card p-4">
+      <h2 class="font-bold mb-2">六獸能量雷達圖</h2>
+      <canvas id="radar"></canvas>
     </div>
-
-    <form id="form">
-      <ol id="qWrap" class="space-y-4"></ol>
-      
-      <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-        <button type="submit" class="brand-gradient text-white px-8 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all">
-          🚀 生成神獸人格分析報告
-        </button>
-        <button type="button" id="btnFillMid" class="border border-slate-300 px-6 py-3 rounded-lg font-medium hover:bg-slate-50 transition-colors">
-          ⚖️ 全部設為中間值
-        </button>
-      </div>
-    </form>
-  </section>
-
-  <!-- 結果顯示區域 -->
-  <section id="result" class="hidden">
-    <div class="flex items-center gap-3 mb-6">
-      <div class="brand-gradient w-8 h-8 rounded-full flex items-center justify-center text-white font-bold">2</div>
-      <h2 class="text-xl font-bold">✨ 您的神獸人格分析結果</h2>
-    </div>
-
-    <div class="grid lg:grid-cols-2 gap-6 mb-8">
-      <!-- 雷達圖 -->
-      <div class="card p-6">
-        <h3 class="font-bold mb-4 text-lg flex items-center gap-2">
-          <span>📊</span> 六獸能量雷達圖
-        </h3>
-        <div class="relative">
-          <canvas id="radar" height="300"></canvas>
+    <div class="card p-4" id="resultCard">
+      <h2 class="font-bold mb-2">主型與三欄建議</h2>
+      <div class="grid grid-cols-3 gap-3 items-start">
+        <div id="beastSVG" class="w-full aspect-square"></div>
+        <div class="col-span-2">
+          <div id="mainBeastTitle" class="font-bold brand"></div>
+          <div id="dualHint" class="text-sm text-slate-600"></div>
+          <div id="mainBeastSummary" class="mt-1 text-sm"></div>
         </div>
       </div>
-
-      <!-- 主神獸分析 -->
-      <div class="card p-6" id="resultCard">
-        <h3 class="font-bold mb-4 text-lg flex items-center gap-2">
-          <span>🐉</span> 主神獸與特質分析
-        </h3>
-        
-        <div class="grid grid-cols-3 gap-4 items-start mb-4">
-          <div id="beastSVG" class="w-full aspect-square bg-amber-50 rounded-lg p-4"></div>
-          <div class="col-span-2">
-            <div id="mainBeastTitle" class="font-bold text-xl brand mb-2"></div>
-            <div id="dualHint" class="text-sm text-slate-600 mb-3 p-2 bg-slate-50 rounded"></div>
-            <div id="mainBeastSummary" class="text-sm leading-relaxed"></div>
-          </div>
-        </div>
-
-        <hr class="my-4" />
-        
-        <h4 class="font-semibold mb-3">💡 人生建議</h4>
-        <div id="adviceCols" class="grid md:grid-cols-3 gap-4 text-sm"></div>
-      </div>
-    </div>
-
-    <!-- AI智能分析 -->
-    <div class="card p-6 mt-6" id="aiReport">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="brand-gradient w-8 h-8 rounded-full flex items-center justify-center text-white font-bold">3</div>
-        <h3 class="text-xl font-bold">🤖 AI 智能個人化分析報告</h3>
-      </div>
-      
-      <p class="text-sm text-slate-600 mb-4">
-        以下內容由仙人指路AI系統生成，融合易經五行、六獸象徵與現代心理學視角，為您提供深度個人化分析。
-      </p>
-      
-      <button id="btnAI" class="no-print px-6 py-3 border-2 border-amber-500 text-amber-600 rounded-lg font-semibold hover:bg-amber-50 transition-colors flex items-center gap-2">
-        <span>🔮</span> 生成深度AI分析報告
-      </button>
-      
-      <div id="aiOut" class="mt-6 p-4 bg-slate-50 rounded-lg border border-slate-200 min-h-[200px]">
-        <p class="text-slate-500 text-center py-8">點擊上方按鈕生成AI深度分析報告</p>
-      </div>
+      <hr class="my-2" />
+      <div id="adviceCols" class="grid md:grid-cols-3 gap-2 text-sm"></div>
+      <button id="btnShare" class="mt-4 px-4 py-2 border rounded no-print">分享結果圖片</button>
     </div>
   </section>
 
-  <footer class="text-center text-sm text-slate-500 mt-12 pt-6 border-t border-slate-200">
-    <p>© 2025 仙人指路占卜研究學會｜測驗僅供覺察與教學用途，非專業心理診斷</p>
+  <!-- AI 智能分析 -->
+  <section class="card p-4 mt-4" id="aiReport">
+    <h2 class="font-bold mb-2">🤖 AI 智能個人化分析報告</h2>
+    <p class="text-sm text-slate-600 mb-3">以下內容由仙人指路AI系統生成，融合金錢卦、五行、地支與心理視角。</p>
+    <div class="flex gap-2">
+      <button id="btnAI" class="px-4 py-2 border rounded no-print">生成分析報告</button>
+      <button id="btnRetry" class="px-4 py-2 border rounded bg-gray-200 no-print" style="display:none;">重試</button>
+    </div>
+    <pre id="aiOut" class="mt-3 text-sm bg-slate-50 p-3 rounded-lg whitespace-pre-wrap leading-relaxed"></pre>
+  </section>
+
+  <footer class="text-center text-xs text-slate-500 mt-8">
+    © 2025 仙人指路占卜研究學會｜測驗僅供覺察與教學用途
   </footer>
 </main>
 
 <script>
+// ========== 風格切換 ==========
+document.getElementById('themeSelect').addEventListener('change', (e) => {
+  document.body.className = e.target.value;
+  if (radarChart) radarChart.destroy(); // 重置雷達圖
+  renderRadar(JSON.parse(localStorage.getItem('shen-shou-v7') || '{}').scores || {});
+});
+
 // ========== 題庫 ==========
 const BANK = [
-  // 保持原有的題庫數據不變
   {t:"我常有突如其來的靈感並想立即嘗試。",b:"青龍"},
   {t:"我喜歡打破常規尋找新方法。",b:"青龍"},
   {t:"遇阻力時我會靈活轉向。",b:"青龍"},
@@ -222,40 +143,30 @@ const BANK = [
   {t:"我習慣冷靜看待問題。",b:"玄武"},
 ];
 
-// 初始化題目
+// 隨機題目
+BANK.sort(() => Math.random() - 0.5);
 const qWrap = document.getElementById("qWrap");
 BANK.forEach((q, i) => {
-  qWrap.innerHTML += `
-    <li class="question-item card">
-      <p class="font-medium mb-3">${i + 1}. ${q.t}</p>
-      <div class="flex items-center gap-4">
-        <span class="text-sm text-slate-500">不同意</span>
-        <input type='range' min='1' max='5' value='3' id='q${i}' class='flex-1 slider'>
-        <span class="text-sm text-slate-500">非常同意</span>
-        <span class="w-8 text-center font-medium brand" id="valueq${i}">3</span>
-      </div>
-    </li>
-  `;
+  qWrap.innerHTML += `<li><p>${i+1}. ${q.t}</p><input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'></li>`;
 });
 
-// 添加滑桿數值顯示
-document.querySelectorAll('.slider').forEach(slider => {
-  const valueDisplay = document.getElementById(`value${slider.id}`);
-  slider.addEventListener('input', () => {
-    valueDisplay.textContent = slider.value;
-  });
+// 進度條
+qWrap.innerHTML += `<div id="progress" class="text-right text-sm">0/30</div>`;
+document.querySelectorAll('input[type="range"]').forEach(s => {
+  s.onchange = () => {
+    const filled = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== '3').length;
+    document.getElementById("progress").textContent = `${filled}/30`;
+  };
 });
 
-// ========== 神獸SVG (保持不變) ==========
+// ========== 神獸SVG ==========
 function beastSVG(name) {
-  // 保持原有的SVG代碼不變
   const stroke = '#B6822B', fill = 'none';
   const s = d => `<path d='${d}' fill='${fill}' stroke='${stroke}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>`;
   const base = d => `<svg viewBox='0 0 100 100' class='w-full h-auto' xmlns='http://www.w3.org/2000/svg'>
     <defs><radialGradient id='g' cx='50%' cy='50%' r='60%'>
       <stop offset='0%' stop-color='rgba(182,130,43,0.25)'/><stop offset='100%' stop-color='rgba(182,130,43,0)'/>
     </radialGradient></defs><rect width='100' height='100' fill='url(#g)'/>${d}</svg>`;
-  
   switch (name) {
     case '青龍': return base(s("M15 60 C25 40, 45 35, 55 45 C65 55, 75 35, 85 45 M45 45 q5 -12 16 -10 m-6 6 l6 4 m-36 20 q10 -6 18 2 m12 -2 q8 -6 18 2") + s("M30 70 q10 8 20 0 q10 -8 20 0"));
     case '朱雀': return base(s("M20 60 q15 -30 30 -30 q15 0 30 30 M50 30 l0 12 M35 55 q15 -8 30 0 M25 62 q10 8 25 8 q15 0 25 -8"));
@@ -267,214 +178,97 @@ function beastSVG(name) {
   }
 }
 
-// ========== 結果生成 (改進版本) ==========
+// ========== 結果生成 ==========
 function summarize(scores) {
   const arr = Object.entries(scores).sort((a, b) => b[1] - a[1]);
   const top = arr[0], second = arr[1];
-  const dual = (top[1] - second[1] <= 2) ? [top[0], second[0]] : null;
-  return { top: top[0], dual, ranking: arr };
+  const dual = (top[1] - second[1] <= 1) ? [top[0], second[0]] : null;
+  const total = Object.values(scores).reduce((a, b) => a + b, 0);
+  const variantIdx = total % 12;
+  const variants = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+  const variant = variants[variantIdx];
+  return { top: top[0], dual, ranking: arr, variant, total };
 }
 
 let radarChart = null;
 function renderRadar(scores) {
   const ctx = document.getElementById("radar");
   if (radarChart) radarChart.destroy();
-  
-  // 改進雷達圖樣式
   radarChart = new Chart(ctx, {
     type: "radar",
-    data: {
-      labels: Object.keys(scores),
-      datasets: [{
-        label: "六獸能量",
-        data: Object.values(scores),
-        backgroundColor: "rgba(182, 130, 43, 0.2)",
-        borderColor: "#b6822b",
-        borderWidth: 2,
-        pointBackgroundColor: "#b6822b",
-        pointBorderColor: "#fff",
-        pointHoverBackgroundColor: "#fff",
-        pointHoverBorderColor: "#b6822b"
-      }]
-    },
-    options: {
-      scales: {
-        r: {
-          suggestedMin: 0,
-          suggestedMax: 25,
-          ticks: {
-            stepSize: 5,
-            backdropColor: 'transparent'
-          },
-          grid: {
-            color: 'rgba(0,0,0,0.1)'
-          },
-          angleLines: {
-            color: 'rgba(0,0,0,0.1)'
-          },
-          pointLabels: {
-            font: {
-              size: 12,
-              weight: 'bold'
-            },
-            color: '#4b5563'
-          }
-        }
-      },
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          backgroundColor: 'rgba(0,0,0,0.8)',
-          titleFont: { size: 12 },
-          bodyFont: { size: 11 }
-        }
-      },
-      maintainAspectRatio: false
-    }
+    data: { labels: Object.keys(scores), datasets: [{ label: "六獸能量", data: Object.values(scores), backgroundColor: `rgba(${hexToRgb(var(--brand)).join(',')}, 0.15)`, borderColor: var(--brand) }] },
+    options: { scales: { r: { suggestedMin: 0, suggestedMax: 25, ticks: { stepSize: 5 } } }, plugins: { legend: { display: false } } }
   });
+}
+
+function hexToRgb(hex) {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? [parseInt(result[1], 16), parseInt(result[2], 16), parseInt(result[3], 16)] : [255, 69, 145];
 }
 
 function renderReport(summary, scores) {
   document.getElementById("beastSVG").innerHTML = beastSVG(summary.top);
-  document.getElementById("mainBeastTitle").textContent = 
-    summary.dual ? `雙獸型：${summary.top} × ${summary.dual[1]}` : `主神獸：${summary.top}`;
-  
-  document.getElementById("dualHint").textContent = 
-    summary.dual ? `🌟 第二主導能量：${summary.dual[1]}（能量平衡型）` : '✨ 單一主導特質明顯';
-  
-  document.getElementById("mainBeastSummary").textContent = 
-    `你的核心人格由 ${summary.top} 主導，這反映了你最突出的性格特質和行為模式。`;
+  const mainType = `${summary.top}${summary.variant}型`;
+  document.getElementById("mainBeastTitle").textContent = summary.dual ? `雙獸${summary.variant}型：${summary.top} × ${summary.dual[1]}` : `主${summary.variant}型：${summary.top}`;
+  document.getElementById("dualHint").textContent = summary.dual ? `第二主導能量：${summary.dual[1]}` : '';
+  document.getElementById("mainBeastSummary").textContent = `你的主型為 ${mainType}，融合${summary.top}能量與${summary.variant}地支特質。`;
 
-  // 改進建議欄位
-  const col = (t, a, icon) => `
-    <div class="card p-4 h-full">
-      <div class="flex items-center gap-2 mb-3">
-        <span class="text-lg">${icon}</span>
-        <b class="brand">${t}</b>
-      </div>
-      <ul class="space-y-2 text-sm">${a.map(x => `<li class="flex items-start gap-2"><span class="brand mt-1">•</span><span>${x}</span></li>`).join('')}</ul>
-    </div>`;
-  
-  const advice = {
-    職場: [
-      "根據你的神獸特質選擇合適的工作環境",
-      "發揮主神獸優勢，平衡次要能量",
-      "建立適合自己的工作節奏和模式"
-    ],
-    感情: [
-      "理解自己的情感表達方式",
-      "尋找能量互補的伴侶關係",
-      "保持情感溝通的平衡"
-    ],
-    養生: [
-      "根據能量特質選擇適合的運動",
-      "注意情緒和壓力的平衡調節",
-      "建立規律的作息和飲食習慣"
-    ]
+  const col = (t, a) => `<div class='border rounded p-2'><b>${t}</b><ul class='list-disc pl-5'>${a.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
+  const ADVICE_DB = {
+    青龍: { 職場: ["創新領頭，勇於嘗試新方法。", "注意風險評估，避免衝動。"], 感情: ["浪漫冒險，需穩定表達。"], 養生: ["戶外運動釋放能量。"] },
+    朱雀: { 職場: ["激勵團隊，擅長溝通。"], 感情: ["熱情表達愛，保持真誠。"], 養生: ["藝術創作減壓。"] },
+    勾陳: { 職場: ["穩定執行，注重細節。"], 感情: ["忠誠可靠，建立信任。"], 養生: ["規律作息，均衡飲食。"] },
+    螣蛇: { 職場: ["協調衝突，善於傾聽。"], 感情: ["敏感體貼，深入溝通。"], 養生: ["冥想練習，調節情緒。"] },
+    白虎: { 職場: ["決斷領導，追求效率。"], 感情: ["直接表達，勇於承諾。"], 養生: ["高強度運動，釋放壓力。"] },
+    玄武: { 職場: ["策略規劃，長遠視野。"], 感情: ["理性分析，穩健關係。"], 養生: ["靜坐閱讀，養成內省。"] },
   };
-  
-  document.getElementById("adviceCols").innerHTML = 
-    col("職場建議", advice.職場, "💼") +
-    col("感情建議", advice.感情, "❤️") +
-    col("養生建議", advice.養生, "🌿");
+  const beastAdvice = ADVICE_DB[summary.top] || { 職場: ["重視角色定位。"], 感情: ["真誠表達需求。"], 養生: ["早睡早起，穩定能量。"] };
+  document.getElementById("adviceCols").innerHTML = col("職場建議", beastAdvice.職場) + col("感情建議", beastAdvice.感情) + col("養生建議", beastAdvice.養生);
 }
 
-// 表單提交處理
 document.getElementById("form").addEventListener("submit", e => {
   e.preventDefault();
-  
-  // 顯示載入狀態
-  const submitBtn = e.target.querySelector('button[type="submit"]');
-  const originalText = submitBtn.innerHTML;
-  submitBtn.innerHTML = '⏳ 分析中...';
-  submitBtn.disabled = true;
-  
-  setTimeout(() => {
-    const scores = { 青龍: 0, 朱雀: 0, 勾陳: 0, 螣蛇: 0, 白虎: 0, 玄武: 0 };
-    BANK.forEach((q, i) => scores[q.b] += parseInt(document.getElementById(`q${i}`).value));
-    
-    const summary = summarize(scores);
-    renderRadar(scores);
-    renderReport(summary, scores);
-    
-    // 顯示結果區域
-    document.getElementById("result").classList.remove("hidden");
-    
-    // 保存到本地存儲
-    localStorage.setItem("shen-shou-v7", JSON.stringify({ scores, summary }));
-    
-    // 恢復按鈕狀態
-    submitBtn.innerHTML = originalText;
-    submitBtn.disabled = false;
-    
-    // 滾動到結果區域
-    document.getElementById("result").scrollIntoView({ behavior: 'smooth' });
-  }, 1000);
+  const scores = { 青龍: 0, 朱雀: 0, 勾陳: 0, 螣蛇: 0, 白虎: 0, 玄武: 0 };
+  BANK.forEach((q, i) => scores[q.b] += parseInt(document.getElementById(`q${i}`).value));
+  const summary = summarize(scores);
+  renderRadar(scores);
+  renderReport(summary, scores);
+  localStorage.setItem("shen-shou-v7", JSON.stringify({ scores, summary }));
 });
 
-// 全部填中間值
-document.getElementById("btnFillMid").onclick = () => {
-  document.querySelectorAll(".slider").forEach(s => {
-    s.value = 3;
-    const valueDisplay = document.getElementById(`value${s.id}`);
-    if (valueDisplay) valueDisplay.textContent = '3';
-  });
-};
+document.getElementById("btnFillMid").onclick = () => document.querySelectorAll(".slider").forEach(s => s.value = 3);
 
-// ========== AI智能分析 (改進版本) ==========
+// 分享結果
+document.getElementById("btnShare").addEventListener("click", () => {
+  html2canvas(document.getElementById("result")).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'shenshou-result.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+});
+
+// ========== AI智能分析 ==========
 document.getElementById("btnAI").addEventListener("click", async () => {
   const saved = JSON.parse(localStorage.getItem("shen-shou-v7") || "null");
   const out = document.getElementById("aiOut");
-  const btn = document.getElementById("btnAI");
-  
-  if (!saved) {
-    out.innerHTML = '<p class="text-red-500">⚠️ 請先完成測驗以生成分析報告</p>';
-    return;
-  }
-  
-  // 顯示載入狀態
-  out.innerHTML = '<div class="text-center py-8"><div class="loading-dots text-amber-600 text-lg">🪶 AI正在深度分析您的神獸人格特質</div></div>';
-  btn.disabled = true;
-  btn.innerHTML = '⏳ 分析生成中...';
-  
+  if (!saved) { out.textContent = "⚠️請先完成測驗。"; return; }
+  out.innerHTML = "🪶 AI 正在分析中，約5~10秒... <span class='spinner'>⏳</span>";
+  document.getElementById("btnRetry").style.display = "none";
   try {
-    const resp = await fetch("/api/ai", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(saved)
-    });
-    
+    const resp = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(saved) });
     if (!resp.ok) throw new Error(await resp.text());
-    
     const data = await resp.json();
-    out.innerHTML = `<div class="prose prose-sm max-w-none">${formatAIText(data.text)}</div>`;
-    
+    out.textContent = data.text.trim();
   } catch (err) {
-    console.error('AI分析錯誤:', err);
-    out.innerHTML = `<p class="text-red-500">❌ 分析失敗：${err.message}</p>`;
-  } finally {
-    btn.disabled = false;
-    btn.innerHTML = '🔮 生成深度AI分析報告';
+    out.textContent = `❌分析失敗：${err.message}（請檢查網路或 API Key，試試重試）`;
+    document.getElementById("btnRetry").style.display = "inline-block";
   }
 });
 
-// 格式化AI返回的文本
-function formatAIText(text) {
-  return text
-    .split('\n')
-    .map(line => {
-      if (line.match(/^【.*】$/)) {
-        return `<h4 class="font-bold text-amber-700 mt-4 mb-2">${line}</h4>`;
-      } else if (line.match(/^[0-9]+\./)) {
-        return `<div class="ml-4 my-1">${line}</div>`;
-      } else if (line.trim() === '') {
-        return '<br>';
-      } else {
-        return `<p class="my-2 leading-relaxed">${line}</p>`;
-      }
-    })
-    .join('');
-}
+document.getElementById("btnRetry").addEventListener("click", () => {
+  document.getElementById("btnAI").click();
+});
 </script>
 </body>
 </html>
