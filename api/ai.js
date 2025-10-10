@@ -1,45 +1,47 @@
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 export default async function handler(req, res) {
+  if (req.method !== "POST") return res.status(405).end("Method not allowed");
+
   try {
-    const body = req.body || (await req.json?.());
-    const { scores, summary } = body || {};
-    if (!scores || !summary)
-      return res.status(400).json({ error: "缺少 scores 或 summary" });
+    const { scores, summary } = req.body;
+    const beast = summary?.top || "未知";
+    const dual = summary?.dual?.[1] ? `與 ${summary.dual[1]} 雙獸特質` : "";
+    const prompt = `
+你是一位結合中醫五行、道家哲理與現代心理學的占卜師。
+根據六獸人格系統，使用者的主神獸為「${beast}」${dual}。
+六獸分數如下：
+${Object.entries(scores || {}).map(([k,v])=>`${k}:${v}`).join("、")}。
 
-    const sys =
-      "你是『仙人指路占卜研究學會』的助教，請根據六獸能量（青龍、朱雀、勾陳、螣蛇、白虎、玄武）與主神獸，撰寫一段約150字的個人化補運建議，語氣溫暖實用。";
-    const usr = `六獸分數：${Object.entries(scores)
-      .map(([k, v]) => `${k}${v}`)
-      .join("、")}；主神獸：${summary.top}${
-      summary.dual ? `，次主導：${summary.dual[1]}` : ""
-    }`;
+請生成一份完整的「神獸七十二型人格專業報告」，格式如下：
+一、人格核心分析（約100字）
+二、內在優勢（3點）
+三、隱藏挑戰（3點）
+四、職場行為特質與合作建議（約200字）
+五、情感互動與相處模式（約200字）
+六、健康與能量平衡建議（結合五行養生，約150字）
+七、總結（以鼓勵語收尾）
 
-    const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: sys },
-          { role: "user", content: usr },
-        ],
-        temperature: 0.7,
-        max_tokens: 220,
-      }),
+要求：
+1. 使用台灣繁體中文。
+2. 語氣自然、啟發、有深度。
+3. 結構清楚、段落分明。
+`;
+
+    const completion = await client.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [{ role: "user", content: prompt }],
+      temperature: 0.85,
     });
 
-    if (!openaiRes.ok) {
-      const text = await openaiRes.text();
-      return res.status(500).json({ error: text });
-    }
-
-    const data = await openaiRes.json();
-    res.status(200).json({
-      text: data.choices?.[0]?.message?.content || "（沒有產生內容）",
-    });
+    const text = completion.choices?.[0]?.message?.content || "(無內容)";
+    res.status(200).json({ text });
   } catch (err) {
-    res.status(500).json({ error: err.message || "Server error" });
+    console.error("AI 分析錯誤:", err);
+    res.status(500).json({ error: err.message });
   }
 }
