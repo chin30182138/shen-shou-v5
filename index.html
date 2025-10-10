@@ -3,65 +3,32 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>神獸七十二型人格 測驗＋AI智能分析 V7</title>
+  <title>神獸七十二型人格 測驗＋AI智能分析</title>
   <meta name="description" content="六獸人格AI分析｜金錢卦五行整合｜即時雷達圖＋智能報告" />
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
-    :root {
-      --brand: #b6822b;
-      --bg1: #fff9f0;
-      --bg2: #f5efe0;
-      --ink: #1f2937;
-    }
-    body {
-      background: radial-gradient(circle at top left, var(--bg1), var(--bg2));
-      overflow-x: hidden;
-    }
-    .brand { color: var(--brand) }
-    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05) }
-    .slider { accent-color: var(--brand) }
-    canvas#bgCanvas {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      z-index: -1; pointer-events: none; opacity: 0.35;
-    }
+    :root { --brand: #b6822b; }
+    body { background: radial-gradient(circle at top left, #fffaf4, #f6f3ea); }
+    .brand { color: var(--brand); }
+    .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+    .slider { accent-color: var(--brand); }
     @media print { .no-print {display:none!important;} }
   </style>
 </head>
 <body class="text-slate-800">
 
-<canvas id="bgCanvas"></canvas>
-
 <main class="max-w-5xl mx-auto p-4 sm:p-6">
   <header class="mb-4 flex justify-between items-center">
     <div class="flex items-center gap-3">
-      <img id="logo" src="img/logo.png" class="h-10 w-auto rounded" alt="仙人指路 Logo" />
+      <img src="img/logo.png" class="h-10 w-auto rounded" alt="仙人指路 Logo" />
       <div>
         <h1 class="text-2xl sm:text-3xl font-extrabold brand">神獸七十二型人格 測驗＋AI智能分析</h1>
         <p class="text-sm text-slate-600">六獸雷達圖・主神獸解析・三欄建議・AI分析報告</p>
       </div>
     </div>
-    <button id="btnSetting" class="no-print text-xl">⚙️</button>
   </header>
-
-  <!-- 分析師設定面板 -->
-  <section id="panel" class="card p-4 mb-4 hidden no-print">
-    <h2 class="font-bold mb-2">分析師設定</h2>
-    <div class="grid sm:grid-cols-3 gap-2">
-      <input id="fName" placeholder="姓名" class="border rounded px-2 py-1" value="林蔚青 阿青師">
-      <input id="fContact" placeholder="聯絡方式" class="border rounded px-2 py-1" value="LINE：@chin573365">
-      <input id="fBio" placeholder="簡介" class="border rounded px-2 py-1" value="以金錢卦為核心，融合五行指引人生方向。">
-    </div>
-    <div class="mt-2">
-      <label class="text-xs text-slate-500">上傳 QR 圖片</label>
-      <input type="file" id="fQR" accept="image/*" class="block">
-    </div>
-    <div class="mt-3 flex gap-2">
-      <button id="btnSaveInst" class="border rounded px-3 py-1">💾 儲存</button>
-      <button id="btnBG" class="border rounded px-3 py-1">🎨 背景樣式</button>
-    </div>
-  </section>
 
   <!-- 問卷 -->
   <form id="form" class="card p-4 mb-4">
@@ -73,7 +40,7 @@
     </div>
   </form>
 
-  <!-- 結果區 -->
+  <!-- 結果 -->
   <section id="result" class="grid lg:grid-cols-2 gap-4">
     <div class="card p-4">
       <h2 class="font-bold mb-2">六獸能量雷達圖</h2>
@@ -91,10 +58,6 @@
       </div>
       <hr class="my-2" />
       <div id="adviceCols" class="grid md:grid-cols-3 gap-2 text-sm"></div>
-      <hr class="my-2" />
-      <div class="text-xs text-right text-slate-500">
-        分析師：<span id="instName">林蔚青 阿青師</span>｜<span id="instContact">LINE：@chin573365</span>
-      </div>
     </div>
   </section>
 
@@ -112,8 +75,8 @@
 </main>
 
 <script>
-// ====== 題庫 ======
-const BANK=[
+// ========== 題庫 ==========
+const BANK = [
 {t:"我常有突如其來的靈感並想立即嘗試。",b:"青龍"},
 {t:"我喜歡打破常規尋找新方法。",b:"青龍"},
 {t:"遇阻力時我會靈活轉向。",b:"青龍"},
@@ -143,91 +106,69 @@ const BANK=[
 {t:"我傾向謹慎評估後行動。",b:"玄武"},
 {t:"我擅長規劃長遠目標。",b:"玄武"},
 {t:"我重視邏輯與分析。",b:"玄武"},
-{t:"我習慣冷靜看待問題。",b:"玄武"}];
-
+{t:"我習慣冷靜看待問題。",b:"玄武"},
+];
 const qWrap=document.getElementById("qWrap");
-BANK.forEach((q,i)=>{
-  qWrap.innerHTML+=`<li><p>${i+1}. ${q.t}</p>
-  <input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'></li>`;
-});
+BANK.forEach((q,i)=>qWrap.innerHTML+=`<li><p>${i+1}. ${q.t}</p><input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'></li>`);
 
-// ====== 分析與雷達 ======
+// ========== 神獸SVG ==========
+function beastSVG(name){
+  const stroke='#B6822B', fill='none';
+  const s=d=>`<path d='${d}' fill='${fill}' stroke='${stroke}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>`;
+  const base=d=>`<svg viewBox='0 0 100 100' class='w-full h-auto' xmlns='http://www.w3.org/2000/svg'>
+    <defs><radialGradient id='g' cx='50%' cy='50%' r='60%'>
+      <stop offset='0%' stop-color='rgba(182,130,43,0.25)'/><stop offset='100%' stop-color='rgba(182,130,43,0)'/>
+    </radialGradient></defs><rect width='100' height='100' fill='url(#g)'/>${d}</svg>`;
+  switch(name){
+    case '青龍': return base(s("M15 60 C25 40, 45 35, 55 45 C65 55, 75 35, 85 45 M45 45 q5 -12 16 -10 m-6 6 l6 4 m-36 20 q10 -6 18 2 m12 -2 q8 -6 18 2")+s("M30 70 q10 8 20 0 q10 -8 20 0"));
+    case '朱雀': return base(s("M20 60 q15 -30 30 -30 q15 0 30 30 M50 30 l0 12 M35 55 q15 -8 30 0 M25 62 q10 8 25 8 q15 0 25 -8"));
+    case '勾陳': return base(s("M20 70 h60 v-20 h-60 v20 z M30 50 v-10 h40 v10 M35 65 h10 M55 65 h10"));
+    case '螣蛇': return base(s("M20 70 q20 -30 40 -10 q10 8 20 -2 q-10 20 -30 10 q-10 -6 -30 2 M60 48 q6 -6 12 0"));
+    case '白虎': return base(s("M20 65 q15 -20 30 -20 q15 0 30 20 M30 60 h40 M35 70 h30 M38 52 l4 6 M58 52 l-4 6"));
+    case '玄武': return base(s("M30 65 q20 15 40 0 q5 -12 -15 -22 q-20 10 -25 22 M55 50 q10 -8 20 2 M25 55 q-8 -6 -10 6"));
+    default: return base('');
+  }
+}
+
+// ========== 結果生成 ==========
 function summarize(scores){
   const arr=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
   const top=arr[0], second=arr[1];
   const dual=(top[1]-second[1]<=1)?[top[0],second[0]]:null;
   return {top:top[0],dual,ranking:arr};
 }
-
 let radarChart=null;
 function renderRadar(scores){
   const ctx=document.getElementById("radar");
   if(radarChart) radarChart.destroy();
-  radarChart=new Chart(ctx,{type:"radar",
-    data:{labels:Object.keys(scores),
-    datasets:[{label:"六獸能量",data:Object.values(scores),
-    backgroundColor:"rgba(182,130,43,0.15)",borderColor:"#b6822b"}]},
-    options:{scales:{r:{suggestedMin:0,suggestedMax:25,ticks:{stepSize:5}}},
-    plugins:{legend:{display:false}}}});
+  radarChart=new Chart(ctx,{type:"radar",data:{labels:Object.keys(scores),datasets:[{label:"六獸能量",data:Object.values(scores),backgroundColor:"rgba(182,130,43,0.15)",borderColor:"#b6822b"}]},options:{scales:{r:{suggestedMin:0,suggestedMax:25,ticks:{stepSize:5}}},plugins:{legend:{display:false}}}});
 }
-
 function renderReport(summary,scores){
-  const info=summary.top;
-  document.getElementById("beastSVG").innerHTML=`<div class='p-4 text-center text-6xl'>${info}</div>`;
+  document.getElementById("beastSVG").innerHTML = beastSVG(summary.top);
   document.getElementById("mainBeastTitle").textContent = summary.dual ? `雙獸型：${summary.top} × ${summary.dual[1]}` : `主神獸：${summary.top}`;
   document.getElementById("dualHint").textContent = summary.dual ? `第二主導能量：${summary.dual[1]}` : '';
   document.getElementById("mainBeastSummary").textContent = `你的主神獸為 ${summary.top}，代表你的核心特質最明顯。`;
-
-  const col=(title,arr)=>`<div class='border rounded p-2'><b>${title}</b><ul class='list-disc pl-5'>${arr.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
-  const advice={
-    職場:["重視角色定位與節奏。","建立團隊信任感。","學會授權與合作。"],
-    感情:["真誠表達需求。","平衡理性與感性。","學習傾聽他人。"],
-    養生:["早睡早起、節制飲食。","保持運動習慣。","用呼吸冥想穩定能量。"]
-  };
+  const col=(t,a)=>`<div class='border rounded p-2'><b>${t}</b><ul class='list-disc pl-5'>${a.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+  const advice={職場:["重視角色定位與節奏。","建立團隊信任感。","學會授權與合作。"],感情:["真誠表達需求。","平衡理性與感性。","學習傾聽他人。"],養生:["早睡早起、節制飲食。","保持運動習慣。","用呼吸冥想穩定能量。"]};
   document.getElementById("adviceCols").innerHTML=col("職場建議",advice.職場)+col("感情建議",advice.感情)+col("養生建議",advice.養生);
 }
-
-// ====== 問卷送出 ======
 document.getElementById("form").addEventListener("submit",e=>{
   e.preventDefault();
   const scores={青龍:0,朱雀:0,勾陳:0,螣蛇:0,白虎:0,玄武:0};
   BANK.forEach((q,i)=>scores[q.b]+=parseInt(document.getElementById(`q${i}`).value));
-  const summary=summarize(scores);
-  renderRadar(scores); renderReport(summary,scores);
+  const summary=summarize(scores); renderRadar(scores); renderReport(summary,scores);
   localStorage.setItem("shen-shou-v7",JSON.stringify({scores,summary}));
 });
-
-// ====== 填3 ======
 document.getElementById("btnFillMid").onclick=()=>document.querySelectorAll(".slider").forEach(s=>s.value=3);
 
-// ====== 齒輪設定 ======
-document.getElementById("btnSetting").onclick=()=>panel.classList.toggle("hidden");
-
-// ====== 分析師儲存 ======
-document.getElementById("btnSaveInst").onclick=()=>{
-  const data={
-    name:fName.value,contact:fContact.value,bio:fBio.value
-  };localStorage.setItem("inst",JSON.stringify(data));
-  alert("已儲存分析師資訊");
-};
-
-// ====== 背景特效 ======
-const c=document.getElementById("bgCanvas"),ctx=c.getContext("2d");
-let w,h,particles=[];function resize(){w=c.width=window.innerWidth;h=c.height=window.innerHeight;}
-window.addEventListener("resize",resize);resize();
-function createParticles(n=40){particles=[];for(let i=0;i<n;i++)particles.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*3+1,dx:(Math.random()-.5)*0.5,dy:(Math.random()-.5)*0.5});}
-function draw(){ctx.clearRect(0,0,w,h);for(const p of particles){ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle="rgba(182,130,43,0.25)";ctx.fill();p.x+=p.dx;p.y+=p.dy;if(p.x<0||p.x>w)p.dx*=-1;if(p.y<0||p.y>h)p.dy*=-1;}requestAnimationFrame(draw);}
-createParticles();draw();
-
-// ====== AI 智能分析 ======
+// ========== AI智能分析 ==========
 document.getElementById("btnAI").addEventListener("click",async()=>{
   const saved=JSON.parse(localStorage.getItem("shen-shou-v7")||"null");
   const out=document.getElementById("aiOut");
   if(!saved){out.textContent="⚠️請先完成測驗。";return;}
   out.textContent="🪶 AI 正在分析中，約5~10秒...";
   try{
-    const resp=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},
-      body:JSON.stringify(saved)});
+    const resp=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(saved)});
     if(!resp.ok)throw new Error(await resp.text());
     const data=await resp.json();
     out.textContent=data.text.trim();
