@@ -50,6 +50,7 @@
     <div class="mt-4 flex gap-3">
       <button type="submit" class="bg-amber-600 text-white px-5 py-2 rounded">送出測驗</button>
       <button type="button" id="btnFillMid" class="border px-3 py-2 rounded no-print">全部填3</button>
+      <button type="button" id="btnClearStorage" class="border px-3 py-2 rounded no-print text-red-600">清除記錄</button>
     </div>
   </form>
 
@@ -270,8 +271,14 @@ document.addEventListener('DOMContentLoaded', function() {
   // 表單提交
   document.getElementById("form").addEventListener("submit", e => {
     e.preventDefault();
+    
+    // 計算分數
     const scores = { 青龍: 0, 朱雀: 0, 勾陳: 0, 螣蛇: 0, 白虎: 0, 玄武: 0 };
-    BANK.forEach((q, i) => scores[q.b] += parseInt(document.getElementById(`q${i}`).value));
+    BANK.forEach((q, i) => {
+      const value = parseInt(document.getElementById(`q${i}`).value);
+      scores[q.b] += value;
+    });
+    
     const summary = summarize(scores);
     
     // 顯示結果區域
@@ -290,6 +297,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const filled = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== '3').length;
     document.getElementById("progress").textContent = `${filled}/30`;
     console.log('全部填 3');
+  });
+
+  // 清除記錄
+  document.getElementById("btnClearStorage").addEventListener("click", () => {
+    localStorage.removeItem("shen-shou-v7");
+    document.getElementById("result").style.display = 'none';
+    document.getElementById("aiReport").style.display = 'none';
+    document.querySelectorAll(".slider").forEach(s => s.value = 3);
+    document.getElementById("progress").textContent = '0/30';
+    document.getElementById("aiOut").textContent = '';
+    document.getElementById("aiStatus").style.display = 'none';
+    console.log('清除所有記錄');
+    alert('已清除所有記錄，請重新進行測驗！');
   });
 
   // 分享結果
@@ -348,18 +368,9 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('重試 AI');
   });
 
-  // 檢查是否有保存的結果
-  const savedData = localStorage.getItem('shen-shou-v7');
-  if (savedData) {
-    const data = JSON.parse(savedData);
-    if (data.scores) {
-      document.getElementById("result").style.display = 'grid';
-      document.getElementById("aiReport").style.display = 'block';
-      renderRadar(data.scores);
-      renderReport(data.summary, data.scores);
-      console.log('載入保存的結果');
-    }
-  }
+  // 初始化時隱藏結果區域（重要修復！）
+  document.getElementById("result").style.display = 'none';
+  document.getElementById("aiReport").style.display = 'none';
 
   console.log('腳本初始化完成！');
 });
