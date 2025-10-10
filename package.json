@@ -1,11 +1,8 @@
 {
-  "name": "shen-shou-v5",
+  "name": "shen-shou-v7",
   "version": "1.0.0",
-  "private": true,
-  "engines": {
-    "node": ">=18"
-  },
-  "scripts": {
-    "start": "echo 'no build needed'"
+  "type": "module",
+  "dependencies": {
+    "openai": "^4.38.5"
   }
 }
