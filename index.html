@@ -25,7 +25,7 @@
       <img src="img/logo.png" class="h-10 w-auto rounded" alt="仙人指路 Logo" />
       <div>
         <h1 class="text-2xl sm:text-3xl font-extrabold brand">神獸七十二型人格 測驗＋AI智能分析</h1>
-        <p class="text-sm text-slate-600">六獸雷達圖・主神獸解析・三欄建議・AI分析報告</p>
+        <p class="text-sm text-slate-600">六獸雷達圖・主型解析・三欄建議・AI分析報告</p>
       </div>
     </div>
   </header>
@@ -47,7 +47,7 @@
       <canvas id="radar"></canvas>
     </div>
     <div class="card p-4" id="resultCard">
-      <h2 class="font-bold mb-2">主神獸與三欄建議</h2>
+      <h2 class="font-bold mb-2">主型與三欄建議</h2>
       <div class="grid grid-cols-3 gap-3 items-start">
         <div id="beastSVG" class="w-full aspect-square"></div>
         <div class="col-span-2">
@@ -58,13 +58,14 @@
       </div>
       <hr class="my-2" />
       <div id="adviceCols" class="grid md:grid-cols-3 gap-2 text-sm"></div>
+      <button id="btnShare" class="mt-4 px-4 py-2 border rounded no-print">分享結果圖片</button>
     </div>
   </section>
 
   <!-- AI 智能分析 -->
   <section class="card p-4 mt-4" id="aiReport">
     <h2 class="font-bold mb-2">🤖 AI 智能個人化分析報告</h2>
-    <p class="text-sm text-slate-600 mb-3">以下內容由仙人指路AI系統生成，融合金錢卦、五行與心理視角。</p>
+    <p class="text-sm text-slate-600 mb-3">以下內容由仙人指路AI系統生成，融合金錢卦、五行、地支與心理視角。</p>
     <button id="btnAI" class="px-4 py-2 border rounded no-print">生成分析報告</button>
     <pre id="aiOut" class="mt-3 text-sm bg-slate-50 p-3 rounded-lg whitespace-pre-wrap leading-relaxed"></pre>
   </section>
@@ -77,50 +78,65 @@
 <script>
 // ========== 題庫 ==========
 const BANK = [
-{t:"我常有突如其來的靈感並想立即嘗試。",b:"青龍"},
-{t:"我喜歡打破常規尋找新方法。",b:"青龍"},
-{t:"遇阻力時我會靈活轉向。",b:"青龍"},
-{t:"我富想像力，喜歡創新思考。",b:"青龍"},
-{t:"我熱愛探索未知事物。",b:"青龍"},
-{t:"我喜歡在人群中表達自己。",b:"朱雀"},
-{t:"我用情緒帶動他人。",b:"朱雀"},
-{t:"別人的反應會影響我。",b:"朱雀"},
-{t:"我擅長說服與演說。",b:"朱雀"},
-{t:"我重視被傾聽與關注。",b:"朱雀"},
-{t:"我喜歡按計畫行事。",b:"勾陳"},
-{t:"我重視安全感與穩定。",b:"勾陳"},
-{t:"我責任感強。",b:"勾陳"},
-{t:"我傾向維持現狀。",b:"勾陳"},
-{t:"我注重細節與程序。",b:"勾陳"},
-{t:"我對他人情緒很敏感。",b:"螣蛇"},
-{t:"我擅長觀察與傾聽。",b:"螣蛇"},
-{t:"我常思考背後的動機。",b:"螣蛇"},
-{t:"我思考事情會考量時機與人心。",b:"螣蛇"},
-{t:"我善於協調不同觀點。",b:"螣蛇"},
-{t:"我講求效率與結果。",b:"白虎"},
-{t:"我會主動做決策。",b:"白虎"},
-{t:"我以數據與成果為導向。",b:"白虎"},
-{t:"我願意承擔壓力以完成任務。",b:"白虎"},
-{t:"我偏好明確的規範與標準。",b:"白虎"},
-{t:"我喜歡獨自思考。",b:"玄武"},
-{t:"我傾向謹慎評估後行動。",b:"玄武"},
-{t:"我擅長規劃長遠目標。",b:"玄武"},
-{t:"我重視邏輯與分析。",b:"玄武"},
-{t:"我習慣冷靜看待問題。",b:"玄武"},
+  {t:"我常有突如其來的靈感並想立即嘗試。",b:"青龍"},
+  {t:"我喜歡打破常規尋找新方法。",b:"青龍"},
+  {t:"遇阻力時我會靈活轉向。",b:"青龍"},
+  {t:"我富想像力，喜歡創新思考。",b:"青龍"},
+  {t:"我熱愛探索未知事物。",b:"青龍"},
+  {t:"我喜歡在人群中表達自己。",b:"朱雀"},
+  {t:"我用情緒帶動他人。",b:"朱雀"},
+  {t:"別人的反應會影響我。",b:"朱雀"},
+  {t:"我擅長說服與演說。",b:"朱雀"},
+  {t:"我重視被傾聽與關注。",b:"朱雀"},
+  {t:"我喜歡按計畫行事。",b:"勾陳"},
+  {t:"我重視安全感與穩定。",b:"勾陳"},
+  {t:"我責任感強。",b:"勾陳"},
+  {t:"我傾向維持現狀。",b:"勾陳"},
+  {t:"我注重細節與程序。",b:"勾陳"},
+  {t:"我對他人情緒很敏感。",b:"螣蛇"},
+  {t:"我擅長觀察與傾聽。",b:"螣蛇"},
+  {t:"我常思考背後的動機。",b:"螣蛇"},
+  {t:"我思考事情會考量時機與人心。",b:"螣蛇"},
+  {t:"我善於協調不同觀點。",b:"螣蛇"},
+  {t:"我講求效率與結果。",b:"白虎"},
+  {t:"我會主動做決策。",b:"白虎"},
+  {t:"我以數據與成果為導向。",b:"白虎"},
+  {t:"我願意承擔壓力以完成任務。",b:"白虎"},
+  {t:"我偏好明確的規範與標準。",b:"白虎"},
+  {t:"我喜歡獨自思考。",b:"玄武"},
+  {t:"我傾向謹慎評估後行動。",b:"玄武"},
+  {t:"我擅長規劃長遠目標。",b:"玄武"},
+  {t:"我重視邏輯與分析。",b:"玄武"},
+  {t:"我習慣冷靜看待問題。",b:"玄武"},
 ];
-const qWrap=document.getElementById("qWrap");
-BANK.forEach((q,i)=>qWrap.innerHTML+=`<li><p>${i+1}. ${q.t}</p><input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'></li>`);
+
+// 隨機shuffle題目
+BANK.sort(() => Math.random() - 0.5);
+
+const qWrap = document.getElementById("qWrap");
+BANK.forEach((q, i) => {
+  qWrap.innerHTML += `<li><p>${i+1}. ${q.t}</p><input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'></li>`;
+});
+
+// 加進度顯示
+qWrap.innerHTML += `<div id="progress" class="text-right text-sm">0/30</div>`;
+document.querySelectorAll('input[type="range"]').forEach((s) => {
+  s.onchange = () => {
+    const filled = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== '3').length;
+    document.getElementById('progress').textContent = `${filled}/30`;
+  };
+});
 
 // ========== 神獸SVG ==========
-function beastSVG(name){
-  const stroke='#B6822B', fill='none';
-  const s=d=>`<path d='${d}' fill='${fill}' stroke='${stroke}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>`;
-  const base=d=>`<svg viewBox='0 0 100 100' class='w-full h-auto' xmlns='http://www.w3.org/2000/svg'>
+function beastSVG(name) {
+  const stroke = '#B6822B', fill = 'none';
+  const s = d => `<path d='${d}' fill='${fill}' stroke='${stroke}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>`;
+  const base = d => `<svg viewBox='0 0 100 100' class='w-full h-auto' xmlns='http://www.w3.org/2000/svg'>
     <defs><radialGradient id='g' cx='50%' cy='50%' r='60%'>
       <stop offset='0%' stop-color='rgba(182,130,43,0.25)'/><stop offset='100%' stop-color='rgba(182,130,43,0)'/>
     </radialGradient></defs><rect width='100' height='100' fill='url(#g)'/>${d}</svg>`;
-  switch(name){
-    case '青龍': return base(s("M15 60 C25 40, 45 35, 55 45 C65 55, 75 35, 85 45 M45 45 q5 -12 16 -10 m-6 6 l6 4 m-36 20 q10 -6 18 2 m12 -2 q8 -6 18 2")+s("M30 70 q10 8 20 0 q10 -8 20 0"));
+  switch (name) {
+    case '青龍': return base(s("M15 60 C25 40, 45 35, 55 45 C65 55, 75 35, 85 45 M45 45 q5 -12 16 -10 m-6 6 l6 4 m-36 20 q10 -6 18 2 m12 -2 q8 -6 18 2") + s("M30 70 q10 8 20 0 q10 -8 20 0"));
     case '朱雀': return base(s("M20 60 q15 -30 30 -30 q15 0 30 30 M50 30 l0 12 M35 55 q15 -8 30 0 M25 62 q10 8 25 8 q15 0 25 -8"));
     case '勾陳': return base(s("M20 70 h60 v-20 h-60 v20 z M30 50 v-10 h40 v10 M35 65 h10 M55 65 h10"));
     case '螣蛇': return base(s("M20 70 q20 -30 40 -10 q10 8 20 -2 q-10 20 -30 10 q-10 -6 -30 2 M60 48 q6 -6 12 0"));
@@ -131,48 +147,78 @@ function beastSVG(name){
 }
 
 // ========== 結果生成 ==========
-function summarize(scores){
-  const arr=Object.entries(scores).sort((a,b)=>b[1]-a[1]);
-  const top=arr[0], second=arr[1];
-  const dual=(top[1]-second[1]<=1)?[top[0],second[0]]:null;
-  return {top:top[0],dual,ranking:arr};
+function summarize(scores) {
+  const arr = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const top = arr[0], second = arr[1];
+  const dual = (top[1] - second[1] <= 1) ? [top[0], second[0]] : null;
+  const total = Object.values(scores).reduce((a, b) => a + b, 0);
+  const variantIdx = total % 12;
+  const variants = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
+  const variant = variants[variantIdx];
+  return { top: top[0], dual, ranking: arr, variant };
 }
-let radarChart=null;
-function renderRadar(scores){
-  const ctx=document.getElementById("radar");
-  if(radarChart) radarChart.destroy();
-  radarChart=new Chart(ctx,{type:"radar",data:{labels:Object.keys(scores),datasets:[{label:"六獸能量",data:Object.values(scores),backgroundColor:"rgba(182,130,43,0.15)",borderColor:"#b6822b"}]},options:{scales:{r:{suggestedMin:0,suggestedMax:25,ticks:{stepSize:5}}},plugins:{legend:{display:false}}}});
+
+let radarChart = null;
+function renderRadar(scores) {
+  const ctx = document.getElementById("radar");
+  if (radarChart) radarChart.destroy();
+  radarChart = new Chart(ctx, { type: "radar", data: { labels: Object.keys(scores), datasets: [{ label: "六獸能量", data: Object.values(scores), backgroundColor: "rgba(182,130,43,0.15)", borderColor: "#b6822b" }] }, options: { scales: { r: { suggestedMin: 0, suggestedMax: 25, ticks: { stepSize: 5 } } }, plugins: { legend: { display: false } } } });
 }
-function renderReport(summary,scores){
+
+function renderReport(summary, scores) {
   document.getElementById("beastSVG").innerHTML = beastSVG(summary.top);
-  document.getElementById("mainBeastTitle").textContent = summary.dual ? `雙獸型：${summary.top} × ${summary.dual[1]}` : `主神獸：${summary.top}`;
+  const mainType = `${summary.top}${summary.variant}型`;
+  document.getElementById("mainBeastTitle").textContent = summary.dual ? `雙獸${summary.variant}型：${summary.top} × ${summary.dual[1]}` : `主${summary.variant}型：${summary.top}`;
   document.getElementById("dualHint").textContent = summary.dual ? `第二主導能量：${summary.dual[1]}` : '';
-  document.getElementById("mainBeastSummary").textContent = `你的主神獸為 ${summary.top}，代表你的核心特質最明顯。`;
-  const col=(t,a)=>`<div class='border rounded p-2'><b>${t}</b><ul class='list-disc pl-5'>${a.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
-  const advice={職場:["重視角色定位與節奏。","建立團隊信任感。","學會授權與合作。"],感情:["真誠表達需求。","平衡理性與感性。","學習傾聽他人。"],養生:["早睡早起、節制飲食。","保持運動習慣。","用呼吸冥想穩定能量。"]};
-  document.getElementById("adviceCols").innerHTML=col("職場建議",advice.職場)+col("感情建議",advice.感情)+col("養生建議",advice.養生);
+  document.getElementById("mainBeastSummary").textContent = `你的主型為 ${mainType}，代表核心特質融合${summary.top}能量與${summary.variant}地支變體。`;
+
+  const col = (t, a) => `<div class='border rounded p-2'><b>${t}</b><ul class='list-disc pl-5'>${a.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
+  const ADVICE_DB = {
+    青龍: { 職場: ["擁抱變化，創新項目領頭。", "避免衝動，評估風險。"], 感情: ["浪漫冒險，但需穩定。"], 養生: ["戶外活動釋放能量。"] },
+    朱雀: { 職場: ["團隊溝通王，激勵他人。"], 感情: ["熱情表達愛。"], 養生: ["藝術療法減壓。"] },
+    勾陳: { 職場: ["穩定執行，注重細節。"], 感情: ["忠誠可靠，建立信任。"], 養生: ["規律作息，均衡飲食。"] },
+    螣蛇: { 職場: ["協調專家，化解衝突。"], 感情: ["敏感體貼，深入溝通。"], 養生: ["冥想練習，調節情緒。"] },
+    白虎: { 職場: ["決斷領導，追求效率。"], 感情: ["直接表達，勇於承諾。"], 養生: ["高強度運動，釋放壓力。"] },
+    玄武: { 職場: ["策略規劃，長遠視野。"], 感情: ["理性分析，穩健關係。"], 養生: ["靜坐閱讀，養成內省。"] },
+  };
+  const beastAdvice = ADVICE_DB[summary.top] || { 職場: ["重視角色定位與節奏。", "建立團隊信任感。", "學會授權與合作。"], 感情: ["真誠表達需求。", "平衡理性與感性。", "學習傾聽他人。"], 養生: ["早睡早起、節制飲食。", "保持運動習慣。", "用呼吸冥想穩定能量。"] };
+  document.getElementById("adviceCols").innerHTML = col("職場建議", beastAdvice.職場) + col("感情建議", beastAdvice.感情) + col("養生建議", beastAdvice.養生);
 }
-document.getElementById("form").addEventListener("submit",e=>{
+
+document.getElementById("form").addEventListener("submit", e => {
   e.preventDefault();
-  const scores={青龍:0,朱雀:0,勾陳:0,螣蛇:0,白虎:0,玄武:0};
-  BANK.forEach((q,i)=>scores[q.b]+=parseInt(document.getElementById(`q${i}`).value));
-  const summary=summarize(scores); renderRadar(scores); renderReport(summary,scores);
-  localStorage.setItem("shen-shou-v7",JSON.stringify({scores,summary}));
+  const scores = { 青龍: 0, 朱雀: 0, 勾陳: 0, 螣蛇: 0, 白虎: 0, 玄武: 0 };
+  BANK.forEach((q, i) => scores[q.b] += parseInt(document.getElementById(`q${i}`).value));
+  const summary = summarize(scores); 
+  renderRadar(scores); 
+  renderReport(summary, scores);
+  localStorage.setItem("shen-shou-v7", JSON.stringify({ scores, summary }));
 });
-document.getElementById("btnFillMid").onclick=()=>document.querySelectorAll(".slider").forEach(s=>s.value=3);
+
+document.getElementById("btnFillMid").onclick = () => document.querySelectorAll(".slider").forEach(s => s.value = 3);
+
+// 分享結果
+document.getElementById("btnShare").addEventListener("click", () => {
+  html2canvas(document.getElementById("result")).then(canvas => {
+    const link = document.createElement('a');
+    link.download = 'shenshou-result.png';
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+});
 
 // ========== AI智能分析 ==========
-document.getElementById("btnAI").addEventListener("click",async()=>{
-  const saved=JSON.parse(localStorage.getItem("shen-shou-v7")||"null");
-  const out=document.getElementById("aiOut");
-  if(!saved){out.textContent="⚠️請先完成測驗。";return;}
-  out.textContent="🪶 AI 正在分析中，約5~10秒...";
-  try{
-    const resp=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(saved)});
-    if(!resp.ok)throw new Error(await resp.text());
-    const data=await resp.json();
-    out.textContent=data.text.trim();
-  }catch(err){out.textContent="❌分析失敗："+err.message;}
+document.getElementById("btnAI").addEventListener("click", async () => {
+  const saved = JSON.parse(localStorage.getItem("shen-shou-v7") || "null");
+  const out = document.getElementById("aiOut");
+  if (!saved) { out.textContent = "⚠️請先完成測驗。"; return; }
+  out.textContent = "🪶 AI 正在分析中，約5~10秒...";
+  try {
+    const resp = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(saved) });
+    if (!resp.ok) throw new Error(await resp.text());
+    const data = await resp.json();
+    out.textContent = data.text.trim();
+  } catch (err) { out.textContent = "❌分析失敗：" + err.message; }
 });
 </script>
 </body>
