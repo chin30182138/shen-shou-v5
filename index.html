@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>神獸七十二型人格 測驗＋AI智能分析</title>
   <meta name="description" content="六獸人格AI分析｜金錢卦五行整合｜即時雷達圖＋智能報告" />
-  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.tailwindcss.com"></script> <!-- 開發用，生產時移除 -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
@@ -91,11 +91,14 @@
 </main>
 
 <script>
+console.log('腳本開始執行！');
+
 // 風格切換
 document.getElementById('themeSelect').addEventListener('change', (e) => {
   document.body.className = e.target.value;
   if (radarChart) radarChart.destroy();
   renderRadar(JSON.parse(localStorage.getItem('shen-shou-v7') || '{}').scores || {});
+  console.log('風格切換至：', e.target.value);
 });
 
 // 題庫
@@ -141,6 +144,7 @@ document.querySelectorAll('input[type="range"]').forEach(s => {
   s.onchange = () => {
     const filled = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== '3').length;
     document.getElementById("progress").textContent = `${filled}/30`;
+    console.log('進度更新：', filled);
   };
 });
 
@@ -184,6 +188,7 @@ function renderRadar(scores) {
     data: { labels: Object.keys(scores), datasets: [{ label: "六獸能量", data: Object.values(scores), backgroundColor: `rgba(${hexToRgb(var(--brand)).join(',')}, 0.15)`, borderColor: var(--brand) }] },
     options: { scales: { r: { suggestedMin: 0, suggestedMax: 25, ticks: { stepSize: 5 } } }, plugins: { legend: { display: false } } }
   });
+  console.log('雷達圖渲染：', scores);
 }
 
 function hexToRgb(hex) {
@@ -209,6 +214,7 @@ function renderReport(summary, scores) {
   };
   const beastAdvice = ADVICE_DB[summary.top] || { 職場: ["重視角色定位。"], 感情: ["真誠表達需求。"], 養生: ["早睡早起，穩定能量。"] };
   document.getElementById("adviceCols").innerHTML = col("職場建議", beastAdvice.職場) + col("感情建議", beastAdvice.感情) + col("養生建議", beastAdvice.養生);
+  console.log('報告渲染：', summary);
 }
 
 document.getElementById("form").addEventListener("submit", e => {
@@ -219,9 +225,13 @@ document.getElementById("form").addEventListener("submit", e => {
   renderRadar(scores);
   renderReport(summary, scores);
   localStorage.setItem("shen-shou-v7", JSON.stringify({ scores, summary }));
+  console.log('測驗提交：', scores, summary);
 });
 
-document.getElementById("btnFillMid").onclick = () => document.querySelectorAll(".slider").forEach(s => s.value = 3);
+document.getElementById("btnFillMid").onclick = () => {
+  document.querySelectorAll(".slider").forEach(s => s.value = 3);
+  console.log('全部填 3');
+};
 
 document.getElementById("btnShare").addEventListener("click", () => {
   html2canvas(document.getElementById("result")).then(canvas => {
@@ -229,6 +239,7 @@ document.getElementById("btnShare").addEventListener("click", () => {
     link.download = 'shenshou-result.png';
     link.href = canvas.toDataURL();
     link.click();
+    console.log('分享圖片生成');
   });
 });
 
@@ -240,6 +251,7 @@ document.getElementById("btnAI").addEventListener("click", async () => {
     out.textContent = '';
     status.textContent = '⚠️ 請先完成測驗。';
     status.style.display = 'block';
+    console.log('無測驗數據');
     return;
   }
   out.textContent = '';
@@ -256,15 +268,18 @@ document.getElementById("btnAI").addEventListener("click", async () => {
     const data = await resp.json();
     out.textContent = data.text.trim();
     status.style.display = 'none';
+    console.log('AI 回應：', data.text);
   } catch (err) {
     out.textContent = '';
     status.textContent = `❌ 分析失敗：${err.message}（請檢查後端或重試）`;
     document.getElementById("btnRetry").style.display = 'inline-block';
+    console.error('AI 錯誤：', err);
   }
 });
 
 document.getElementById("btnRetry").addEventListener("click", () => {
   document.getElementById("btnAI").click();
+  console.log('重試 AI');
 });
 </script>
 </body>
