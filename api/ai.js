@@ -1,7 +1,47 @@
 const OpenAI = require('openai');
 
+// 小仙女輪換系統
+const fairyProfiles = [
+  {
+    name: "智慧書仙",
+    emoji: "📚",
+    greeting: "讓本仙女的智慧之書為你指引方向吧～"
+  },
+  {
+    name: "元氣花仙",
+    emoji: "💐",
+    greeting: "送你一朵元氣小花花，今天也要開開心心！"
+  },
+  {
+    name: "冒險風仙",
+    emoji: "🧭",
+    greeting: "跟著本仙女去探索未知的領域吧！"
+  },
+  {
+    name: "溫柔月仙",
+    emoji: "🌙",
+    greeting: "月光會溫柔守護每一個勇敢的靈魂～"
+  },
+  {
+    name: "財神小仙",
+    emoji: "💰",
+    greeting: "財源滾滾來，好運天天在！"
+  },
+  {
+    name: "治癒雲仙",
+    emoji: "☁️",
+    greeting: "不開心的時候，就來雲朵上躺一躺吧～"
+  }
+];
+
+// 隨機選擇小仙女
+function getRandomFairy() {
+  return fairyProfiles[Math.floor(Math.random() * fairyProfiles.length)];
+}
+
 // 靜態 fallback 報告（超萌韓風！）
 function generateFallbackReport(summary, scores) {
+  const randomFairy = getRandomFairy();
   const topBeast = summary.top;
   const variant = summary.variant;
   const mainType = `${topBeast}${variant}型`;
@@ -22,6 +62,9 @@ function generateFallbackReport(summary, scores) {
   };
 
   return `
+【本期出場小仙女：${randomFairy.name}】${randomFairy.emoji}
+*${randomFairy.greeting}*
+
 🌸💖 哇塞！你是宇宙最閃亮的小 ${mainType}${dualHint} 寶貝！😻✨ ${topBeast} 能量像彩虹糖，${branchDesc[variant]} 讓你萌到飛天，韓劇女主級別！🌟😽
 
 📊 能量分析：${topBeast} 超無敵 (${scores[topBeast]}/25)！🌈 你是小天才喵！低分小夥伴？嘻嘻，多玩玩就變強啦～😉 ${summary.dual ? `還有 ${summary.dual[1]} 雙倍萌力！` : '單萌也超棒！'} 😺
@@ -65,6 +108,7 @@ module.exports = async (req, res) => {
       apiKey: process.env.OPENAI_API_KEY 
     });
 
+    const randomFairy = getRandomFairy();
     const topBeast = summary.top;
     const dual = summary.dual ? `雙獸: ${summary.dual.join(' x ')}` : '';
     const variant = summary.variant;
@@ -73,6 +117,9 @@ module.exports = async (req, res) => {
 
     const prompt = `
 你是超級仙風 仙人指路 小仙女，專聊「神獸七十二型人格」！😽💕 融合神獸、五行、金錢卦、地支、心理學，超粉紅好玩！用戶分數：${scoreStr}。主神獸：${topBeast} ${dual}。變體：${variant}。
+
+【本期出場小仙女：${randomFairy.name}】${randomFairy.emoji}
+*${randomFairy.greeting}*
 
 地支特質：${branchTraits}。
 
@@ -83,7 +130,7 @@ module.exports = async (req, res) => {
 2. 📊能量分析：狂誇強項（高分像「${topBeast} 閃到爆！」），輕鬆鼓勵弱項（「小練習就萌翻！」）。
 3. 🧠人格特質：MBTI 比喻（像 ENFP 小冒險家！），神獸+地支超萌形容（「聊天小鳥+溫柔兔兔！」🐰）。
 4. 🌈生活應用：職場/感情/養生小 tip，超個性化（分數+地支，粉紅實用！）。
-5. 💰金錢卦：財運萌建議（「子型買可愛配件賺大錢！」），加卦象。
+5. 💰金錢卦：財運萌建議（「${variant}型買可愛配件賺大錢！」），加卦象。
 6. 🎉結語：大抱抱鼓勵+AI tip（「每天自拍一張，萌力滿滿！」😻）。
 
 500-800字，繁體中文，少女風到融化！讓 ${topBeast}${variant}型超獨特可愛！🌈💖😺`;
