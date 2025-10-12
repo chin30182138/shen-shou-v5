@@ -14,90 +14,72 @@
     .brand { color: var(--brand); }
     .card { background: #fff; border: 1px solid #e5e7eb; border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     .slider { accent-color: var(--brand); }
-    .spinner { animation: spin 1s linear infinite; display: inline-block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
     
-    /* 列印樣式 */
-    @media print { 
-      .no-print { display: none !important; } 
-      #form, header, footer { display: none !important; }
-      body { 
-        background: white !important; 
-        font-size: 12px !important;
-        padding: 10px !important;
-        margin: 0 !important;
-      }
-      main {
-        max-width: 100% !important;
-        padding: 0 !important;
-      }
-      .card { 
-        box-shadow: none !important; 
-        border: 1px solid #999 !important;
-        margin-bottom: 15px !important;
-        break-inside: avoid;
-        page-break-inside: avoid;
-      }
-      #result {
-        display: grid !important;
-        grid-template-columns: 45% 55% !important;
-        gap: 15px !important;
-        margin-bottom: 20px !important;
-      }
-      /* 雷達圖容器保持正方形 */
-      #radar-container {
-        position: relative;
-        width: 100% !important;
-        height: 0 !important;
-        padding-bottom: 100% !important; /* 保持1:1比例 */
-      }
-      #radar {
-        position: absolute !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100% !important;
-        height: 100% !important;
-      }
-      #resultCard {
-        font-size: 11px !important;
-      }
-      #aiReport {
-        display: block !important;
-        page-break-before: always;
-        margin-top: 20px !important;
-      }
-      #aiOut {
-        font-size: 11px !important;
-        line-height: 1.3 !important;
-        max-height: none !important;
-      }
-      h1, h2 {
-        color: black !important;
-        margin-bottom: 8px !important;
-      }
-      .print-only { display: block !important; }
-      .print-header {
-        text-align: center;
-        margin-bottom: 20px;
-        padding-bottom: 10px;
-        border-bottom: 2px solid #b6822b;
-      }
-      .print-header h1 {
-        font-size: 18px !important;
-        margin-bottom: 5px !important;
-      }
-      .print-header p {
-        font-size: 12px !important;
-        color: #666 !important;
-      }
+    .slide-toggle { transition: all 0.4s ease-in-out; overflow: hidden; max-height: 1000px; }
+    .slide-toggle.is-closed { max-height: 0; padding-top: 0; padding-bottom: 0; margin-top: 0; margin-bottom: 0; opacity: 0; border-width: 0; }
+
+    .spinner { animation: spin 1.5s linear infinite; display: inline-block; font-size: 2em; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .loading-dots:after { content: '.'; animation: dots 1.5s steps(5, end) infinite; }
+    @keyframes dots { 0%, 20% { content: '.'; } 40% { content: '..'; } 60%, 100% { content: '...'; } }
+    
+    .progress-container { width: 100%; background-color: #e5e7eb; border-radius: 10px; margin: 15px 0; overflow: hidden; }
+    .progress-bar { height: 8px; background: linear-gradient(90deg, #b6822b, #d4a017); border-radius: 10px; transition: width 0.4s ease; width: 0%; }
+    
+    .superhero-card { border-radius: 12px; padding: 12px; margin: 8px 0; background: linear-gradient(135deg, #e8f4fd, #f0f9ff); border: 2px solid #2b6cb0; }
+    .superhero-title { font-size: 1.1em; font-weight: bold; color: #2b6cb0; margin-bottom: 6px; }
+    .superhero-ability { background: rgba(43, 108, 176, 0.1); padding: 6px; border-radius: 6px; margin: 6px 0; font-weight: bold; color: #2c5282; font-size: 0.9em; }
+    .superhero-desc { font-size: 0.85em; color: #666; line-height: 1.4; }
+    
+    .ai-analysis-section { background: linear-gradient(135deg, #f8f9fa, #ffffff); border: 1px solid #e9ecef; border-radius: 12px; padding: 16px; margin: 12px 0; }
+    .ai-analysis-header { display: flex; align-items: center; margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #e9ecef; }
+    .ai-analysis-icon { font-size: 1.5em; margin-right: 10px; }
+    .ai-analysis-title { color: #2d3748; font-weight: bold; font-size: 1.1em; }
+    .ai-analysis-content { font-size: 0.9em; color: #4a5568; line-height: 1.6; }
+    .ai-analysis-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 12px; margin-top: 16px; }
+    .ai-analysis-item { background: white; padding: 12px; border-radius: 8px; border-left: 4px solid #b6822b; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+    .ai-analysis-item-title { font-weight: bold; color: #2d3748; margin-bottom: 6px; font-size: 0.95em; }
+    .ai-analysis-item-content { font-size: 0.85em; color: #718096; line-height: 1.5; }
+    
+    .ai-loading { text-align: center; padding: 30px 20px; color: #718096; background: linear-gradient(135deg, #f8f9fa, #ffffff); border-radius: 12px; border: 2px dashed #e5e7eb; }
+
+    .print-only { display: none; }
+    @media screen {
+      #radar { width: 100% !important; height: 300px !important; }
     }
     
-    .print-only { display: none; }
-    
-    /* 網頁顯示時的雷達圖樣式 */
-    #radar {
-      width: 100% !important;
-      height: 300px !important;
+    @media print { 
+      .no-print { display: none !important; } 
+      .print-only { display: block !important; }
+      
+      body { background: white !important; font-size: 14px !important; color: black !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      main { max-width: 100% !important; padding: 20px !important; margin: 0 !important; }
+      .card { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; page-break-inside: avoid; }
+      #result { display: grid !important; grid-template-columns: 45% 55% !important; gap: 20px !important; margin-bottom: 20px !important; }
+      #radar-container { position: relative; width: 100% !important; height: auto !important; padding-bottom: 0 !important; }
+      h1, h2 { color: #b6822b !important; margin-bottom: 15px !important; font-weight: bold !important; }
+      h2 { font-size: 20px !important; border-bottom: 2px solid #b6822b; padding-bottom: 6px; }
+      .print-header { display: block !important; text-align: center; margin-bottom: 25px; padding: 20px; border: 2px solid #b6822b; border-radius: 15px; background: #fffaf4 !important; position: relative; page-break-after: avoid; box-shadow: 0 4px 12px rgba(182, 130, 43, 0.15); }
+      .header-top-border { position: absolute; top: 0; left: 0; right: 0; height: 8px; background: linear-gradient(90deg, #b6822b, #d4a017) !important; border-top-left-radius: 12px; border-top-right-radius: 12px; }
+      .header-main-content { display: flex !important; justify-content: space-between; align-items: center; padding: 20px 10px 15px 10px; border-bottom: 1px solid #e5e7eb; }
+      .header-left, .header-right { display: flex !important; align-items: center; gap: 12px; flex: 1; }
+      .header-right { justify-content: flex-end; }
+      .print-logo-img, .print-qrcode-img { width: 70px !important; height: 70px !important; border: 2px solid #d4a017; border-radius: 10px; padding: 4px; background: white; object-fit: contain; }
+      .logo-text, .qrcode-text { text-align: left; }
+      .qrcode-text { text-align: right; }
+      .print-logo-title, .print-qrcode-title { font-size: 15px !important; font-weight: bold; color: #b6822b; }
+      .print-logo-subtitle, .print-qrcode-subtitle { font-size: 12px !important; color: #555; line-height: 1.4; }
+      .header-title-container { padding: 20px 0; }
+      .report-main-title { font-size: 32px !important; font-weight: 900 !important; color: #b6822b !important; margin: 0 !important; text-shadow: 1px 1px 3px rgba(0,0,0,0.1); letter-spacing: 2px; font-family: 'Microsoft JhengHei', '微軟正黑體', sans-serif; }
+      .report-subtitle { font-size: 16px !important; color: #333 !important; margin-top: 8px !important; font-weight: 600; }
+      .print-date { text-align: center; font-size: 13px !important; color: #777 !important; margin-top: 10px; border-top: 1px solid #e5e7eb; padding-top: 10px; }
+      #superheroReport { margin-top: 0 !important; padding: 12px !important; break-inside: avoid; page-break-before: auto; }
+      #superheroReport h2 { font-size: 18px !important; margin-bottom: 8px !important; }
+      .superhero-card { padding: 8px !important; margin: 0 !important; }
+      .superhero-title { font-size: 1.1em !important; margin-bottom: 4px !important; }
+      .superhero-ability, .superhero-desc, .superhero-local { font-size: 13px !important; line-height: 1.4 !important; padding: 4px !important; margin: 4px 0 !important; }
+      #aiReport { display: block !important; page-break-before: auto; margin-top: 20px !important; }
+      .ai-analysis-content { font-size: 14px !important; line-height: 1.6 !important; }
     }
   </style>
 </head>
@@ -105,412 +87,234 @@
 <main class="max-w-5xl mx-auto p-4 sm:p-6">
   <header class="mb-4 flex justify-between items-center no-print">
     <div class="flex items-center gap-3">
-      <img src="img/logo.png" class="h-10 w-auto rounded" alt="仙人指路 Logo" />
+      <img src="https://via.placeholder.com/40x40.png?text=Logo" class="h-10 w-auto rounded" alt="仙人指路 Logo" />
       <div>
         <h1 class="text-2xl sm:text-3xl font-extrabold brand">神獸七十二型人格 測驗＋AI智能分析</h1>
         <p class="text-sm text-slate-600">六獸雷達圖・主型解析・三欄建議・AI分析報告</p>
       </div>
     </div>
+    <button id="toggleSettingsBtn" type="button" class="no-print p-2 rounded-full hover:bg-amber-100 transition">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+    </button>
   </header>
 
-  <!-- 問卷 -->
+  <form id="reportSettingsForm" class="card p-4 mb-4 no-print slide-toggle is-closed">
+    <h2 class="font-bold mb-3">⚙️ 報表資訊設定 (資訊將自動儲存於您的瀏覽器)</h2>
+    <div class="space-y-4 text-sm">
+      <div class="flex items-center gap-4">
+        <div>
+          <label for="qrCodeUploader" class="font-semibold text-slate-700 block mb-1">上傳 QR Code 圖片：</label>
+          <input type="file" id="qrCodeUploader" accept="image/*" class="text-slate-600">
+        </div>
+        <div>
+            <label class="font-semibold text-slate-700 block mb-1">圖片預覽：</label>
+            <img id="qrCodePreview" src="https://via.placeholder.com/80x80.png?text=QR+Code" alt="QR Code 預覽" class="w-20 h-20 border rounded p-1 bg-white object-contain">
+        </div>
+      </div>
+      <div>
+        <label for="contactTitle" class="font-semibold text-slate-700">聯絡標題：</label>
+        <input type="text" id="contactTitle" class="w-full mt-1 p-2 border rounded">
+      </div>
+      <div>
+        <label for="contactLine1" class="font-semibold text-slate-700">聯絡資訊 (第一行)：</label>
+        <input type="text" id="contactLine1" class="w-full mt-1 p-2 border rounded">
+      </div>
+      <div>
+        <label for="contactLine2" class="font-semibold text-slate-700">聯絡資訊 (第二行)：</label>
+        <input type="text" id="contactLine2" class="w-full mt-1 p-2 border rounded">
+      </div>
+    </div>
+    <div class="mt-4">
+      <button type="submit" class="bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 transition text-sm">儲存設定</button>
+    </div>
+  </form>
+
   <form id="form" class="card p-4 mb-4 no-print">
     <h2 class="font-bold mb-3">📋 請回答下列30題（1＝不同意，5＝非常同意）</h2>
     <ol id="qWrap" class="space-y-3"></ol>
     <div class="mt-4 flex gap-3">
-      <button type="submit" class="bg-amber-600 text-white px-5 py-2 rounded">送出測驗</button>
-      <button type="button" id="btnFillMid" class="border px-3 py-2 rounded">全部填3</button>
+      <button type="submit" class="bg-amber-600 text-white px-5 py-2 rounded hover:bg-amber-700 transition">送出測驗</button>
+      <button type="button" id="btnFillMid" class="border px-3 py-2 rounded hover:bg-gray-50 transition">全部填3</button>
     </div>
   </form>
 
-  <!-- 列印專用標題 -->
   <div class="print-only print-header">
-    <h1>神獸人格分析報告</h1>
-    <p>個人專屬分析結果</p>
+    <div class="header-top-border"></div>
+    <div class="header-main-content">
+      <div class="header-left">
+        <img src="https://via.placeholder.com/80x80.png?text=Logo" alt="Logo" class="print-logo-img">
+        <div class="logo-text">
+            <div class="print-logo-title">仙人指路占卜研究學會</div>
+            <div class="print-logo-subtitle">專業命理諮詢服務</div>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="qrcode-text">
+            <div id="print-qrcode-title" class="print-qrcode-title"></div>
+            <div id="print-qrcode-subtitle" class="print-qrcode-subtitle"></div>
+        </div>
+        <img id="print-qrcode-img" src="https://via.placeholder.com/80x80.png?text=QR+Code" alt="QR Code" class="print-qrcode-img">
+      </div>
+    </div>
+    <div class="header-title-container">
+      <h1 class="report-main-title">仙人指路神獸七十二型人格</h1>
+      <p class="report-subtitle">個人化深度分析報告 (V45.0 最終穩定版)</p>
+    </div>
+    <div class="print-date">報告生成時間：<span id="report-date"></span></div>
   </div>
 
-  <!-- 結果 - 初始隱藏 -->
   <section id="result" class="grid lg:grid-cols-2 gap-4" style="display: none;">
     <div class="card p-4">
       <h2 class="font-bold mb-2">六獸能量雷達圖</h2>
       <div id="radar-container">
-        <canvas id="radar"></canvas>
+        <canvas id="radar" class="no-print"></canvas>
+        <img id="radarPrintImage" class="print-only w-full h-auto" alt="雷達圖列印預覽">
       </div>
-      <button class="mt-3 px-4 py-2 border rounded no-print" onclick="printAnalysis()">🖨️ 列印分析報告</button>
+      <button class="mt-3 px-4 py-2 border rounded no-print hover:bg-gray-50 transition" onclick="printAnalysis()">🖨️ 列印分析報告</button>
     </div>
     <div class="card p-4" id="resultCard">
       <h2 class="font-bold mb-2">主型與三欄建議</h2>
       <div class="grid grid-cols-3 gap-3 items-start">
-        <div id="beastSVG" class="w-full aspect-square"></div>
+        <div class="w-full aspect-square">
+            <div id="beastSVG" class="w-full h-full no-print"></div>
+            <img id="beastSVGPrintImage" class="print-only w-full h-auto" alt="神獸線條圖">
+        </div>
         <div class="col-span-2">
-          <div id="mainBeastTitle" class="font-bold brand"></div>
-          <div id="dualHint" class="text-sm text-slate-600"></div>
-          <div id="mainBeastSummary" class="mt-1 text-sm"></div>
+          <div id="mainBeastTitle" class="font-bold brand text-lg"></div>
+          <div id="dualHint" class="text-sm text-slate-600 mt-1"></div>
+          <div id="mainBeastSummary" class="mt-2 text-sm"></div>
         </div>
       </div>
-      <hr class="my-2" />
-      <div id="adviceCols" class="grid md:grid-cols-3 gap-2 text-sm"></div>
+      <hr class="my-3" />
+      <div id="adviceCols" class="grid md:grid-cols-3 gap-3 text-sm"></div>
       <div class="mt-4 flex gap-2 no-print">
-        <button id="btnShare" class="px-4 py-2 border rounded">分享結果圖片</button>
-        <button class="px-4 py-2 border rounded" onclick="printAnalysis()">🖨️ 列印分析報告</button>
+        <button id="btnShare" class="px-4 py-2 border rounded hover:bg-gray-50 transition">分享結果圖片</button>
+        <button class="px-4 py-2 border rounded hover:bg-gray-50 transition" onclick="printAnalysis()">🖨️ 列印分析報告</button>
       </div>
     </div>
   </section>
 
-  <!-- AI 智能分析 - 初始隱藏 -->
+  <section class="card p-4 mt-4" id="superheroReport" style="display: none;">
+    <h2 class="font-bold mb-2">🦸‍♂️ 你的神獸超人身分</h2>
+    <div id="superhero-display" class="superhero-card">
+      <div id="superhero-name" class="superhero-title"></div>
+      <div id="superhero-ability" class="superhero-ability"></div>
+      <div id="superhero-mission" class="superhero-desc"></div>
+      <div id="superhero-local" class="text-sm mt-2 font-bold text-blue-700"></div>
+    </div>
+  </section>
+
   <section class="card p-4 mt-4" id="aiReport" style="display: none;">
     <h2 class="font-bold mb-2">🤖 AI 智能個人化分析報告</h2>
     <p class="text-sm text-slate-600 mb-3">以下內容由仙人指路AI系統生成，融合金錢卦、五行、地支與心理視角。</p>
-    <div class="flex gap-2 no-print">
-      <button id="btnAI" class="px-4 py-2 border rounded">生成分析報告</button>
-      <button id="btnRetry" class="px-4 py-2 border rounded bg-gray-200" style="display:none;">重試</button>
-      <button class="px-4 py-2 border rounded" onclick="printAnalysis()">🖨️ 列印完整報告</button>
+    <div id="ai-analysis-structured">
+      <div class="ai-loading" id="ai-loading" style="display: none;">
+        <div class="spinner">🔮</div>
+        <p class="mt-3 text-lg font-semibold">AI 正在為您深度分析中<span class="loading-dots"></span></p>
+        <p class="mt-2 text-sm text-gray-600">這可能需要 10-20 秒，請稍候</p>
+        <div class="progress-container mt-4"><div class="progress-bar" id="progress-bar"></div></div>
+        <div class="mt-3 text-xs text-gray-500" id="loading-step">初始化分析引擎...</div>
+      </div>
+      <div id="ai-analysis-content">
+        <div class="ai-analysis-section">
+          <div class="ai-analysis-header"><div class="ai-analysis-icon">🎭</div><div class="ai-analysis-title">人格特質分析</div></div>
+          <div class="ai-analysis-content" id="ai-personality"><div class="text-gray-500 text-center py-4">點擊「生成深度分析」獲取詳細解析</div></div>
+        </div>
+        <div class="ai-analysis-section">
+          <div class="ai-analysis-header"><div class="ai-analysis-icon">⚡</div><div class="ai-analysis-title">能量優勢分析</div></div>
+          <div class="ai-analysis-content" id="ai-strengths"><div class="text-gray-500 text-center py-4">點擊「生成深度分析」獲取詳細解析</div></div>
+        </div>
+        <div class="ai-analysis-section">
+          <div class="ai-analysis-header"><div class="ai-analysis-icon">📈</div><div class="ai-analysis-title">成長發展建議</div></div>
+          <div class="ai-analysis-grid">
+            <div class="ai-analysis-item"><div class="ai-analysis-item-title">職場發展</div><div class="ai-analysis-item-content" id="ai-career">點擊「生成深度分析」獲取職場建議</div></div>
+            <div class="ai-analysis-item"><div class="ai-analysis-item-title">人際關係</div><div class="ai-analysis-item-content" id="ai-relationships">點擊「生成深度分析」獲取人際建議</div></div>
+            <div class="ai-analysis-item"><div class="ai-analysis-item-title">個人成長</div><div class="ai-analysis-item-content" id="ai-growth">點擊「生成深度分析」獲取成長建議</div></div>
+          </div>
+        </div>
+        <div class="ai-analysis-section">
+          <div class="ai-analysis-header"><div class="ai-analysis-icon">💰</div><div class="ai-analysis-title">五行金錢卦解析</div></div>
+          <div class="ai-analysis-content" id="ai-money"><div class="text-gray-500 text-center py-4">點擊「生成深度分析」獲取金錢卦解析</div></div>
+        </div>
+      </div>
     </div>
-    <pre id="aiOut" class="mt-3 text-sm bg-slate-50 p-3 rounded-lg whitespace-pre-wrap leading-relaxed"></pre>
+    <div class="flex gap-2 no-print mt-4">
+      <button id="btnAI" class="px-4 py-2 border rounded bg-amber-500 text-white hover:bg-amber-600 transition">生成深度分析</button>
+      <button id="btnRetry" class="px-4 py-2 border rounded bg-gray-200 hover:bg-gray-300 transition" style="display:none;">重新分析</button>
+      <button class="px-4 py-2 border rounded hover:bg-gray-50 transition" onclick="printAnalysis()">🖨️ 列印完整報告</button>
+    </div>
   </section>
 
   <footer class="text-center text-xs text-slate-500 mt-8 no-print">
-    © 2025 仙人指路占卜研究學會｜測驗僅供覺察與教學用途
+    <div class="flex justify-center items-center gap-4 mb-2">
+      <span>© 2025 仙人指路占卜研究學會</span><span>|</span><span>Line: @immortalguiide</span>
+    </div>
+    <p>測驗僅供覺察與教學用途</p>
   </footer>
 </main>
 
 <script>
-// 列印功能
+document.getElementById('report-date').textContent = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+const toggleBtn = document.getElementById('toggleSettingsBtn');
+const settingsPanel = document.getElementById('reportSettingsForm');
+toggleBtn.addEventListener('click', () => { settingsPanel.classList.toggle('is-closed'); });
+const settingsForm = document.getElementById('reportSettingsForm');
+const qrCodeUploader = document.getElementById('qrCodeUploader');
+const qrCodePreview = document.getElementById('qrCodePreview');
+const contactTitleInput = document.getElementById('contactTitle');
+const contactLine1Input = document.getElementById('contactLine1');
+const contactLine2Input = document.getElementById('contactLine2');
+const DEFAULT_QR_PLACEHOLDER = 'https://via.placeholder.com/80x80.png?text=QR+Code';
+qrCodeUploader.addEventListener('change', (e) => { const file = e.target.files[0]; if (file) { const reader = new FileReader(); reader.onload = (e) => { qrCodePreview.src = e.target.result; }; reader.readAsDataURL(file); } });
+settingsForm.addEventListener('submit', (e) => { e.preventDefault(); localStorage.setItem('reportContactSettings', JSON.stringify({ qrDataUrl: qrCodePreview.src, title: contactTitleInput.value, line1: contactLine1Input.value, line2: contactLine2Input.value })); alert('設定已儲存！'); });
+function loadSettings() { const saved = JSON.parse(localStorage.getItem('reportContactSettings')); if (saved) { qrCodePreview.src = saved.qrDataUrl || DEFAULT_QR_PLACEHOLDER; contactTitleInput.value = saved.title || '掃碼預約一對一諮詢'; contactLine1Input.value = saved.line1 || 'Line ID: @immortalguiide'; contactLine2Input.value = saved.line2 || '專業諮詢預約'; } else { qrCodePreview.src = DEFAULT_QR_PLACEHOLDER; contactTitleInput.value = '掃碼預約一對一諮詢'; contactLine1Input.value = 'Line ID: @immortalguiide'; contactLine2Input.value = '專業諮詢預約'; } }
+loadSettings();
+
+// *** 最終版列印函式，同時處理雷達圖與神獸SVG圖 ***
 function printAnalysis() {
-  window.print();
+  const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings')) || {};
+  document.getElementById('print-qrcode-img').src = savedSettings.qrDataUrl || DEFAULT_QR_PLACEHOLDER;
+  document.getElementById('print-qrcode-title').textContent = savedSettings.title || '掃碼預約一對一諮詢';
+  const line1 = savedSettings.line1 || 'Line ID: @immortalguiide';
+  const line2 = savedSettings.line2 || '專業諮詢預約';
+  document.getElementById('print-qrcode-subtitle').innerHTML = `${line1}${line2 ? '<br>' + line2 : ''}`;
+
+  // 1. 轉換 Chart.js 雷達圖為圖片
+  if (radarChart) {
+    document.getElementById('radarPrintImage').src = radarChart.toBase64Image();
+  }
+  
+  // 2. 轉換神獸 SVG 線條圖為圖片
+  const beastSvgDiv = document.getElementById('beastSVG');
+  if (beastSvgDiv && beastSvgDiv.innerHTML) {
+      const svgString = beastSvgDiv.innerHTML;
+      // btoa() 需要對非 ASCII 字符進行特殊處理
+      const encodedSvg = btoa(unescape(encodeURIComponent(svgString)));
+      document.getElementById('beastSVGPrintImage').src = 'data:image/svg+xml;base64,' + encodedSvg;
+  }
+  
+  setTimeout(() => { window.print(); }, 200); // 稍微加長延遲確保兩張圖都渲染完成
 }
 
-// ========== 題庫 ==========
-const BANK = [
-  {t:"我常有突如其來的靈感並想立即嘗試。",b:"青龍"},
-  {t:"我喜歡打破常規尋找新方法。",b:"青龍"},
-  {t:"遇阻力時我會靈活轉向。",b:"青龍"},
-  {t:"我富想像力，喜歡創新思考。",b:"青龍"},
-  {t:"我熱愛探索未知事物。",b:"青龍"},
-  {t:"我喜歡在人群中表達自己。",b:"朱雀"},
-  {t:"我用情緒帶動他人。",b:"朱雀"},
-  {t:"別人的反應會影響我。",b:"朱雀"},
-  {t:"我擅長說服與演說。",b:"朱雀"},
-  {t:"我重視被傾聽與關注。",b:"朱雀"},
-  {t:"我喜歡按計畫行事。",b:"勾陳"},
-  {t:"我重視安全感與穩定。",b:"勾陳"},
-  {t:"我責任感強。",b:"勾陳"},
-  {t:"我傾向維持現狀。",b:"勾陳"},
-  {t:"我注重細節與程序。",b:"勾陳"},
-  {t:"我對他人情緒很敏感。",b:"螣蛇"},
-  {t:"我擅長觀察與傾聽。",b:"螣蛇"},
-  {t:"我常思考背後的動機。",b:"螣蛇"},
-  {t:"我思考事情會考量時機與人心。",b:"螣蛇"},
-  {t:"我善於協調不同觀點。",b:"螣蛇"},
-  {t:"我講求效率與結果。",b:"白虎"},
-  {t:"我會主動做決策。",b:"白虎"},
-  {t:"我以數據與成果為導向。",b:"白虎"},
-  {t:"我願意承擔壓力以完成任務。",b:"白虎"},
-  {t:"我偏好明確的規範與標準。",b:"白虎"},
-  {t:"我喜歡獨自思考。",b:"玄武"},
-  {t:"我傾向謹慎評估後行動。",b:"玄武"},
-  {t:"我擅長規劃長遠目標。",b:"玄武"},
-  {t:"我重視邏輯與分析。",b:"玄武"},
-  {t:"我習慣冷靜看待問題。",b:"玄武"},
-];
-
-// 隨機題目
-BANK.sort(() => Math.random() - 0.5);
-const qWrap = document.getElementById("qWrap");
-BANK.forEach((q, i) => {
-  qWrap.innerHTML += `<li><p>${i+1}. ${q.t}</p><input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'></li>`;
-});
-
-// 進度條
-qWrap.innerHTML += `<div id="progress" class="text-right text-sm">0/30</div>`;
-document.querySelectorAll('input[type="range"]').forEach(s => {
-  s.onchange = () => {
-    const filled = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== '3').length;
-    document.getElementById("progress").textContent = `${filled}/30`;
-  };
-});
-
-// ========== 神獸SVG ==========
-function beastSVG(name) {
-  const stroke = '#B6822B', fill = 'none';
-  const s = d => `<path d='${d}' fill='${fill}' stroke='${stroke}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>`;
-  const base = d => `<svg viewBox='0 0 100 100' class='w-full h-auto' xmlns='http://www.w3.org/2000/svg'>
+const superheroData = {'青龍':{name:'創意飛龍超人',ability:'🦸‍♂️ 超能力：靈感爆發 + 快速應變 + 突破框架',mission:'🎯 專屬任務：創新專案發起人、危機處理專家、新領域開拓者',localName:'台灣點子王',description:'你就像台灣的創新引擎，總能想出讓人驚艷的點子！',analysis:{personality:'青龍型人格的你，內心蘊藏著一股生生不息的創造活水。你的思維如同春雷破曉，總能在平凡中看見不凡，在框架外找到新路。你不喜歡墨守成規，享受從無到有的創造過程，腦中時常有無數個「如果這樣會怎樣？」的念頭在翻騰。對你而言，世界不是一個固定的劇本，而是一個充滿無限可能的遊樂場，等待你去探索、去定義。',strengths:'你最大的優勢在於那無人能及的「靈感爆發力」與「靈活應變性」。當團隊陷入僵局時，你總能提出石破天驚的觀點，化解危機。你像一位高明的舵手，即便遇到突來的風暴也能迅速調整航向，找到新的航道。這種突破性的思維是你最寶貴的資產，讓你在變動快速的環境中如魚得水，成為團隊中不可或缺的創新催化劑。',career:'在職業選擇上，你如同翱翔的巨龍，最適合在需要源源不絕創意的領域發光發熱，例如廣告設計、產品開發、新創企業的開拓者，或是任何鼓勵打破常規、挑戰現狀的崗位。你需要一個能夠給予你高度自由度和發揮空間的舞台。切記，避免選擇過於僵化、重複性高的工作，那會扼殺你的天賦。',relationships:'情感世界裡，你需要的是新鮮感與共同成長的火花。一成不變的關係會讓你感到窒息。你嚮往能一起探索未知、嘗試新事物、激盪思想的伴侶。對你而言，最浪漫的事莫過於兩人一起把生活變成一場有趣的冒險。不過，也要學習在追求變化的同時，給予對方穩定的安全感，找到創新與承諾間的平衡點。',growth:'你的挑戰在於如何將天馬行空的創意「落地」。學習建立系統性的執行計畫、培養耐心與專注力至關重要。可以嘗試使用專案管理工具，將大目標拆解成小步驟，並設定明確的時程。另外，適時地沉澱與反思，而非一味追逐新點子，能讓你的創造力發揮得更長久、更有深度。',money:'金錢卦象顯示，你的財富密碼藏在「趨勢」與「創新」之中。你對新興產業、潛力科技有著敏銳的直覺，適合進行風險與回報較高的前瞻性投資。然而，你的挑戰在於避免因一時的靈感而衝動決策。建議你建立一個核心穩健的投資組合，再撥出一部分資金用於實現你的創意投資，並嚴格設立停損點，方能駕馭財富的浪潮。'}},'朱雀':{name:'熱情鳳凰超人',ability:'🦸‍♂️ 超能力：感染力場 + 溝通大師 + 激勵光環',mission:'🎯 專屬任務：團隊士氣充電站、公關溝通達人、教育推廣先鋒',localName:'台灣熱情大使',description:'你是台灣的人氣王，用熱情感染身邊的每一個人！',analysis:{personality:'朱雀型人格的你，生來就是舞台的焦點，人群中的發光體。你的內心燃燒著一團熱情的火焰，這股能量透過你的言談、舉止自然而然地散發出來，溫暖並感染著身邊的每一個人。你享受與人互動，渴望被看見、被聽見，並從中獲得能量。對你來說，生命是一場盛大的派對，而你就是那個邀請大家共舞的核心人物。',strengths:'你與生俱來的「溝通魅力」和「超凡感染力」是你最強大的武器。你善於用生動的語言、真誠的情感去打動人心，能輕易地化解尷尬、凝聚共識。在團隊中，你就像一顆小太陽，能驅散低迷的氣氛，激發夥伴的鬥志與潛能。建立人際網絡對你來說易如反掌，人們會不自覺地被你的熱情與真誠所吸引。',career:'你的天賦在於所有需要與「人」打交道的工作。公關、市場行銷、銷售、教育培訓、主持人、人力資源等領域都是你能大放異彩的舞台。你需要一份能讓你充分表達自我、與他人建立連結的工作。一個充滿互動、氣氛活躍的工作環境，遠比一份薪水優渥但枯燥乏味的工作更能讓你獲得成就感。',relationships:'在感情中，你是一個需要大量情感交流與肯定的浪漫主義者。甜言蜜語、溫暖的擁抱、真誠的讚美對你而言如同空氣般重要。你擅長製造浪漫與驚喜，也同樣渴望對方能給予熱情的回應。尋找一位同樣重視情感表達、願意與你分享生活點滴的伴侶至關重要。你需要的是靈魂的共舞，而非沉默的陪伴。',growth:'你的成長課題是學習「管理情緒」與「尋求內在平靜」。高度的情感敏感性是一把雙面刃，它讓你充滿魅力的同時，也可能讓你因外界的評價而情緒起伏。你需要學習在熱情奔放之餘，保留一個獨處的空間，傾聽內心的聲音，避免將自我價值完全建立在他人的認可之上。學會分辨哪些是自己的情緒，哪些是受他人的影響。',money:'從金錢卦來看，你的財富往往與你的「人脈」和「聲望」緊密相連。透過建立良好的合作關係、利用你的口才與溝通能力，往往能為你帶來意想不到的財富機會。投資自己，例如提升演說技巧、拓展社交圈，會是回報率最高的方式。理財上，你需要避免因一時的情緒或朋友推薦而做出衝動的投資決定，尋求專業建議能幫助你更穩健地累積財富。'}},'勾陳':{name:'穩固城牆超人',ability:'🦸‍♂️ 超能力：可靠防護 + 細節掌控 + 執行力場',mission:'🎯 專屬任務：系統穩定守護者、品質把關專家、長期規劃師',localName:'台灣地基主',description:'你是台灣的穩定力量，像堅固的地基一樣可靠！',analysis:{personality:'勾陳型人格的你，是穩定與秩序的化身。你的內心有一座堅實的堡壘，凡事講求計畫、注重細節、信守承諾。你可能不是人群中最耀眼的那一個，但絕對是最讓人安心、最值得信賴的夥伴。你相信按部就班的力量，對混亂和不確定性感到不安。對你而言，生活的美好在於建立一個可預測、有條理且充滿安全感的環境。',strengths:'「極致的可靠性」與「強大的執行力」是你最核心的優勢。任何交付到你手中的任務，你都會以最高的標準、最嚴謹的態度去完成。你對細節的掌控力令人驚嘆，總能發現他人忽略的疏漏。在一個團隊中，你就是品質的最後一道防線，是確保計畫能從藍圖變為現實的關鍵支柱。你的存在，本身就是一種承諾。',career:'任何要求精準、穩定和責任感的工作都非常適合你。例如，專案管理、財務會計、法務、品管工程師、系統管理員等。你需要一個結構清晰、權責分明的工作環境。你的價值在於為組織提供穩定性，並確保每一個環節都準確無誤。你是優秀的守護者與執行者，能在已有的框架下將事情做到一百二十分。',relationships:'在情感關係中，你追求的是「長久而穩定的安全感」。你會用持續而務實的行動來表達關愛，而非華而不實的言語。對你來說，承諾重於泰山。一個可靠的肩膀、一個溫暖的家，是你對感情最深的期盼。你需要一個同樣重視家庭、理解你對穩定生活嚮往的伴侶。你的愛，是細水長流，是日復一日的守護。',growth:'你的成長關鍵在於學習「擁抱彈性」與「適度放手」。世界充滿了變化，過於堅持計畫有時會讓你錯失良機或倍感壓力。嘗試在你的計畫中保留一些彈性空間，學習接受「足夠好」而非「絕對完美」。偶爾放下對細節的掌控，授權給他人，不僅能讓你更輕鬆，也能發現新的可能性。',money:'金錢卦象顯示，你的理財天賦在於「穩健增值」與「風險規避」。你非常適合長期、有規律的儲蓄和投資計畫，例如定期定額投資藍籌股或指數型基金。你的耐心將會為你帶來豐厚的複利回報。你需要警惕的是過於保守，有時一些經過審慎評估的、略帶風險的機會也值得嘗試。建立一個攻守兼備的資產配置是你的理想路徑。'}},'螣蛇':{name:'洞察靈蛇超人',ability:'🦸‍♂️ 超能力：讀心感知 + 協調力場 + 時機掌控',mission:'🎯 專屬任務：人際關係調解員、策略分析師、危機預警系統',localName:'台灣和事佬',description:'你是台灣的人際雷達，總能洞察人心、化解衝突！',analysis:{personality:'螣蛇型人格的你，擁有如雷達般敏銳的感知力，天生就能洞察言語背後的動機與情感的細微波動。你看似低調，實則內心清明，對周遭環境的氛圍、人際關係的暗流有著驚人的直覺。你擅長在複雜的關係中找到平衡點，並在最適當的時機採取行動。對你而言，世界是一個充滿訊號的網絡，而你就是那個高明的解碼者。',strengths:'你最大的天賦是「精準的洞察力」與「卓越的協調能力」。你總能「讀懂空氣」，理解他人的未竟之語。這讓你成為一個絕佳的傾聽者、調解者與談判專家。在衝突一觸即發之際，你往往能以柔克剛，找到雙方都能接受的方案，化解危機。你的策略性思維讓你總能比別人早一步預見問題，並做好應對準備。',career:'你的才能在於需要高度人際敏感度與策略思維的領域。心理諮商師、人力資源專家、外交官、採購談判、危機管理顧問等工作都能讓你如魚得水。你擅長擔任團隊中的「潤滑劑」，促進溝通，解決內部矛盾。你需要一份能夠發揮你洞察力，並對他人產生正面影響的工作，這會帶給你極大的滿足感。',relationships:'在感情中，你是一個極度體貼且善解-人意的伴侶。你總能敏銳地捕捉到對方的情緒變化與內心需求，並給予溫柔的支持。你追求的是深度的靈魂連結與心靈共鳴。然而，你也需要一個能理解你敏感內心、並給予你足夠個人空間的伴侶。有時候，你的過度揣測可能會造成不必要的困擾，學習直接溝通同樣重要。',growth:'你的主要課題是「建立健康的個人邊界」。因為你太容易感知並承接他人的情緒，有時會感到心力交瘁，甚至分不清哪些是自己的情緒。學習溫柔而堅定地拒絕，為自己的心靈設立一道防護牆，是保持能量平衡的關鍵。同時，要信任自己的判斷，避免因過度思考而陷入猶豫不決的狀態。',money:'金錢卦象指出，你的財富之道在於「資訊差」與「時機掌握」。你對市場情緒、政策風向的敏感度，能幫助你在投資中搶佔先機。適合從事需要分析人性與市場趨勢的投資，例如股市中的波段操作或房地產投資。但你需要克服的是，在關鍵時刻的果斷行動力，避免因過度分析而錯失良機。將你的洞察轉化為行動，是致富的關鍵。'}},'白虎':{name:'疾風戰神超人',ability:'🦸‍♂️ 超能力：決斷力場 + 行動加速 + 目標鎖定',mission:'🎯 專屬任務：緊急救援隊長、專案領導者、效率優化師',localName:'台灣急先鋒',description:'你是台灣的行動派，像疾風一樣快速解決問題！',analysis:{personality:'白虎型人格的你，體內流淌著果敢與決斷的血液。你天生就是為了解決問題而生，目標明確，行動力極強。面對挑戰，你不會猶豫，而是選擇正面迎擊。你講求效率，厭惡拖延，相信最好的防守就是進攻。對你來說，生命是一場場需要攻克的戰役，而你就是那個衝鋒陷陣、引領團隊走向勝利的大將軍。',strengths:'你最核心的優勢是「卓越的決斷力」與「閃電般的執行力」。在壓力之下，當別人還在徬徨時，你已經能快速分析利弊，做出決定並付諸行動。你以結果為導向，能為團隊設定清晰的目標，並以身作則地帶領大家全力衝刺。你的存在，就像一支強心針，能迅速提升團隊的效率與戰鬥力，特別擅長處理緊急與棘手的任務。',career:'你天生就是領導者與開拓者。企業高管、專案經理、外科醫生、運動教練、軍警等需要快速決策和強大抗壓性的職業都非常適合你。你需要一個充滿挑戰、能夠讓你主導局面並看到立即成果的環境。一個目標明確、節奏快速的團隊能最大化你的潛能。避免那些需要漫長等待和複雜流程的工作，那會讓你感到挫敗。',relationships:'在情感世界裡，你直接而真誠，愛憎分明。一旦認定了對方，你會展現出強烈的保護慾，成為對方最堅實的依靠。你傾向於用實際行動來證明你的愛，而不是空泛的承諾。你需要一個能夠欣賞你果斷風格、並能給予你溫柔支持的伴侶。同時，也要學習放慢腳步，傾聽對方的感受，避免因過於強勢而忽略了關係中的細膩情感。',growth:'你的成長功課在於學習「耐心」與「周全」。你的行動有時會快於思考，雖然效率高，但也可能因考慮不周而付出代價。在做出重大決定前，強迫自己花一些時間蒐集更多資訊，聽取不同意見，能讓你的決策更具智慧與遠見。學會欣賞過程，而不僅僅是結果，你的領導魅力將會更加圓融。',money:'金錢卦象顯示，你的財富來自於「效率」與「決斷」。你適合高周轉率、能快速見到成效的投資方式，例如短線交易、專案投資或創業。你勇於承擔風險以換取高回報。然而，你必須嚴格遵守「紀律」，特別是設定明確的停損點，以防止因一次的誤判而造成重大損失。將你的決斷力用於風險控制，而非僅僅是進攻，才能在財富戰場上立於不敗之地。'}},'玄武':{name:'智慧龜仙超人',ability:'🦸‍♂️ 超能力：深度思考 + 策略規劃 + 冷靜屏障',mission:'🎯 專屬任務：長遠規劃師、技術研發專家、智慧決策顧問',localName:'台灣諸葛亮',description:'你是台灣的智慧寶庫，像龜甲一樣保護重要決策！',analysis:{personality:'玄武型人格的你，是一位天生的思想家與策略家。你的內心世界深邃如海，習慣於在行動前進行深度思考與周密佈局。你不多言，但一開口往往切中要害。面對混亂的局面，你總能保持超然的冷靜，用理性的眼光穿透表象，洞察事物運行的底層邏輯。對你來說，世界是一盤複雜的棋局，而你享受在其中深思熟慮、運籌帷幄的過程。',strengths:'你最大的力量源於「深度思考能力」與「長遠的策略眼光」。你從不滿足於表面的答案，而是會追根究底，探尋問題的本質。這讓你能夠制定出周延且可持續的計畫，避免短視近利。在團隊中，你就像一位軍師，你的冷靜分析和智慧建議總能在關鍵時刻為團隊指明方向，避免潛在的風險，是決策者最信賴的顧問。',career:'任何需要深度分析、策略規劃與專業知識的領域都是你的舞台。例如，研發工程師、數據科學家、策略顧問、投資分析師、律師或學者。你需要一個能夠提供你安靜思考空間、並尊重你專業判斷的工作環境。你的價值不在於執行的速度，而在於思考的深度。一份能讓你持續學習與鑽研的工作，最能讓你發光發熱。',relationships:'在感情中，你追求的是心靈與智識層面的深度共鳴。你可能不擅長浪漫的表達，但你會用智慧去理解和支持你的伴侶，成為對方人生道路上最可靠的導師與夥伴。你需要一個能與你進行深度對話、欣賞你內在世界、並尊重你個人空間的伴-侶。對你而言，最深刻的親密關係，是兩個獨立而成熟的靈魂的相互輝映。',growth:'你的成長課題是「連結現實」與「付諸行動」。有時候，你可能會陷入過度分析的迴圈，導致「分析癱瘓」，從而錯失行動的良機。你需要學習在掌握七成資訊後就勇敢地踏出第一步，並在實踐中不斷修正。多參與一些社交活動，與不同領域的人交流，可以為你的深度思考注入新的活力與現實感，避免與世界脫節。',money:'根據金錢卦象，你的財富之道在於「知識變現」與「價值投資」。你的專業知識與深度分析能力本身就是最寶貴的資產。透過專業服務或知識付費，能為你帶來穩定的現金流。在投資上，你非常適合巴菲特式的價值投資法，深入研究企業基本面，進行長期佈局。你的耐心和智慧，將會隨著時間的推移，轉化為可觀的財富。'}}};
+const BANK=[{t:"我常有突如其來的靈感並想立即嘗試。",b:"青龍"},{t:"我喜歡打破常規尋找新方法。",b:"青龍"},{t:"遇阻力時我會靈活轉向。",b:"青龍"},{t:"我富想像力，喜歡創新思考。",b:"青龍"},{t:"我熱愛探索未知事物。",b:"青龍"},{t:"我喜歡在人群中表達自己。",b:"朱雀"},{t:"我用情緒帶動他人。",b:"朱雀"},{t:"別人的反應會影響我。",b:"朱雀"},{t:"我擅長說服與演說。",b:"朱雀"},{t:"我重視被傾聽與關注。",b:"朱雀"},{t:"我喜歡按計畫行事。",b:"勾陳"},{t:"我重視安全感與穩定。",b:"勾陳"},{t:"我責任感強。",b:"勾陳"},{t:"我傾向維持現狀。",b:"勾陳"},{t:"我注重細節與程序。",b:"勾陳"},{t:"我對他人情緒很敏感。",b:"螣蛇"},{t:"我擅長觀察與傾聽。",b:"螣蛇"},{t:"我常思考背後的動機。",b:"螣蛇"},{t:"我思考事情會考量時機與人心。",b:"螣蛇"},{t:"我善於協調不同觀點。",b:"螣蛇"},{t:"我講求效率與結果。",b:"白虎"},{t:"我會主動做決策。",b:"白虎"},{t:"我以數據與成果為導向。",b:"白虎"},{t:"我願意承擔壓力以完成任務。",b:"白虎"},{t:"我偏好明確的規範與標準。",b:"白虎"},{t:"我喜歡獨自思考。",b:"玄武"},{t:"我傾向謹慎評估後行動。",b:"玄武"},{t:"我擅長規劃長遠目標。",b:"玄武"},{t:"我重視邏輯與分析。",b:"玄武"},{t:"我習慣冷靜看待問題。",b:"玄武"}];BANK.sort(()=>.5-Math.random());const qWrap=document.getElementById("qWrap");BANK.forEach((e,o)=>{qWrap.innerHTML+=`<li><p>${o+1}. ${e.t}</p><input type='range' min='1' max='5' value='3' id='q${o}' class='w-full slider'></li>`}),qWrap.innerHTML+='<div id="progress" class="text-right text-sm">0/30</div>',document.querySelectorAll('input[type="range"]').forEach(e=>{e.onchange=()=>{const e=Array.from(document.querySelectorAll('input[type="range"]')).filter(e=>"3"!==e.value).length;document.getElementById("progress").textContent=`${e}/30`}});
+let radarChart=null;
+function showSuperhero(e){const o=superheroData[e];if(o){document.getElementById("superhero-name").textContent=`${o.name}`,document.getElementById("superhero-ability").textContent=o.ability,document.getElementById("superhero-mission").textContent=o.mission,document.getElementById("superhero-local").textContent=`🏮 台灣在地版：${o.localName} - ${o.description}`,document.getElementById("superheroReport").style.display="block"}}
+function fillAIAnalysis(e){const o=superheroData[e];o&&(document.getElementById("ai-personality").textContent=o.analysis.personality,document.getElementById("ai-strengths").textContent=o.analysis.strengths,document.getElementById("ai-career").textContent=o.analysis.career,document.getElementById("ai-relationships").textContent=o.analysis.relationships,document.getElementById("ai-growth").textContent=o.analysis.growth,document.getElementById("ai-money").textContent=o.analysis.money)}
+function simulateProgress(){const e=document.getElementById("progress-bar"),o=document.getElementById("loading-step"),t=[{percent:20,text:"分析人格特質..."},{percent:40,text:"解析能量分布..."},{percent:60,text:"生成發展建議..."},{percent:80,text:"計算五行金錢卦..."},{percent:95,text:"最終整合報告..."},{percent:100,text:"分析完成！"}];let n=0;const i=setInterval(()=>{n<t.length?(e.style.width=t[n].percent+"%",o.textContent=t[n].text,n++):clearInterval(i)},800)}
+function parseAIResponse(e,o){document.getElementById("ai-loading").style.display="none";try{if(e.includes("🎭")&&e.includes("⚡")&&e.includes("💰")){const t=e.match(/🎭[^⚡]+/),n=e.match(/⚡[^📈]+/),i=e.match(/📈[^💰]+/),a=e.match(/💰.+/);t&&(document.getElementById("ai-personality").textContent=t[0].replace("🎭","").trim()),n&&(document.getElementById("ai-strengths").textContent=n[0].replace("⚡","").trim()),a&&(document.getElementById("ai-money").textContent=a[0].replace("💰","").trim()),i&&(growthText=i[0].replace("📈","").trim(),document.getElementById("ai-career").textContent=growthText,document.getElementById("ai-relationships").textContent=growthText,document.getElementById("ai-growth").textContent=growthText)}else fillAIAnalysis(o)}catch(e){console.error("AI回應解析失敗:",e),fillAIAnalysis(o)}}
+function beastSVG(e){const o="#B6822B",t="none",n=e=>`<path d='${e}' fill='${t}' stroke='${o}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>`,i=o=>`<svg viewBox='0 0 100 100' class='w-full h-auto' xmlns='http://www.w3.org/2000/svg'>
     <defs><radialGradient id='g' cx='50%' cy='50%' r='60%'>
       <stop offset='0%' stop-color='rgba(182,130,43,0.25)'/><stop offset='100%' stop-color='rgba(182,130,43,0)'/>
-    </radialGradient></defs><rect width='100' height='100' fill='url(#g)'/>${d}</svg>`;
-  switch (name) {
-    case '青龍': return base(s("M15 60 C25 40, 45 35, 55 45 C65 55, 75 35, 85 45 M45 45 q5 -12 16 -10 m-6 6 l6 4 m-36 20 q10 -6 18 2 m12 -2 q8 -6 18 2") + s("M30 70 q10 8 20 0 q10 -8 20 0"));
-    case '朱雀': return base(s("M20 60 q15 -30 30 -30 q15 0 30 30 M50 30 l0 12 M35 55 q15 -8 30 0 M25 62 q10 8 25 8 q15 0 25 -8"));
-    case '勾陳': return base(s("M20 70 h60 v-20 h-60 v20 z M30 50 v-10 h40 v10 M35 65 h10 M55 65 h10"));
-    case '螣蛇': return base(s("M20 70 q20 -30 40 -10 q10 8 20 -2 q-10 20 -30 10 q-10 -6 -30 2 M60 48 q6 -6 12 0"));
-    case '白虎': return base(s("M20 65 q15 -20 30 -20 q15 0 30 20 M30 60 h40 M35 70 h30 M38 52 l4 6 M58 52 l-4 6"));
-    case '玄武': return base(s("M30 65 q20 15 40 0 q5 -12 -15 -22 q-20 10 -25 22 M55 50 q10 -8 20 2 M25 55 q-8 -6 -10 6"));
-    default: return base('');
-  }
-}
-
-// ========== 動態建議生成 ==========
-function generateAdvice(mainBeast, secondaryBeast, scores, variant) {
-  const adviceTemplates = {
-    青龍: {
-      職場: [
-        "創新領頭，勇於嘗試新方法",
-        "帶領團隊突破傳統框架",
-        "開拓新市場或業務領域",
-        "將創意轉化為實際行動"
-      ],
-      感情: [
-        "保持關係中的新鮮感",
-        "共同探索新體驗",
-        "開放溝通創新想法",
-        "平衡冒險與穩定需求"
-      ],
-      養生: [
-        "戶外運動釋放能量",
-        "嘗試新的運動方式",
-        "保持生活多樣性",
-        "適當冒險挑戰自我"
-      ]
-    },
-    朱雀: {
-      職場: [
-        "發揮表達與溝通優勢",
-        "激勵團隊士氣",
-        "建立廣泛人際網絡",
-        "展現熱情與感染力"
-      ],
-      感情: [
-        "真誠表達情感需求",
-        "創造浪漫驚喜時刻",
-        "保持關係中的熱情",
-        "適度分享內心感受"
-      ],
-      養生: [
-        "藝術創作抒發情感",
-        "社交活動保持活力",
-        "表達性運動如舞蹈",
-        "注意情緒波動管理"
-      ]
-    },
-    勾陳: {
-      職場: [
-        "建立穩定工作流程",
-        "確保任務按時完成",
-        "注重細節與品質",
-        "提供可靠支持"
-      ],
-      感情: [
-        "建立信任與安全感",
-        "保持承諾與一致性",
-        "穩定表達關心",
-        "營造溫馨家庭氛圍"
-      ],
-      養生: [
-        "規律作息保持平衡",
-        "均衡飲食與運動",
-        "建立健康生活習慣",
-        "注重實際養生方法"
-      ]
-    },
-    螣蛇: {
-      職場: [
-        "發揮洞察與協調能力",
-        "理解團隊成員需求",
-        "妥善處理人際關係",
-        "把握時機採取行動"
-      ],
-      感情: [
-        "深入理解伴侶感受",
-        "敏感體貼對方需求",
-        "建立深度情感連結",
-        "適時表達支持"
-      ],
-      養生: [
-        "冥想與內省練習",
-        "情緒管理與釋放",
-        "溫和調理身心",
-        "注重心理平衡"
-      ]
-    },
-    白虎: {
-      職場: [
-        "果斷決策追求效率",
-        "設定明確目標",
-        "承擔領導責任",
-        "注重成果與績效"
-      ],
-      感情: [
-        "直接表達愛與承諾",
-        "保護與支持伴侶",
-        "明確關係界線",
-        "展現堅定與忠誠"
-      ],
-      養生: [
-        "高強度運動釋壓",
-        "挑戰體能極限",
-        "培養紀律性",
-        "注意壓力管理"
-      ]
-    },
-    玄武: {
-      職場: [
-        "策略規劃長遠發展",
-        "深入分析問題本質",
-        "獨立思考與判斷",
-        "保持理性與客觀"
-      ],
-      感情: [
-        "深度交流思想",
-        "理性分析關係",
-        "保持個人空間",
-        "建立智慧連結"
-      ],
-      養生: [
-        "靜坐與閱讀",
-        "深度思考與反思",
-        "獨立運動如游泳",
-        "注重精神養生"
-      ]
-    }
-  };
-
-  // 根據分數選擇建議強度
-  const getAdviceIntensity = (score) => {
-    if (score >= 20) return 0; // 最強烈的建議
-    if (score >= 15) return 1;
-    if (score >= 10) return 2;
-    return 3; // 最溫和的建議
-  };
-
-  const mainScore = scores[mainBeast];
-  const secondaryScore = secondaryBeast ? scores[secondaryBeast] : 0;
-  
-  const mainIntensity = getAdviceIntensity(mainScore);
-  const secondaryIntensity = getAdviceIntensity(secondaryScore);
-
-  // 組合主要和次要神獸的建議
-  const combineAdvice = (category) => {
-    const mainAdvices = adviceTemplates[mainBeast][category];
-    const secondaryAdvices = secondaryBeast ? adviceTemplates[secondaryBeast][category] : [];
-    
-    let combined = [];
-    
-    // 主要神獸建議
-    if (mainAdvices && mainAdvices[mainIntensity]) {
-      combined.push(mainAdvices[mainIntensity] + "。");
-    }
-    
-    // 次要神獸建議（如果存在且分數足夠高）
-    if (secondaryBeast && secondaryScore >= 10 && secondaryAdvices && secondaryAdvices[secondaryIntensity]) {
-      combined.push(secondaryAdvices[secondaryIntensity] + "。");
-    }
-    
-    // 確保至少有2條建議
-    while (combined.length < 2) {
-      const randomIndex = Math.floor(Math.random() * mainAdvices.length);
-      if (!combined.includes(mainAdvices[randomIndex] + "。")) {
-        combined.push(mainAdvices[randomIndex] + "。");
-      }
-    }
-    
-    return combined;
-  };
-
-  return {
-    職場: combineAdvice('職場'),
-    感情: combineAdvice('感情'), 
-    養生: combineAdvice('養生')
-  };
-}
-
-// ========== 結果生成 ==========
-function summarize(scores) {
-  const arr = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-  const top = arr[0], second = arr[1];
-  const dual = (top[1] - second[1] <= 2) ? [top[0], second[0]] : null;
-  const total = Object.values(scores).reduce((a, b) => a + b, 0);
-  const variantIdx = total % 12;
-  const variants = ['子', '丑', '寅', '卯', '辰', '巳', '午', '未', '申', '酉', '戌', '亥'];
-  const variant = variants[variantIdx];
-  return { top: top[0], dual, ranking: arr, variant, total, scores };
-}
-
-let radarChart = null;
-function renderRadar(scores) {
-  const ctx = document.getElementById("radar");
-  if (radarChart) radarChart.destroy();
-  radarChart = new Chart(ctx, {
-    type: "radar",
-    data: { labels: Object.keys(scores), datasets: [{ label: "六獸能量", data: Object.values(scores), backgroundColor: "rgba(182,130,43,0.15)", borderColor: "#b6822b" }] },
-    options: { 
-      scales: { r: { suggestedMin: 0, suggestedMax: 25, ticks: { stepSize: 5 } } }, 
-      plugins: { legend: { display: false } },
-      maintainAspectRatio: true
-    }
-  });
-}
-
-function renderReport(summary, scores) {
-  document.getElementById("beastSVG").innerHTML = beastSVG(summary.top);
-  const mainType = `${summary.top}${summary.variant}型`;
-  document.getElementById("mainBeastTitle").textContent = summary.dual ? `雙獸${summary.variant}型：${summary.top} × ${summary.dual[1]}` : `主${summary.variant}型：${summary.top}`;
-  document.getElementById("dualHint").textContent = summary.dual ? `第二主導能量：${summary.dual[1]}` : '';
-  document.getElementById("mainBeastSummary").textContent = `你的主型為 ${mainType}，融合${summary.top}能量與${summary.variant}地支特質。`;
-
-  // 生成動態建議
-  const advice = generateAdvice(summary.top, summary.dual ? summary.dual[1] : null, scores, summary.variant);
-  
-  const col = (t, a) => `<div class='border rounded p-2'><b>${t}</b><ul class='list-disc pl-5'>${a.map(x => `<li>${x}</li>`).join('')}</ul></div>`;
-  document.getElementById("adviceCols").innerHTML = col("職場建議", advice.職場) + col("感情建議", advice.感情) + col("養生建議", advice.養生);
-}
-
-document.getElementById("form").addEventListener("submit", e => {
-  e.preventDefault();
-  const scores = { 青龍: 0, 朱雀: 0, 勾陳: 0, 螣蛇: 0, 白虎: 0, 玄武: 0 };
-  BANK.forEach((q, i) => scores[q.b] += parseInt(document.getElementById(`q${i}`).value));
-  const summary = summarize(scores);
-  renderRadar(scores);
-  renderReport(summary, scores);
-  localStorage.setItem("shen-shou-v7", JSON.stringify({ scores, summary }));
-  
-  // 顯示結果區域
-  document.getElementById("result").style.display = "grid";
-  document.getElementById("aiReport").style.display = "block";
-});
-
-document.getElementById("btnFillMid").onclick = () => document.querySelectorAll(".slider").forEach(s => s.value = 3);
-
-// 分享結果
-document.getElementById("btnShare").addEventListener("click", () => {
-  html2canvas(document.getElementById("result")).then(canvas => {
-    const link = document.createElement('a');
-    link.download = 'shenshou-result.png';
-    link.href = canvas.toDataURL();
-    link.click();
-  });
-});
-
-// ========== AI智能分析 ==========
-document.getElementById("btnAI").addEventListener("click", async () => {
-  const saved = JSON.parse(localStorage.getItem("shen-shou-v7") || "null");
-  const out = document.getElementById("aiOut");
-  if (!saved) { out.textContent = "⚠️請先完成測驗。"; return; }
-  out.innerHTML = "🪶 AI 正在分析中，約5~10秒... <span class='spinner'>⏳</span>";
-  document.getElementById("btnRetry").style.display = "none";
-  try {
-    const resp = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(saved) });
-    if (!resp.ok) throw new Error(await resp.text());
-    const data = await resp.json();
-    out.textContent = data.text.trim();
-  } catch (err) {
-    out.textContent = `❌分析失敗：後端服務暫時不可用\n\n💡 請確認：\n1. 後端服務是否運行\n2. API Key 是否正確設定\n3. 或稍後再試`;
-    document.getElementById("btnRetry").style.display = "inline-block";
-  }
-});
-
-document.getElementById("btnRetry").addEventListener("click", () => {
-  document.getElementById("btnAI").click();
-});
+    </radialGradient></defs><rect width='100' height='100' fill='url(#g)'/>${o}</svg>`;switch(e){case"青龍":return i(n("M15 60 C25 40, 45 35, 55 45 C65 55, 75 35, 85 45 M45 45 q5 -12 16 -10 m-6 6 l6 4 m-36 20 q10 -6 18 2 m12 -2 q8 -6 18 2")+n("M30 70 q10 8 20 0 q10 -8 20 0"));case"朱雀":return i(n("M20 60 q15 -30 30 -30 q15 0 30 30 M50 30 l0 12 M35 55 q15 -8 30 0 M25 62 q10 8 25 8 q15 0 25 -8"));case"勾陳":return i(n("M20 70 h60 v-20 h-60 v20 z M30 50 v-10 h40 v10 M35 65 h10 M55 65 h10"));case"螣蛇":return i(n("M20 70 q20 -30 40 -10 q10 8 20 -2 q-10 20 -30 10 q-10 -6 -30 2 M60 48 q6 -6 12 0"));case"白虎":return i(n("M20 65 q15 -20 30 -20 q15 0 30 20 M30 60 h40 M35 70 h30 M38 52 l4 6 M58 52 l-4 6"));case"玄武":return i(n("M30 65 q20 15 40 0 q5 -12 -15 -22 q-20 10 -25 22 M55 50 q10 -8 20 2 M25 55 q-8 -6 -10 6"));default:return i("")}}
+function generateAdvice(e,o,t,n){const i={青龍:{職場:["創新領頭，勇於嘗試新方法","帶領團隊突破傳統框架","開拓新市場或業務領域","將創意轉化為實際行動"],感情:["保持關係中的新鮮感","共同探索新體驗","開放溝通創新想法","平衡冒險與穩定需求"],養生:["戶外運動釋放能量","嘗試新的運動方式","保持生活多樣性","適當冒險挑戰自我"]},朱雀:{職場:["發揮表達與溝通優勢","激勵團隊士氣","建立廣泛人際網絡","展現熱情與感染力"],感情:["真誠表達情感需求","創造浪漫驚喜時刻","保持關係中的熱情","適度分享內心感受"],養生:["藝術創作抒發情感","社交活動保持活力","表達性運動如舞蹈","注意情緒波動管理"]},勾陳:{職場:["建立穩定工作流程","確保任務按時完成","注重細節與品質","提供可靠支持"],感情:["建立信任與安全感","保持承諾與一致性","穩定表達關心","營造溫馨家庭氛圍"],養生:["規律作息保持平衡","均衡飲食與運動","建立健康生活習慣","注重實際養生方法"]},螣蛇:{職場:["發揮洞察與協調能力","理解團隊成員需求","妥善處理人際關係","把握時機採取行動"],感情:["深入理解伴侶感受","敏感體貼對方需求","建立深度情感連結","適時表達支持"],養生:["冥想與內省練習","情緒管理與釋放","溫和調理身心","注重心理平衡"]},白虎:{職場:["果斷決策追求效率","設定明確目標","承擔領導責任","注重成果與績效"],感情:["直接表達愛與承諾","保護與支持伴侶","明確關係界線","展現堅定與忠誠"],養生:["高強度運動釋壓","挑戰體能極限","培養紀律性","注意壓力管理"]},玄武:{職場:["策略規劃長遠發展","深入分析問題本質","獨立思考與判斷","保持理性與客觀"],感情:["深度交流思想","理性分析關係","保持個人空間","建立智慧連結"],養生:["靜坐與閱讀","深度思考與反思","獨立運動如游泳","注重精神養生"]}},a=e=>e>=20?0:e>=15?1:e>=10?2:3,d=t[e],s=o?t[o]:0,r=a(d);a(s);const l=t=>{const n=i[e][t],a=o?i[o][t]:[];let d=[];for(n&&n[r]&&d.push(n[r]+"。"),o&&s>=10&&a&&a[r]&&d.push(a[r]+"。");d.length<2;){const e=Math.floor(Math.random()*n.length);d.includes(n[e]+"。")||d.push(n[e]+"。")}return d};return{職場:l("職場"),感情:l("感情"),養生:l("養生")}}
+function summarize(e){const o=Object.entries(e).sort((e,o)=>o[1]-e[1]),t=o[0],n=o[1],i=t[1]-n[1]<=2?[t[0],n[0]]:null,a=Object.values(e).reduce((e,o)=>e+o,0),d=a%12,s=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];return{top:t[0],dual:i,ranking:o,variant:s[d],total:a,scores:e}}
+function renderRadar(e){const o=document.getElementById("radar");radarChart&&radarChart.destroy(),radarChart=new Chart(o,{type:"radar",data:{labels:Object.keys(e),datasets:[{label:"六獸能量",data:Object.values(e),backgroundColor:"rgba(182,130,43,0.15)",borderColor:"#b6822b"}]},options:{scales:{r:{suggestedMin:0,suggestedMax:25,ticks:{stepSize:5}}},plugins:{legend:{display:!1}},maintainAspectRatio:!0}})}
+function renderReport(e,o){document.getElementById("beastSVG").innerHTML=beastSVG(e.top);const t=`${e.top}${e.variant}型`;document.getElementById("mainBeastTitle").textContent=e.dual?`雙獸${e.variant}型：${e.top} × ${e.dual[1]}`:`主${e.variant}型：${e.top}`,document.getElementById("dualHint").textContent=e.dual?`第二主導能量：${e.dual[1]}`:"",document.getElementById("mainBeastSummary").textContent=`你的主型為 ${t}，融合${e.top}能量與${e.variant}地支特質。`;const n=generateAdvice(e.top,e.dual?e.dual[1]:null,o,e.variant),i=(e,o)=>`<div class='border rounded p-2'><b>${e}</b><ul class='list-disc pl-5'>${o.map(e=>`<li>${e}</li>`).join("")}</ul></div>`;document.getElementById("adviceCols").innerHTML=i("職場建議",n.職場)+i("感情建議",n.感情)+i("養生建議",n.養生)}
+let currentBeastType="";document.getElementById("form").addEventListener("submit",e=>{e.preventDefault();const o={青龍:0,朱雀:0,勾陳:0,螣蛇:0,白虎:0,玄武:0};BANK.forEach((e,t)=>{o[e.b]+=parseInt(document.getElementById(`q${t}`).value)});const t=summarize(o);currentBeastType=t.top,renderRadar(o),renderReport(t,o),localStorage.setItem("shen-shou-v7",JSON.stringify({scores:o,summary:t})),document.getElementById("result").style.display="grid",document.getElementById("aiReport").style.display="block",showSuperhero(t.top)}),document.getElementById("btnFillMid").onclick=()=>document.querySelectorAll(".slider").forEach(e=>e.value=3),document.getElementById("btnShare").addEventListener("click",()=>{html2canvas(document.getElementById("result")).then(e=>{const o=document.createElement("a");o.download="shenshou-result.png",o.href=e.toDataURL(),o.click()})}),document.getElementById("btnAI").addEventListener("click",async()=>{const e=JSON.parse(localStorage.getItem("shen-shou-v7")||"null");if(!e)return void alert("⚠️請先完成測驗。");document.getElementById("ai-loading").style.display="block",document.getElementById("ai-analysis-content").style.display="none",document.getElementById("btnRetry").style.display="none",document.getElementById("btnAI").disabled=!0,simulateProgress();try{const o=await fetch("/api/ai",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(e)});if(!o.ok)throw new Error(await o.text());const t=await o.json();parseAIResponse(t.text.trim(),currentBeastType)}catch(e){console.log("AI請求失敗，使用本地分析資料"),fillAIAnalysis(currentBeastType)}finally{document.getElementById("ai-loading").style.display="none",document.getElementById("ai-analysis-content").style.display="block",document.getElementById("btnRetry").style.display="inline-block",document.getElementById("btnAI").disabled=!1}}),document.getElementById("btnRetry").addEventListener("click",()=>{document.getElementById("btnAI").click()});
 </script>
 </body>
 </html>
