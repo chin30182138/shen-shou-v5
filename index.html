@@ -79,6 +79,23 @@
       position: relative;
     }
     
+    .beast-text-container {
+      width: 100%; 
+      height: 100%; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center;
+      background: radial-gradient(circle, rgba(182,130,43,0.1) 0%, rgba(182,130,43,0) 70%);
+      border: 2px solid #b6822b;
+      border-radius: 12px;
+      font-size: 1.8em;
+      font-weight: bold;
+      color: #b6822b;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+      padding: 10px;
+      text-align: center;
+    }
+    
     .ai-analysis-section { background: linear-gradient(135deg, #f8f9fa, #ffffff); border: 1px solid #e9ecef; border-radius: 12px; padding: 12px; margin: 8px 0; }
     .ai-analysis-header { display: flex; align-items: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px solid #e9ecef; }
     .ai-analysis-icon { font-size: 1.5em; margin-right: 8px; }
@@ -248,6 +265,11 @@
         height: auto !important;
       }
       .accent-bar {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
+      .beast-text-container {
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
         color-adjust: exact !important;
@@ -778,38 +800,209 @@ const aiAnalysisData = {
 
 <strong>財富發展建議：</strong>建議利用人脈資源發展事業，建立個人品牌影響力，同時注意財務紀律和儲蓄計劃。`
   },
-  // 其他神獸的詳細分析內容...
   '勾陳': {
-    personality: `勾陳型人格的你，如同大地的守護者，為周圍的一切提供穩定和安全感。你的存在本身就是一種可靠的力量。`,
-    strengths: `你最大的優勢在於無與倫比的可靠性和組織能力。`,
-    career: `在職業選擇上，你適合需要穩定性和系統思維的領域。`,
-    relationships: `在關係中，你提供堅實的支持和長久的承諾。`,
-    growth: `主要成長課題是學習接受變化和不確定性。`,
-    money: `財富能量穩定增長，適合長期投資策略。`
+    personality: `勾陳型人格的你，如同大地的守護者，為周圍的一切提供穩定和安全感。你的存在本身就是一種可靠的力量。
+
+你天生具備優秀的組織能力和系統思維，能夠將複雜的事務分解為可管理的步驟。在團隊中，你是那個確保一切按計劃進行的關鍵人物。
+
+你的耐心和堅持讓你能夠完成那些需要長期投入的任務。然而，你也需要學習在保持穩定的同時，適時地擁抱變化，避免過度僵化。`,
+
+    strengths: `你最大的優勢在於無與倫比的可靠性和組織能力。當其他人被新奇的點子吸引時，你總是那個確保基礎穩固的人。
+
+你的系統思維讓你能夠看到事物的整體架構，並找出潛在的問題點。這種能力在項目管理和品質控制中極為重要。
+
+此外，你的責任感和承諾意識讓你成為團隊中最值得信賴的成員。人們知道交給你的事情一定會被認真對待並妥善完成。`,
+
+    career: `在職業選擇上，你適合需要穩定性和系統思維的領域。
+
+<strong>最適職業領域：</strong>
+• 項目管理與運營
+• 品質控制與檢測
+• 財務與會計工作
+• 系統分析與設計
+• 行政管理與協調
+
+<strong>職場優勢：</strong>優秀的流程優化者和問題解決者，能夠建立高效的工作系統。
+
+<strong>發展建議：</strong>建議發展項目管理或系統分析技能，同時學習靈活應對變化。`,
+
+    relationships: `<strong>情感模式：</strong>在關係中提供堅實的支持和長久的承諾，重視穩定和安全。你相信真正的感情需要時間的考驗和細心的經營。
+
+<strong>溝通風格：</strong>實際而真誠，注重承諾的履行和細節的關注。
+
+<strong>親密關係建議：</strong>需要建立穩定的相處模式，同時保持適度的浪漫和驚喜，避免關係變得過於例行公事。
+
+<strong>情感相容類型：</strong>青龍型、朱雀型、螣蛇型`,
+
+    growth: `<strong>主要成長課題：</strong>學習接受變化和不確定性，培養靈活性和冒險精神。需要在保持穩定的同時，學會擁抱新的可能性。
+
+<strong>具體改進方向：</strong>
+• 嘗試小範圍的改變和冒險
+• 學習適應突發狀況的處理
+• 培養對新事物的好奇心
+• 練習快速決策的能力
+• 接受不完美也是一種美`,
+
+    money: `<strong>財富能量：</strong>財富能量穩定增長，適合長期投資策略。你的理財風格保守而穩健。
+
+<strong>適合的理財方式：</strong>房地產、指數基金、儲蓄保險、傳統產業、基礎建設
+
+<strong>金錢卦象解讀：</strong>坤為地卦，象徵包容與承載。財運如大地滋養，宜長期穩健投資，避免高風險投機。
+
+<strong>財富發展建議：</strong>建議建立多元化的穩健投資組合，注重長期收益而非短期波動。`
   },
   '螣蛇': {
-    personality: `螣蛇型人格的你，擁有敏銳的直覺和洞察力，能夠感知他人未說出口的需求。`,
-    strengths: `你最大的優勢在於人際洞察和時機把握能力。`,
-    career: `適合從事需要協調和洞察力的工作。`,
-    relationships: `在關係中追求深度理解和心靈契合。`,
-    growth: `需要學習建立明確的個人邊界。`,
-    money: `財富能量靈活多變，適合時機性投資。`
+    personality: `螣蛇型人格的你，擁有敏銳的直覺和洞察力，能夠感知他人未說出口的需求。你就像人際關係中的雷達，總能準確捕捉細微的情感變化。
+
+你天生具備優秀的協調能力，能夠在不同觀點之間找到平衡點。在衝突場合中，你往往是那個化解矛盾、促進理解的和事佬。
+
+你的思考深度和觀察力讓你能夠看到事情的本質，但也可能讓你過度分析而陷入猶豫。學習信任直覺並快速行動是你的成長課題。`,
+
+    strengths: `你最大的優勢在於人際洞察和時機把握能力。你能夠準確讀懂場域能量，知道何時該進、何時該退。
+
+你的直覺力讓你在資訊不完全的情況下也能做出正確判斷。這種能力在快速變化的環境中尤其寶貴。
+
+此外，你的適應性和靈活性讓你能夠在不同情境下游刃有處，總能找到最適合的應對方式。`,
+
+    career: `適合從事需要協調和洞察力的工作。
+
+<strong>最適職業領域：</strong>
+• 人力資源與組織發展
+• 心理諮詢與輔導
+• 商業談判與協調
+• 市場研究與分析
+• 公關危機處理
+
+<strong>職場優勢：</strong>優秀的團隊協調者和人際問題解決者，能夠創造和諧的工作環境。
+
+<strong>發展建議：</strong>建議發展諮詢或協調相關技能，同時學習果斷決策。`,
+
+    relationships: `<strong>情感模式：</strong>在關係中追求深度理解和心靈契合，重視情感的細膩交流。你能夠感知伴侶未說出口的需求，並給予貼心的回應。
+
+<strong>溝通風格：</strong>細膩而體貼，善於用間接的方式表達關心和理解。
+
+<strong>親密關係建議：</strong>需要建立深度的情感連結，同時保持適當的個人空間，避免過度敏感或猜疑。
+
+<strong>情感相容類型：</strong>白虎型、青龍型、朱雀型`,
+
+    growth: `<strong>主要成長課題：</strong>需要學習建立明確的個人邊界，培養果斷力和行動力。避免因過度考慮他人感受而忽略自己的需求。
+
+<strong>具體改進方向：</strong>
+• 練習清晰表達個人界線
+• 學習快速做出決定
+• 培養說「不」的勇氣
+• 減少過度分析和猶豫
+• 信任自己的直覺判斷`,
+
+    money: `<strong>財富能量：</strong>財富能量靈活多變，適合時機性投資。你能夠感知市場的微妙變化。
+
+<strong>適合的理財方式：</strong>外匯交易、短期投資、諮詢服務、中介業務、時機性買賣
+
+<strong>金錢卦象解讀：</strong>巽為風卦，象徵滲透與順應。財運如風行草偃，宜把握時機進出，注重資訊收集和直覺判斷。
+
+<strong>財富發展建議：</strong>建議發展與人相關的服務業，利用洞察力把握投資時機，但需設定明確的停損點。`
   },
   '白虎': {
-    personality: `白虎型人格的你，行動力強且目標明確，具有天生的領導氣質。`,
-    strengths: `你最大的優勢在於快速決策和高效執行。`,
-    career: `適合需要決斷力和行動力的職業。`,
-    relationships: `在關係中直接而保護，重視行動證明。`,
-    growth: `需要培養耐心和團隊合作能力。`,
-    money: `財富能量迅猛，適合主動投資策略。`
+    personality: `白虎型人格的你，行動力強且目標明確，具有天生的領導氣質。你就像草原上的獵豹，總是能夠快速鎖定目標並採取行動。
+
+你天生具備優秀的決斷力和執行力，在壓力下反而表現得更加出色。在危機時刻，你總是那個能夠冷靜分析並果斷決策的人。
+
+你的直接和坦率讓你的人際關係清晰明了，但也可能顯得過於強勢。學習傾聽和團隊協作是你的重要成長課題。`,
+
+    strengths: `你最大的優勢在於快速決策和高效執行。當其他人還在猶豫時，你已經開始行動並取得進展。
+
+你的領導氣質讓你能夠在混亂中建立秩序，帶領團隊朝向明確的目標前進。這種能力在創業和變革期尤其重要。
+
+此外，你的抗壓性和挑戰精神讓你能夠克服困難，完成那些看似不可能的任務。`,
+
+    career: `適合需要決斷力和行動力的職業。
+
+<strong>最適職業領域：</strong>
+• 企業管理與領導
+• 緊急救援與危機處理
+• 銷售與業務開發
+• 競技運動與訓練
+• 項目執行與推進
+
+<strong>職場優勢：</strong>優秀的危機管理者和目標達成者，能夠在壓力下保持高效表現。
+
+<strong>發展建議：</strong>建議發展領導力或專業技能，同時學習團隊協作和情感智慧。`,
+
+    relationships: `<strong>情感模式：</strong>在關係中直接而保護，重視行動證明和實際付出。你相信愛要通過行動來表達，而不是空洞的承諾。
+
+<strong>溝通風格：</strong>直接而明確，注重問題解決和目標達成。
+
+<strong>親密關係建議：</strong>需要學習表達柔軟的情感，給予伴侶足夠的情感支持，避免過度強調控制和主導。
+
+<strong>情感相容類型：</strong>玄武型、螣蛇型、勾陳型`,
+
+    growth: `<strong>主要成長課題：</strong>需要培養耐心和團隊合作能力，學習傾聽和理解他人觀點。避免因過度追求效率而忽略過程的重要性。
+
+<strong>具體改進方向：</strong>
+• 練習主動傾聽和提問
+• 學習欣賞不同的工作風格
+• 培養耐心等待的藝術
+• 重視團隊成員的感受
+• 平衡目標與過程的價值`,
+
+    money: `<strong>財富能量：</strong>財富能量迅猛，適合主動投資策略。你善於抓住機會並快速行動。
+
+<strong>適合的理財方式：</strong>股票短線、創業投資、競技產業、高端銷售、績效獎金
+
+<strong>金錢卦象解讀：</strong>震為雷卦，象徵行動與奮起。財運如雷動九天，宜主動出擊，但需注意風險控制和情緒管理。
+
+<strong>財富發展建議：</strong>建議選擇高成長性的投資領域，但需建立風險管理機制，避免衝動決策。`
   },
   '玄武': {
-    personality: `玄武型人格的你，深思熟慮且理性冷靜，具有優秀的分析能力。`,
-    strengths: `你最大的優勢在於深度思考和策略規劃。`,
-    career: `適合研究和分析型的工作環境。`,
-    relationships: `在關係中追求智慧碰撞和深度交流。`,
-    growth: `需要加強行動力和情感表達。`,
-    money: `財富能量深藏，適合長期智慧投資。`
+    personality: `玄武型人格的你，深思熟慮且理性冷靜，具有優秀的分析能力。你就像深海中的智者，總能在混亂中保持清晰的思考。
+
+你天生具備優秀的邏輯思維和策略規劃能力，能夠看到問題的根源和長遠發展。在複雜情境中，你總是那個能夠提供深度見解的人。
+
+你的獨立性和內省特質讓你擁有豐富的內心世界，但也可能讓你顯得疏離。學習表達情感和與人連結是你的成長課題。`,
+
+    strengths: `你最大的優勢在於深度思考和策略規劃。當其他人關注表面現象時，你總是能夠看到問題的本質和潛在影響。
+
+你的分析能力讓你能夠在複雜資訊中找出規律和關聯，這種能力在研究和策劃領域極為重要。
+
+此外，你的冷靜和理性讓你能夠在壓力下保持清晰的頭腦，做出明智的決策。`,
+
+    career: `適合研究和分析型的工作環境。
+
+<strong>最適職業領域：</strong>
+• 研究開發與創新
+• 數據分析與解讀
+• 戰略規劃與諮詢
+• 技術研發與應用
+• 學術研究與教學
+
+<strong>職場優勢：</strong>優秀的問題分析者和策略規劃者，能夠提供深度的見解和解決方案。
+
+<strong>發展建議：</strong>建議發展專業領域的深度知識，同時學習團隊協作和表達能力。`,
+
+    relationships: `<strong>情感模式：</strong>在關係中追求智慧碰撞和深度交流，重視思想的共鳴和價值觀的契合。你需要時間來建立信任和親密感。
+
+<strong>溝通風格：</strong>理性而深刻，喜歡探討理念和分享見解。
+
+<strong>親密關係建議：</strong>需要學習表達情感需求，建立深度的情感連結，避免過度理性而忽略情感交流。
+
+<strong>情感相容類型：</strong>朱雀型、白虎型、勾陳型`,
+
+    growth: `<strong>主要成長課題：</strong>需要加強行動力和情感表達，學習將想法轉化為實際行動。避免因過度思考而錯失行動時機。
+
+<strong>具體改進方向：</strong>
+• 練習快速做出決定並行動
+• 學習表達情感和感受
+• 培養人際連結的能力
+• 重視當下體驗和感受
+• 平衡思考與行動的節奏`,
+
+    money: `<strong>財富能量：</strong>財富能量深藏，適合長期智慧投資。你善於發現被低估的價值。
+
+<strong>適合的理財方式：</strong>長期股票、知識產權、技術投資、研究項目、智慧財產
+
+<strong>金錢卦象解讀：</strong>坎為水卦，象徵深潛與積累。財運如深水潛流，宜長期佈局，注重價值投資和知識變現。
+
+<strong>財富發展建議：</strong>建議發展知識型產業或技術投資，利用專業知識創造價值，注重長期回報而非短期收益。`
   }
 };
 
@@ -1109,7 +1302,7 @@ function renderRadar(scores) {
 }
 
 function renderReport(summary, scores) {
-  // 顯示六獸圖
+  // 顯示六獸圖 - 使用簡單文字版
   document.getElementById("beastSVG").innerHTML = beastSVG(summary.top);
   
   // 顯示主型資訊
@@ -1135,38 +1328,15 @@ function renderReport(summary, scores) {
     adviceHTML("養生建議", advice.養生);
 }
 
-// ========== 神獸SVG ==========
+// ========== 簡單文字版神獸顯示 ==========
 function beastSVG(beast) {
   const color = "#B6822B";
-  const fill = "none";
-  const path = d => `<path d='${d}' fill='${fill}' stroke='${color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>`;
-  const wrap = content => `<svg viewBox='0 0 100 100' class='w-full h-auto' xmlns='http://www.w3.org/2000/svg'>
-    <defs><radialGradient id='g' cx='50%' cy='50%' r='60%'>
-      <stop offset='0%' stop-color='rgba(182,130,43,0.25)'/><stop offset='100%' stop-color='rgba(182,130,43,0)'/>
-    </radialGradient></defs><rect width='100' height='100' fill='url(#g)'/>${content}</svg>`;
   
-  switch(beast) {
-    case "青龍": return wrap(
-      path("M15 60 C25 40, 45 35, 55 45 C65 55, 75 35, 85 45 M45 45 q5 -12 16 -10 m-6 6 l6 4 m-36 20 q10 -6 18 2 m12 -2 q8 -6 18 2") +
-      path("M30 70 q10 8 20 0 q10 -8 20 0")
-    );
-    case "朱雀": return wrap(
-      path("M20 60 q15 -30 30 -30 q15 0 30 30 M50 30 l0 12 M35 55 q15 -8 30 0 M25 62 q10 8 25 8 q15 0 25 -8")
-    );
-    case "勾陳": return wrap(
-      path("M20 70 h60 v-20 h-60 v20 z M30 50 v-10 h40 v10 M35 65 h10 M55 65 h10")
-    );
-    case "螣蛇": return wrap(
-      path("M20 70 q20 -30 40 -10 q10 8 20 -2 q-10 20 -30 10 q-10 -6 -30 2 M60 48 q6 -6 12 0")
-    );
-    case "白虎": return wrap(
-      path("M20 65 q15 -20 30 -20 q15 0 30 20 M30 60 h40 M35 70 h30 M38 52 l4 6 M58 52 l-4 6")
-    );
-    case "玄武": return wrap(
-      path("M30 65 q20 15 40 0 q5 -12 -15 -22 q-20 10 -25 22 M55 50 q10 -8 20 2 M25 55 q-8 -6 -10 6")
-    );
-    default: return wrap("");
-  }
+  return `
+    <div class="beast-text-container">
+      ${beast}
+    </div>
+  `;
 }
 
 // ========== 建議生成 ==========
@@ -1249,7 +1419,7 @@ function showSuperhero(beastType) {
   }
 }
 
-// ========== AI分析 - 簡化版本 ==========
+// ========== AI分析 - 完整版本 ==========
 function fillAIAnalysis(beastType) {
   const data = aiAnalysisData[beastType] || aiAnalysisData['青龍'];
   
