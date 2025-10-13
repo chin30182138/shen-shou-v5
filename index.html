@@ -1124,6 +1124,618 @@ function showSuperhero(beastType) {
   }
 }
 
+// ========== AI分析 - 智能生成擴充內容 ==========
+function fillAIAnalysis(beastType) {
+  // 根據用戶的具體分數和特質生成個性化分析
+  const saved = JSON.parse(localStorage.getItem("shen-shou-result") || "null");
+  const scores = saved?.scores || {};
+  const gender = saved?.gender || 'male';
+  
+  // 計算能量分布特徵
+  const energyDistribution = calculateEnergyDistribution(scores);
+  const dominantTraits = identifyDominantTraits(scores, beastType);
+  const growthAreas = identifyGrowthAreas(scores);
+  
+  const analysisData = generatePersonalizedAnalysis(beastType, scores, energyDistribution, dominantTraits, growthAreas, gender);
+  
+  document.getElementById("ai-personality").innerHTML = formatAnalysisContent(analysisData.personality);
+  document.getElementById("ai-strengths").innerHTML = formatAnalysisContent(analysisData.strengths);
+  document.getElementById("ai-career").innerHTML = formatAnalysisContent(analysisData.career);
+  document.getElementById("ai-relationships").innerHTML = formatAnalysisContent(analysisData.relationships);
+  document.getElementById("ai-growth").innerHTML = formatAnalysisContent(analysisData.growth);
+  document.getElementById("ai-money").innerHTML = formatAnalysisContent(analysisData.money);
+}
+
+// 計算能量分布
+function calculateEnergyDistribution(scores) {
+  const total = Object.values(scores).reduce((sum, score) => sum + score, 0);
+  const distribution = {};
+  
+  for (const [beast, score] of Object.entries(scores)) {
+    distribution[beast] = {
+      percentage: ((score / total) * 100).toFixed(1),
+      level: getEnergyLevel(score)
+    };
+  }
+  
+  return distribution;
+}
+
+function getEnergyLevel(score) {
+  if (score >= 23) return '極強';
+  if (score >= 20) return '強';
+  if (score >= 17) return '中等';
+  if (score >= 14) return '偏弱';
+  return '弱';
+}
+
+// 識別主導特質
+function identifyDominantTraits(scores, mainBeast) {
+  const traits = [];
+  const sorted = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  
+  // 主型特質
+  traits.push({
+    beast: mainBeast,
+    score: scores[mainBeast],
+    description: getBeastTraits(mainBeast)
+  });
+  
+  // 次型特質（如果分數接近）
+  if (sorted[1] && sorted[1][1] >= scores[mainBeast] - 3) {
+    traits.push({
+      beast: sorted[1][0],
+      score: sorted[1][1],
+      description: getBeastTraits(sorted[1][0])
+    });
+  }
+  
+  return traits;
+}
+
+// 識別成長領域
+function identifyGrowthAreas(scores) {
+  const areas = [];
+  const minScore = Math.min(...Object.values(scores));
+  const weakBeasts = Object.entries(scores).filter(([_, score]) => score === minScore);
+  
+  weakBeasts.forEach(([beast, score]) => {
+    areas.push({
+      beast: beast,
+      score: score,
+      improvement: getGrowthSuggestions(beast)
+    });
+  });
+  
+  return areas;
+}
+
+// 生成個性化分析
+function generatePersonalizedAnalysis(beastType, scores, energyDistribution, dominantTraits, growthAreas, gender) {
+  const mainScore = scores[beastType];
+  const energyLevel = getEnergyLevel(mainScore);
+  const hasStrongSecondary = dominantTraits.length > 1;
+  
+  return {
+    personality: generatePersonalityAnalysis(beastType, scores, energyDistribution, dominantTraits, gender),
+    strengths: generateStrengthsAnalysis(beastType, scores, dominantTraits, energyLevel),
+    career: generateCareerAnalysis(beastType, scores, energyDistribution, hasStrongSecondary),
+    relationships: generateRelationshipsAnalysis(beastType, scores, dominantTraits, gender),
+    growth: generateGrowthAnalysis(beastType, growthAreas, energyDistribution),
+    money: generateMoneyAnalysis(beastType, scores, energyDistribution)
+  };
+}
+
+// 詳細分析生成函數
+function generatePersonalityAnalysis(beastType, scores, distribution, traits, gender) {
+  const mainPercent = distribution[beastType].percentage;
+  const genderText = gender === 'male' ? '男性' : gender === 'female' ? '女性' : '';
+  
+  let analysis = `<div class="space-y-3">`;
+  
+  // 核心人格描述
+  analysis += `<p><strong>核心人格特質：</strong>您的${beastType}能量佔比${mainPercent}%，屬於${distribution[beastType].level}程度。${genderText}${beastType}型人格通常${getCorePersonality(beastType, gender)}</p>`;
+  
+  // 能量組合分析
+  if (traits.length > 1) {
+    analysis += `<p><strong>能量組合：</strong>您展現出${beastType}與${traits[1].beast}的獨特組合。這種組合讓您${getCombinationTraits(beastType, traits[1].beast)}</p>`;
+  }
+  
+  // 具體行為模式
+  analysis += `<p><strong>行為模式：</strong>${getBehaviorPatterns(beastType, scores)}</p>`;
+  
+  // 深層動機
+  analysis += `<p><strong>深層動機：</strong>${getDeepMotivations(beastType)}</p>`;
+  
+  analysis += `</div>`;
+  return analysis;
+}
+
+function generateStrengthsAnalysis(beastType, scores, traits, energyLevel) {
+  let analysis = `<div class="space-y-3">`;
+  
+  analysis += `<p><strong>天賦優勢：</strong>您的${beastType}能量達到${energyLevel}等級，在${getKeyStrengths(beastType)}方面具有天然優勢。</p>`;
+  
+  // 具體優勢列舉
+  const strengths = getSpecificStrengths(beastType);
+  analysis += `<ul class="list-disc pl-5 space-y-1">`;
+  strengths.forEach(strength => {
+    analysis += `<li>${strength}</li>`;
+  });
+  analysis += `</ul>`;
+  
+  // 組合優勢
+  if (traits.length > 1) {
+    analysis += `<p><strong>組合優勢：</strong>${getCombinationStrengths(beastType, traits[1].beast)}</p>`;
+  }
+  
+  analysis += `</div>`;
+  return analysis;
+}
+
+function generateCareerAnalysis(beastType, scores, distribution, hasStrongSecondary) {
+  const suitableFields = getSuitableCareerFields(beastType);
+  const avoidFields = getAvoidCareerFields(beastType);
+  
+  let analysis = `<div class="space-y-3">`;
+  
+  analysis += `<p><strong>最適職業領域：</strong></p>`;
+  analysis += `<ul class="list-disc pl-5 space-y-1">`;
+  suitableFields.forEach(field => {
+    analysis += `<li>${field}</li>`;
+  });
+  analysis += `</ul>`;
+  
+  analysis += `<p><strong>職場優勢：</strong>${getWorkplaceAdvantages(beastType)}</p>`;
+  analysis += `<p><strong>發展建議：</strong>${getCareerDevelopmentTips(beastType)}</p>`;
+  
+  if (hasStrongSecondary) {
+    analysis += `<p><strong>跨領域潛力：</strong>${getCrossFieldPotential(beastType)}</p>`;
+  }
+  
+  analysis += `</div>`;
+  return analysis;
+}
+
+function generateRelationshipsAnalysis(beastType, scores, traits, gender) {
+  let analysis = `<div class="space-y-3">`;
+  
+  analysis += `<p><strong>情感模式：</strong>${getRelationshipPatterns(beastType, gender)}</p>`;
+  analysis += `<p><strong>溝通風格：</strong>${getCommunicationStyle(beastType)}</p>`;
+  analysis += `<p><strong>親密關係建議：</strong>${getIntimacyAdvice(beastType, gender)}</p>`;
+  
+  // 適合的伴侶類型
+  const compatibleTypes = getCompatibleTypes(beastType);
+  analysis += `<p><strong>情感相容類型：</strong>${compatibleTypes.join('、')}</p>`;
+  
+  analysis += `</div>`;
+  return analysis;
+}
+
+function generateGrowthAnalysis(beastType, growthAreas, distribution) {
+  let analysis = `<div class="space-y-3">`;
+  
+  analysis += `<p><strong>主要成長課題：</strong>${getMainGrowthChallenges(beastType)}</p>`;
+  
+  // 具體改進建議
+  analysis += `<p><strong>具體改進方向：</strong></p>`;
+  analysis += `<ul class="list-disc pl-5 space-y-1">`;
+  getGrowthActions(beastType).forEach(action => {
+    analysis += `<li>${action}</li>`;
+  });
+  analysis += `</ul>`;
+  
+  // 弱勢能量發展
+  if (growthAreas.length > 0) {
+    analysis += `<p><strong>弱勢能量發展：</strong>${getWeaknessDevelopment(growthAreas[0].beast)}</p>`;
+  }
+  
+  analysis += `</div>`;
+  return analysis;
+}
+
+function generateMoneyAnalysis(beastType, scores, distribution) {
+  let analysis = `<div class="space-y-3">`;
+  
+  analysis += `<p><strong>財富能量：</strong>${getWealthEnergy(beastType)}</p>`;
+  analysis += `<p><strong>適合的理財方式：</strong>${getSuitableInvestments(beastType)}</p>`;
+  analysis += `<p><strong>金錢卦象解讀：</strong>${getMoneyHexagram(beastType)}</p>`;
+  analysis += `<p><strong>財富發展建議：</strong>${getWealthDevelopmentTips(beastType)}</p>`;
+  
+  analysis += `</div>`;
+  return analysis;
+}
+
+// 格式化分析內容
+function formatAnalysisContent(content) {
+  return content;
+}
+
+// 具體的內容生成函數
+function getCorePersonality(beastType, gender) {
+  const personalities = {
+    '青龍': '具有開創性思維，喜歡探索未知，充滿好奇心和創新精神。在團隊中往往是創意的來源，能夠看到別人看不到的可能性。',
+    '朱雀': '熱情洋溢，善於表達，具有強烈的感染力和社交能力。天生就是人群中的焦點，能夠有效激發團隊熱情。',
+    '勾陳': '穩重可靠，注重秩序，具有優秀的組織能力和責任感。是團隊中最值得信賴的支柱，確保一切井然有序。',
+    '螣蛇': '直覺敏銳，善於觀察，具有優秀的洞察力和協調能力。能夠感知他人未說出口的需求和情緒變化。',
+    '白虎': '行動力強，目標明確，具有決斷力和執行力。面對挑戰時能夠快速做出決策並付諸行動。',
+    '玄武': '深思熟慮，理性冷靜，具有優秀的分析能力和戰略思維。善於從複雜信息中提煉關鍵洞察。'
+  };
+  return personalities[beastType] || '具有獨特的人格特質。';
+}
+
+function getKeyStrengths(beastType) {
+  const strengths = {
+    '青龍': '創意發想、問題解決、適應變化',
+    '朱雀': '人際溝通、團隊激勵、公開表達',
+    '勾陳': '系統規劃、細節管理、穩定運作',
+    '螣蛇': '人際洞察、危機處理、時機把握',
+    '白虎': '快速決策、目標達成、壓力管理',
+    '玄武': '深度思考、策略規劃、風險控制'
+  };
+  return strengths[beastType] || '多個領域';
+}
+
+function getSpecificStrengths(beastType) {
+  const strengthMap = {
+    '青龍': [
+      '能夠在複雜情境中看到新的可能性',
+      '善於將抽象概念轉化為具體方案',
+      '面對變化時能夠快速調整策略',
+      '具有跨界思考的獨特能力',
+      '能夠激發團隊的創造性思維'
+    ],
+    '朱雀': [
+      '能夠有效激發團隊的熱情與動力',
+      '在公開場合表達清晰且有說服力',
+      '善於建立廣泛的人際網絡',
+      '能夠敏銳感知他人情緒變化',
+      '具有優秀的衝突調解能力'
+    ],
+    '勾陳': [
+      '能夠建立穩定可靠的工作系統',
+      '注重細節確保任務完美執行',
+      '在壓力下仍能保持冷靜專業',
+      '具有優秀的時間管理能力',
+      '能夠有效協調資源分配'
+    ],
+    '螣蛇': [
+      '能夠準確讀懂他人的真實意圖',
+      '善於在複雜人際關係中找到平衡',
+      '具有優秀的危機預警能力',
+      '能夠把握最佳行動時機',
+      '具有深度傾聽和理解能力'
+    ],
+    '白虎': [
+      '能夠在緊急情況下快速決策',
+      '具有強大的目標達成能力',
+      '面對壓力時表現出卓越韌性',
+      '能夠有效領導團隊衝刺目標',
+      '具有優秀的問題解決效率'
+    ],
+    '玄武': [
+      '能夠進行深度系統性思考',
+      '善於從數據中發現關鍵模式',
+      '具有優秀的長期規劃能力',
+      '能夠冷靜分析複雜情境',
+      '具有卓越的風險評估能力'
+    ]
+  };
+  return strengthMap[beastType] || ['具有多方面的能力優勢'];
+}
+
+function getSuitableCareerFields(beastType) {
+  const fields = {
+    '青龍': [
+      '創新創業領域',
+      '產品設計與開發',
+      '市場策略規劃',
+      '創意內容製作',
+      '新興科技應用',
+      '顧問諮詢服務'
+    ],
+    '朱雀': [
+      '公關與媒體傳播',
+      '教育培訓行業',
+      '銷售與客戶關係',
+      '活動策劃執行',
+      '人力資源管理',
+      '心理諮詢輔導'
+    ],
+    '勾陳': [
+      '項目管理職位',
+      '質量控制部門',
+      '行政管理工作',
+      '財務會計領域',
+      '系統維護運營',
+      '後勤支援服務'
+    ],
+    '螣蛇': [
+      '心理諮詢輔導',
+      '人力資源協調',
+      '商業談判代表',
+      '危機處理專家',
+      '團隊建設指導',
+      '客戶關係管理'
+    ],
+    '白虎': [
+      '緊急救援服務',
+      '銷售團隊領導',
+      '項目執行管理',
+      '競技體育領域',
+      '軍事警察職業',
+      '生產製造管理'
+    ],
+    '玄武': [
+      '研究分析工作',
+      '技術研發領域',
+      '戰略規劃部門',
+      '風險管理職位',
+      '學術研究機構',
+      '數據分析專業'
+    ]
+  };
+  return fields[beastType] || ['多個職業領域'];
+}
+
+function getRelationshipPatterns(beastType, gender) {
+  const patterns = {
+    '青龍': '在關係中追求新鮮感和成長，需要足夠的個人空間和探索自由。喜歡與伴侶共同學習和體驗新事物，避免一成不變的相處模式。',
+    '朱雀': '熱情而投入，重視情感表達和深度連結，需要被關注和認可。在關係中善於營造浪漫氛圍，但也需要得到同等的情感回饋。',
+    '勾陳': '穩定而忠誠，注重實際行動和長期承諾，需要安全感和歸屬感。在關係中提供可靠支持，期望建立穩固長久的伴侶關係。',
+    '螣蛇': '敏感而體貼，重視心靈契合和深度理解，需要信任和真誠。能夠敏銳感知伴侶需求，但也需要被深刻理解和接納。',
+    '白虎': '直接而保護，重視行動證明和實際支持，需要尊重和獨立。在關係中表現出強烈的保護欲，但也需要個人空間和自主權。',
+    '玄武': '深沉而理性，重視思想交流和智慧碰撞，需要空間和理解。在關係中追求深度連結，但也需要獨處時間進行思考。'
+  };
+  return patterns[beastType] || '具有獨特的情感表達方式。';
+}
+
+function getMoneyHexagram(beastType) {
+  const hexagrams = {
+    '青龍': '乾為天卦，象徵創造與開拓。財運如龍騰九天，宜把握創新機會，但需注意風險控制。適合投資新興產業和創意項目。',
+    '朱雀': '離為火卦，象徵光明與連結。財運如鳳舞雲端，宜發展人脈資源，但需避免過度消費。適合從事與人相關的行業。',
+    '勾陳': '坤為地卦，象徵穩定與積累。財運如大地承載，宜穩健投資，但需適時突破舒適圈。適合長期穩定的理財方式。',
+    '螣蛇': '巽為風卦，象徵變通與時機。財運如風行草偃，宜把握時機進退，但需堅守原則。適合靈活多變的投資策略。',
+    '白虎': '震為雷卦，象徵行動與突破。財運如雷動四方，宜積極開拓，但需注意衝動決策。適合高風險高回報的投資。',
+    '玄武': '坎為水卦，象徵智慧與深謀。財運如水匯成淵，宜長期規劃，但需避免過度保守。適合研究和分析型投資。'
+  };
+  return hexagrams[beastType] || '具有獨特的財富能量模式。';
+}
+
+function getMainGrowthChallenges(beastType) {
+  const challenges = {
+    '青龍': '學習將創意落地執行，培養持續性和專注力，避免過度分散注意力。需要建立系統性的工作習慣，將靈感轉化為實際成果。',
+    '朱雀': '平衡情感表達與理性思考，學習獨處和自我反思，避免過度依賴外部認可。需要發展內在安全感，建立健康的邊界感。',
+    '勾陳': '突破傳統思維框架，學習接受變化與不確定性，避免過度保守和僵化。需要培養創新思維，適時跳出舒適圈。',
+    '螣蛇': '建立明確的個人邊界，學習直接表達需求，避免過度適應他人期望。需要發展自我肯定，平衡他人需求與自我需求。',
+    '白虎': '培養耐心和細緻，學習團隊合作與授權，避免過度控制和急躁。需要發展同理心，學習聆聽他人意見。',
+    '玄武': '加強行動力和實踐，學習情感表達與連結，避免過度理性與疏離。需要培養直覺能力，平衡思考與行動。'
+  };
+  return challenges[beastType] || '持續的自我提升和成長。';
+}
+
+// 其他輔助函數
+function getBeastTraits(beastType) {
+  // 返回神獸特質描述
+  return '';
+}
+
+function getGrowthSuggestions(beastType) {
+  // 返回成長建議
+  return '';
+}
+
+function getCombinationTraits(beast1, beast2) {
+  // 返回組合特質
+  return `結合了${beast1}的創造力和${beast2}的穩定性，形成獨特的優勢組合。`;
+}
+
+function getBehaviorPatterns(beastType, scores) {
+  // 返回具體行為模式
+  return `在壓力情境下傾向於${getPressureResponse(beastType)}，在社交場合中表現出${getSocialBehavior(beastType)}的特質。`;
+}
+
+function getDeepMotivations(beastType) {
+  const motivations = {
+    '青龍': '追求自由探索和創造性表達，渴望突破限制實現個人潛能。',
+    '朱雀': '尋求情感連結和社會認同，渴望被看見、被理解和被珍惜。',
+    '勾陳': '追求安全穩定和秩序和諧，渴望建立可靠的生活基礎。',
+    '螣蛇': '尋求深度理解和心靈契合，渴望真實的內在連結。',
+    '白虎': '追求成就目標和影響力，渴望證明自己的能力和價值。',
+    '玄武': '尋求智慧真理和內在平靜，渴望理解生命深層意義。'
+  };
+  return motivations[beastType] || '具有獨特的內在驅動力。';
+}
+
+function getPressureResponse(beastType) {
+  const responses = {
+    '青龍': '尋求新的解決方案',
+    '朱雀': '尋求情感支持',
+    '勾陳': '建立更多結構',
+    '螣蛇': '觀察和分析情況',
+    '白虎': '採取直接行動',
+    '玄武': '退後思考分析'
+  };
+  return responses[beastType] || '特定的應對方式';
+}
+
+function getSocialBehavior(beastType) {
+  const behaviors = {
+    '青龍': '活躍創新',
+    '朱雀': '熱情外向',
+    '勾陳': '穩重可靠',
+    '螣蛇': '觀察傾聽',
+    '白虎': '直接果斷',
+    '玄武': '冷靜內向'
+  };
+  return behaviors[beastType] || '獨特的社交風格';
+}
+
+// 實現其他必要的內容生成函數...
+function getCombinationStrengths(beast1, beast2) {
+  return `這種獨特組合讓您在${beast1}的創新思維和${beast2}的務實執行之間找到完美平衡，能夠既看到遠景又注重細節。`;
+}
+
+function getWorkplaceAdvantages(beastType) {
+  const advantages = {
+    '青龍': '在快速變化的環境中表現出色，能夠為團隊帶來創新思維和突破性解決方案。',
+    '朱雀': '優秀的團隊建設者和激勵者，能夠創造積極的工作氛圍並有效管理客戶關係。',
+    '勾陳': '可靠的項目管理專家，能夠確保工作流程的順暢運行和品質標準的嚴格把關。',
+    '螣蛇': '出色的人際關係專家，能夠有效化解衝突、促進團隊合作並把握最佳時機。',
+    '白虎': '高效的執行領導者，能夠在壓力下快速決策並帶領團隊達成挑戰性目標。',
+    '玄武': '深度的戰略思考者，能夠進行複雜分析、制定長遠規劃並有效管理風險。'
+  };
+  return advantages[beastType] || '在多個工作場景中具有獨特優勢。';
+}
+
+function getCareerDevelopmentTips(beastType) {
+  const tips = {
+    '青龍': '建議選擇允許創意發揮的工作環境，同時學習項目管理技能來確保創意落地。',
+    '朱雀': '建議發展公關或培訓相關技能，同時學習情緒管理來保持工作生活平衡。',
+    '勾陳': '建議深耕專業領域成為專家，同時適時接受新挑戰以避免過度保守。',
+    '螣蛇': '建議發展諮詢或協調相關職業，同時學習設定明確的個人邊界。',
+    '白虎': '建議追求領導管理職位，同時培養團隊合作和耐心等待的藝術。',
+    '玄武': '建議從事研究或分析工作，同時學習將深度思考轉化為實際行動。'
+  };
+  return tips[beastType] || '持續學習和專業發展是關鍵。';
+}
+
+function getCommunicationStyle(beastType) {
+  const styles = {
+    '青龍': '富有想像力和啟發性，喜歡用比喻和故事來表達想法。',
+    '朱雀': '熱情洋溢且富有感染力，善於用情感語言建立連結。',
+    '勾陳': '清晰具體且實事求是，注重邏輯性和實際效果。',
+    '螣蛇': '細膩體貼且富有同理心，能夠感知言外之意。',
+    '白虎': '直接了當且目標明確，注重效率和結果導向。',
+    '玄武': '深思熟慮且富有智慧，注重深度和邏輯嚴謹性。'
+  };
+  return styles[beastType] || '具有獨特的溝通特點。';
+}
+
+function getIntimacyAdvice(beastType, gender) {
+  const advice = {
+    '青龍': '在親密關係中需要保持一定的新鮮感和探索空間，與伴侶共同制定冒險計劃可以增進感情。',
+    '朱雀': '需要定期的情感交流和深度連結，學習表達真實需求的同時也給予伴侶足夠的關注。',
+    '勾陳': '建立穩定可靠的相處模式很重要，同時也要學會在關係中適時展現脆弱和尋求支持。',
+    '螣蛇': '深度理解和心靈契合是關鍵，學習在敏感感知他人需求的同時也明確表達自己的邊界。',
+    '白虎': '行動勝於言語的表達方式，在展現保護力的同時也要學習聆聽和尊重伴侶的獨立性。',
+    '玄武': '需要獨處思考的空間和理解，在追求深度交流的同時也要學習情感表達和即時回應。'
+  };
+  return advice[beastType] || '建立健康平衡的親密關係需要相互理解和尊重。';
+}
+
+function getCompatibleTypes(beastType) {
+  const compatibilities = {
+    '青龍': ['勾陳型', '玄武型', '螣蛇型'],
+    '朱雀': ['玄武型', '白虎型', '青龍型'],
+    '勾陳': ['青龍型', '朱雀型', '螣蛇型'],
+    '螣蛇': ['白虎型', '玄武型', '勾陳型'],
+    '白虎': ['螣蛇型', '朱雀型', '玄武型'],
+    '玄武': ['朱雀型', '青龍型', '白虎型']
+  };
+  return compatibilities[beastType] || ['多種人格類型'];
+}
+
+function getGrowthActions(beastType) {
+  const actions = {
+    '青龍': [
+      '每天設定具體的執行目標',
+      '學習時間管理和優先級排序',
+      '建立創意項目的完成儀式',
+      '練習專注力訓練和冥想',
+      '尋找創意落地的合作夥伴'
+    ],
+    '朱雀': [
+      '建立個人獨處的定期時間',
+      '學習情緒日記和自我反思',
+      '發展不依賴外部的自我價值',
+      '練習設定健康的人際邊界',
+      '培養個人興趣和獨立活動'
+    ],
+    '勾陳': [
+      '每週嘗試一件新事物',
+      '學習接受不完美和犯錯',
+      '參與創意和冒險性活動',
+      '練習靈活應變的思維模式',
+      '尋找突破舒適圈的機會'
+    ],
+    '螣蛇': [
+      '練習直接表達需求和感受',
+      '學習說"不"和設定界限',
+      '發展個人決策的自信',
+      '平衡他人需求與自我需求',
+      '建立個人目標和優先事項'
+    ],
+    '白虎': [
+      '練習耐心聆聽和團隊合作',
+      '學習授權和信任他人',
+      '發展同理心和情感智慧',
+      '培養細緻觀察的習慣',
+      '練習等待和時機把握'
+    ],
+    '玄武': [
+      '設定行動截止日期',
+      '練習即時決策和行動',
+      '發展情感表達能力',
+      '參與團隊合作項目',
+      '平衡思考與實踐時間'
+    ]
+  };
+  return actions[beastType] || ['持續的自我覺察和改進'];
+}
+
+function getWeaknessDevelopment(beastType) {
+  const developments = {
+    '青龍': '可以透過結構化學習和專注訓練來發展執行力，將創意轉化為實際成果。',
+    '朱雀': '可以透過獨處反思和內在探索來發展自我認知，建立更穩定的內在基礎。',
+    '勾陳': '可以透過冒險體驗和創新挑戰來發展適應力，擁抱變化和不確定性。',
+    '螣蛇': '可以透過自信訓練和邊界設定來發展自我肯定，平衡付出與接收。',
+    '白虎': '可以透過團隊合作和耐心練習來發展協作力，學習信任和授權。',
+    '玄武': '可以透過行動實踐和情感表達來發展執行力，平衡思考與行動。'
+  };
+  return developments[beastType] || '透過有意識的練習可以發展相關能力。';
+}
+
+function getWealthEnergy(beastType) {
+  const energies = {
+    '青龍': '財富能量如活水源頭，源源不絕但需要正確引導。適合開創性投資和創新項目。',
+    '朱雀': '財富能量如火焰燃燒，熱情旺盛但需要穩定燃料。適合人脈相關和服務性行業。',
+    '勾陳': '財富能量如大地積累，穩定增長但需要適時突破。適合長期投資和實體產業。',
+    '螣蛇': '財富能量如風之流動，靈活多變但需要把握時機。適合時機性投資和中介服務。',
+    '白虎': '財富能量如雷之迅猛，快速獲取但需要風險控制。適合主動出擊和高回報投資。',
+    '玄武': '財富能量如水之深藏，智慧積累但需要行動實踐。適合研究型投資和技術領域。'
+  };
+  return energies[beastType] || '具有獨特的財富創造模式。';
+}
+
+function getSuitableInvestments(beastType) {
+  const investments = {
+    '青龍': '新創公司、科技股、創意產業、教育培訓、個人品牌',
+    '朱雀': '服務業、娛樂產業、公關公司、教育機構、社交平台',
+    '勾陳': '房地產、基礎建設、公用事業、傳統製造、儲蓄保險',
+    '螣蛇': '中介服務、諮詢業、人力資源、心理服務、時機性投資',
+    '白虎': '主動投資、創業項目、體育產業、軍工股、急難救助',
+    '玄武': '研究開發、技術專利、數據分析、風險投資、長期持股'
+  };
+  return investments[beastType] || '多元化的投資組合';
+}
+
+function getWealthDevelopmentTips(beastType) {
+  const tips = {
+    '青龍': '建議將創意與商業模式結合，尋找可靠的合作夥伴來協助執行，避免過度分散投資。',
+    '朱雀': '建議利用人脈資源發展事業，建立個人品牌影響力，同時注意財務紀律和儲蓄計劃。',
+    '勾陳': '建議採取穩健的財富積累策略，適時投資創新領域，避免過度保守錯失機會。',
+    '螣蛇': '建議把握市場時機進行投資，發展諮詢或中介服務，同時建立明確的財務目標。',
+    '白虎': '建議採取積極的財富創造策略，控制投資風險，學習長期財富規劃的重要性。',
+    '玄武': '建議進行深度市場研究後投資，發展專業技術或知識變現，平衡分析與行動。'
+  };
+  return tips[beastType] || '建立系統性的財富管理計劃是關鍵。';
+}
+
+function getCrossFieldPotential(beastType) {
+  return `您的${beastType}特質讓您在跨領域發展中具有獨特優勢，能夠將不同領域的知識和技能創造性地結合，開創新的可能性。`;
+}
+
 // ========== AI分析 ==========
 function generateAIAnalysis() {
   const saved = JSON.parse(localStorage.getItem("shen-shou-result") || "null");
@@ -1177,37 +1789,6 @@ function simulateProgress() {
       clearInterval(interval);
     }
   }, 500);
-}
-
-function fillAIAnalysis(beastType) {
-  const analysisData = {
-    '青龍': {
-      personality: '青龍型人格的你，內心蘊藏著一股生生不息的創造活水。你的思維如同春雷破曉，總能在平凡中看見不凡，在框架外找到新路。',
-      strengths: '你最大的優勢在於那無人能及的「靈感爆發力」與「靈活應變性」。當團隊陷入僵局時，你總能提出石破天驚的觀點。',
-      career: '在職業選擇上，你如同翱翔的巨龍，最適合在需要源源不絕創意的領域發光發熱。',
-      relationships: '情感世界裡，你需要的是新鮮感與共同成長的火花。一成不變的關係會讓你感到窒息。',
-      growth: '你的挑戰在於如何將天馬行空的創意「落地」。學習建立系統性的執行計畫至關重要。',
-      money: '金錢卦象顯示，你的財富密碼藏在「趨勢」與「創新」之中。'
-    },
-    '朱雀': {
-      personality: '朱雀型人格的你，生來就是舞台的焦點，人群中的發光體。你的內心燃燒著一團熱情的火焰。',
-      strengths: '你與生俱來的「溝通魅力」和「超凡感染力」是你最強大的武器。',
-      career: '你的天賦在於所有需要與「人」打交道的工作。公關、市場行銷等領域都是你能大放異彩的舞台。',
-      relationships: '在感情中，你是一個需要大量情感交流與肯定的浪漫主義者。',
-      growth: '你的成長課題是學習「管理情緒」與「尋求內在平靜」。',
-      money: '從金錢卦來看，你的財富往往與你的「人脈」和「聲望」緊密相連。'
-    }
-    // 其他神獸...
-  };
-  
-  const data = analysisData[beastType] || analysisData['青龍'];
-  
-  document.getElementById("ai-personality").textContent = data.personality;
-  document.getElementById("ai-strengths").textContent = data.strengths;
-  document.getElementById("ai-career").textContent = data.career;
-  document.getElementById("ai-relationships").textContent = data.relationships;
-  document.getElementById("ai-growth").textContent = data.growth;
-  document.getElementById("ai-money").textContent = data.money;
 }
 
 // ========== 分享功能 ==========
