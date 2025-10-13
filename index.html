@@ -367,6 +367,200 @@ document.addEventListener('DOMContentLoaded', function() {
   initializeApp();
 });
 
+// ========== 測驗題庫 ==========
+const BANK = [
+  {t: "我常有突如其來的靈感並想立即嘗試。", b: "青龍"},
+  {t: "我喜歡打破常規尋找新方法。", b: "青龍"},
+  {t: "遇阻力時我會靈活轉向。", b: "青龍"},
+  {t: "我富想像力，喜歡創新思考。", b: "青龍"},
+  {t: "我熱愛探索未知事物。", b: "青龍"},
+  {t: "我喜歡在人群中表達自己。", b: "朱雀"},
+  {t: "我用情緒帶動他人。", b: "朱雀"},
+  {t: "別人的反應會影響我。", b: "朱雀"},
+  {t: "我擅長說服與演說。", b: "朱雀"},
+  {t: "我重視被傾聽與關注。", b: "朱雀"},
+  {t: "我喜歡按計畫行事。", b: "勾陳"},
+  {t: "我重視安全感與穩定。", b: "勾陳"},
+  {t: "我責任感強。", b: "勾陳"},
+  {t: "我傾向維持現狀。", b: "勾陳"},
+  {t: "我注重細節與程序。", b: "勾陳"},
+  {t: "我對他人情緒很敏感。", b: "螣蛇"},
+  {t: "我擅長觀察與傾聽。", b: "螣蛇"},
+  {t: "我常思考背後的動機。", b: "螣蛇"},
+  {t: "我思考事情會考量時機與人心。", b: "螣蛇"},
+  {t: "我善於協調不同觀點。", b: "螣蛇"},
+  {t: "我講求效率與結果。", b: "白虎"},
+  {t: "我會主動做決策。", b: "白虎"},
+  {t: "我以數據與成果為導向。", b: "白虎"},
+  {t: "我願意承擔壓力以完成任務。", b: "白虎"},
+  {t: "我偏好明確的規範與標準。", b: "白虎"},
+  {t: "我喜歡獨自思考。", b: "玄武"},
+  {t: "我傾向謹慎評估後行動。", b: "玄武"},
+  {t: "我擅長規劃長遠目標。", b: "玄武"},
+  {t: "我重視邏輯與分析。", b: "玄武"},
+  {t: "我習慣冷靜看待問題。", b: "玄武"}
+];
+
+// ========== 超人顯示資料 ==========
+const superheroData = {
+  '青龍': {
+    male: { 
+      name:'創意飛龍超人', 
+      ability:'🦸‍♂️ 超能力：靈感爆發 + 快速應變 + 突破框架', 
+      mission:'🎯 專屬任務：創新專案發起人、危機處理專家、新領域開拓者', 
+      localName:'台灣點子王', 
+      description:'你就像台灣的創新引擎，總能想出讓人驚艷的點子！',
+      image: 'img/qinglong-male.png'
+    },
+    female: { 
+      name:'創意飛龍女俠', 
+      ability:'🦸‍♀️ 超能力：靈感爆發 + 直覺洞察 + 跨界融合', 
+      mission:'🎯 專屬任務：創意策劃師、團隊協調者、美感引導者', 
+      localName:'台灣創意女神', 
+      description:'你是台灣的創意女神，總能將靈感轉化為動人的作品！',
+      image: 'img/qinglong-female.png'
+    },
+    other: { 
+      name:'創意飛龍使者', 
+      ability:'🦸 超能力：靈感爆發 + 多元視角 + 跨界連結', 
+      mission:'🎯 專屬任務：創意橋樑、多元文化融合者、創新催化劑', 
+      localName:'台灣創意大使', 
+      description:'你是台灣的創意大使，用多元視角連結不同領域！',
+      image: 'img/qinglong-male.png'
+    }
+  },
+  '朱雀': {
+    male: { 
+      name:'熱情鳳凰超人', 
+      ability:'🦸‍♂️ 超能力：感染力場 + 溝通大師 + 激勵光環', 
+      mission:'🎯 專屬任務：團隊士氣充電站、公關溝通達人、教育推廣先鋒', 
+      localName:'台灣熱情大使', 
+      description:'你是台灣的人氣王，用熱情感染身邊的每一個人！',
+      image: 'img/zhuque-male.png'
+    },
+    female: { 
+      name:'熱情鳳凰女俠', 
+      ability:'🦸‍♀️ 超能力：情感共鳴 + 溝通藝術 + 溫暖療癒', 
+      mission:'🎯 專屬任務：情感支持者、團隊凝聚者、心靈療癒師', 
+      localName:'台灣暖心天使', 
+      description:'你是台灣的暖心天使，用真誠與溫暖照亮他人！',
+      image: 'img/zhuque-female.png'
+    },
+    other: { 
+      name:'熱情鳳凰使者', 
+      ability:'🦸 超能力：情感連結 + 多元溝通 + 社群凝聚', 
+      mission:'🎯 專屬任務：社群橋樑、情感支持者、多元文化推廣者', 
+      localName:'台灣情感連結者', 
+      description:'你是台灣的情感連結者，用真誠連結不同的心靈！',
+      image: 'img/zhuque-male.png'
+    }
+  },
+  '勾陳': {
+    male: { 
+      name:'穩固城牆超人', 
+      ability:'🦸‍♂️ 超能力：可靠防護 + 細節掌控 + 執行力場', 
+      mission:'🎯 專屬任務：系統穩定守護者、品質把關專家、長期規劃師', 
+      localName:'台灣地基主', 
+      description:'你是台灣的穩定力量，像堅固的地基一樣可靠！',
+      image: 'img/gouchen-male.png'
+    },
+    female: { 
+      name:'穩固城牆女俠', 
+      ability:'🦸‍♀️ 超能力：細心守護 + 組織協調 + 穩定支持', 
+      mission:'🎯 專屬任務：系統維護者、品質守護者、團隊穩定劑', 
+      localName:'台灣守護天使', 
+      description:'你是台灣的守護天使，用細心與穩定支持著每個人！',
+      image: 'img/gouchen-female.png'
+    },
+    other: { 
+      name:'穩固城牆使者', 
+      ability:'🦸 超能力：系統思維 + 穩定建構 + 多元協調', 
+      mission:'🎯 專屬任務：系統架構師、穩定維護者、多元協調者', 
+      localName:'台灣系統守護者', 
+      description:'你是台灣的系統守護者，用穩定的力量建構更好的環境！',
+      image: 'img/gouchen-male.png'
+    }
+  },
+  '螣蛇': {
+    male: { 
+      name:'洞察靈蛇超人', 
+      ability:'🦸‍♂️ 超能力：讀心感知 + 協調力場 + 時機掌控', 
+      mission:'🎯 專屬任務：人際關係調解員、策略分析師、危機預警系統', 
+      localName:'台灣和事佬', 
+      description:'你是台灣的人際雷達，總能洞察人心、化解衝突！',
+      image: 'img/tengshe-male.png'
+    },
+    female: { 
+      name:'洞察靈蛇女俠', 
+      ability:'🦸‍♀️ 超能力：直覺感知 + 情感協調 + 時機洞察', 
+      mission:'🎯 專屬任務：情感調解師、團隊潤滑劑、危機預防專家', 
+      localName:'台灣心靈導師', 
+      description:'你是台灣的心靈導師，用直覺與智慧引導他人！',
+      image: 'img/tengshe-female.png'
+    },
+    other: { 
+      name:'洞察靈蛇使者', 
+      ability:'🦸 超能力：多元感知 + 關係協調 + 時機判斷', 
+      mission:'🎯 專屬任務：關係橋樑、多元協調者、時機分析師', 
+      localName:'台灣協調專家', 
+      description:'你是台灣的協調專家，用智慧連結不同的人際網絡！',
+      image: 'img/tengshe-male.png'
+    }
+  },
+  '白虎': {
+    male: { 
+      name:'疾風戰神超人', 
+      ability:'🦸‍♂️ 超能力：決斷力場 + 行動加速 + 目標鎖定', 
+      mission:'🎯 專屬任務：緊急救援隊長、專案領導者、效率優化師', 
+      localName:'台灣急先鋒', 
+      description:'你是台灣的行動派，像疾風一樣快速解決問題！',
+      image: 'img/baihu-male.png'
+    },
+    female: { 
+      name:'疾風戰神女俠', 
+      ability:'🦸‍♀️ 超能力：果斷決策 + 高效執行 + 目標達成', 
+      mission:'🎯 專屬任務：危機處理專家、效率領導者、目標達成師', 
+      localName:'台灣行動女神', 
+      description:'你是台灣的行動女神，用效率與決斷力完成任務！',
+      image: 'img/baihu-female.png'
+    },
+    other: { 
+      name:'疾風戰神使者', 
+      ability:'🦸 超能力：多元決策 + 高效協調 + 目標管理', 
+      mission:'🎯 專屬任務：效率協調者、多元領導者、目標管理師', 
+      localName:'台灣效率專家', 
+      description:'你是台灣的效率專家，用多元視角達成目標！',
+      image: 'img/baihu-male.png'
+    }
+  },
+  '玄武': {
+    male: { 
+      name:'智慧龜仙超人', 
+      ability:'🦸‍♂️ 超能力：深度思考 + 策略規劃 + 冷靜屏障', 
+      mission:'🎯 專屬任務：長遠規劃師、技術研發專家、智慧決策顧問', 
+      localName:'台灣諸葛亮', 
+      description:'你是台灣的智慧寶庫，像龜甲一樣保護重要決策！',
+      image: 'img/xuanwu-male.png'
+    },
+    female: { 
+      name:'智慧龜仙女俠', 
+      ability:'🦸‍♀️ 超能力：深度分析 + 策略思考 + 冷靜智慧', 
+      mission:'🎯 專屬任務：策略規劃師、智慧顧問、冷靜決策者', 
+      localName:'台灣智慧女神', 
+      description:'你是台灣的智慧女神，用深謀遠慮指引方向！',
+      image: 'img/xuanwu-female.png'
+    },
+    other: { 
+      name:'智慧龜仙使者', 
+      ability:'🦸 超能力：多元思考 + 策略協調 + 冷靜分析', 
+      mission:'🎯 專屬任務：智慧橋樑、策略協調者、多元顧問', 
+      localName:'台灣智囊團', 
+      description:'你是台灣的智囊團，用多元智慧解決複雜問題！',
+      image: 'img/xuanwu-male.png'
+    }
+  }
+};
+
 function initializeApp() {
   // 設定報告日期
   document.getElementById('report-date').textContent = new Date().toLocaleDateString('zh-TW', { 
@@ -389,46 +583,13 @@ function initializeApp() {
 
 // ========== 測驗題目初始化 ==========
 function initializeQuestions() {
-  const BANK = [
-    {t: "我常有突如其來的靈感並想立即嘗試。", b: "青龍"},
-    {t: "我喜歡打破常規尋找新方法。", b: "青龍"},
-    {t: "遇阻力時我會靈活轉向。", b: "青龍"},
-    {t: "我富想像力，喜歡創新思考。", b: "青龍"},
-    {t: "我熱愛探索未知事物。", b: "青龍"},
-    {t: "我喜歡在人群中表達自己。", b: "朱雀"},
-    {t: "我用情緒帶動他人。", b: "朱雀"},
-    {t: "別人的反應會影響我。", b: "朱雀"},
-    {t: "我擅長說服與演說。", b: "朱雀"},
-    {t: "我重視被傾聽與關注。", b: "朱雀"},
-    {t: "我喜歡按計畫行事。", b: "勾陳"},
-    {t: "我重視安全感與穩定。", b: "勾陳"},
-    {t: "我責任感強。", b: "勾陳"},
-    {t: "我傾向維持現狀。", b: "勾陳"},
-    {t: "我注重細節與程序。", b: "勾陳"},
-    {t: "我對他人情緒很敏感。", b: "螣蛇"},
-    {t: "我擅長觀察與傾聽。", b: "螣蛇"},
-    {t: "我常思考背後的動機。", b: "螣蛇"},
-    {t: "我思考事情會考量時機與人心。", b: "螣蛇"},
-    {t: "我善於協調不同觀點。", b: "螣蛇"},
-    {t: "我講求效率與結果。", b: "白虎"},
-    {t: "我會主動做決策。", b: "白虎"},
-    {t: "我以數據與成果為導向。", b: "白虎"},
-    {t: "我願意承擔壓力以完成任務。", b: "白虎"},
-    {t: "我偏好明確的規範與標準。", b: "白虎"},
-    {t: "我喜歡獨自思考。", b: "玄武"},
-    {t: "我傾向謹慎評估後行動。", b: "玄武"},
-    {t: "我擅長規劃長遠目標。", b: "玄武"},
-    {t: "我重視邏輯與分析。", b: "玄武"},
-    {t: "我習慣冷靜看待問題。", b: "玄武"}
-  ];
-
   // 隨機排序題目
-  BANK.sort(() => 0.5 - Math.random());
+  const shuffledBANK = [...BANK].sort(() => 0.5 - Math.random());
   
   const qWrap = document.getElementById("qWrap");
   qWrap.innerHTML = ''; // 清空現有內容
   
-  BANK.forEach((q, i) => {
+  shuffledBANK.forEach((q, i) => {
     qWrap.innerHTML += `<li><p>${i+1}. ${q.t}</p><input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'></li>`;
   });
   
@@ -799,165 +960,6 @@ function generateAdvice(mainBeast, secondaryBeast, scores, variant) {
 }
 
 // ========== 超人顯示 ==========
-// ========== 超人顯示 ==========
-const superheroData = {
-  '青龍': {
-    male: { 
-      name:'創意飛龍超人', 
-      ability:'🦸‍♂️ 超能力：靈感爆發 + 快速應變 + 突破框架', 
-      mission:'🎯 專屬任務：創新專案發起人、危機處理專家、新領域開拓者', 
-      localName:'台灣點子王', 
-      description:'你就像台灣的創新引擎，總能想出讓人驚艷的點子！',
-      image: 'img/qinglong-male.png'
-    },
-    female: { 
-      name:'創意飛龍女俠', 
-      ability:'🦸‍♀️ 超能力：靈感爆發 + 直覺洞察 + 跨界融合', 
-      mission:'🎯 專屬任務：創意策劃師、團隊協調者、美感引導者', 
-      localName:'台灣創意女神', 
-      description:'你是台灣的創意女神，總能將靈感轉化為動人的作品！',
-      image: 'img/qinglong-female.png'
-    },
-    other: { 
-      name:'創意飛龍使者', 
-      ability:'🦸 超能力：靈感爆發 + 多元視角 + 跨界連結', 
-      mission:'🎯 專屬任務：創意橋樑、多元文化融合者、創新催化劑', 
-      localName:'台灣創意大使', 
-      description:'你是台灣的創意大使，用多元視角連結不同領域！',
-      image: 'img/qinglong-male.png'  // 使用男生圖片
-    }
-  },
-  '朱雀': {
-    male: { 
-      name:'熱情鳳凰超人', 
-      ability:'🦸‍♂️ 超能力：感染力場 + 溝通大師 + 激勵光環', 
-      mission:'🎯 專屬任務：團隊士氣充電站、公關溝通達人、教育推廣先鋒', 
-      localName:'台灣熱情大使', 
-      description:'你是台灣的人氣王，用熱情感染身邊的每一個人！',
-      image: 'img/zhuque-male.png'
-    },
-    female: { 
-      name:'熱情鳳凰女俠', 
-      ability:'🦸‍♀️ 超能力：情感共鳴 + 溝通藝術 + 溫暖療癒', 
-      mission:'🎯 專屬任務：情感支持者、團隊凝聚者、心靈療癒師', 
-      localName:'台灣暖心天使', 
-      description:'你是台灣的暖心天使，用真誠與溫暖照亮他人！',
-      image: 'img/zhuque-female.png'
-    },
-    other: { 
-      name:'熱情鳳凰使者', 
-      ability:'🦸 超能力：情感連結 + 多元溝通 + 社群凝聚', 
-      mission:'🎯 專屬任務：社群橋樑、情感支持者、多元文化推廣者', 
-      localName:'台灣情感連結者', 
-      description:'你是台灣的情感連結者，用真誠連結不同的心靈！',
-      image: 'img/zhuque-male.png'  // 使用男生圖片
-    }
-  },
-  '勾陳': {
-    male: { 
-      name:'穩固城牆超人', 
-      ability:'🦸‍♂️ 超能力：可靠防護 + 細節掌控 + 執行力場', 
-      mission:'🎯 專屬任務：系統穩定守護者、品質把關專家、長期規劃師', 
-      localName:'台灣地基主', 
-      description:'你是台灣的穩定力量，像堅固的地基一樣可靠！',
-      image: 'img/gouchen-male.png'
-    },
-    female: { 
-      name:'穩固城牆女俠', 
-      ability:'🦸‍♀️ 超能力：細心守護 + 組織協調 + 穩定支持', 
-      mission:'🎯 專屬任務：系統維護者、品質守護者、團隊穩定劑', 
-      localName:'台灣守護天使', 
-      description:'你是台灣的守護天使，用細心與穩定支持著每個人！',
-      image: 'img/gouchen-female.png'
-    },
-    other: { 
-      name:'穩固城牆使者', 
-      ability:'🦸 超能力：系統思維 + 穩定建構 + 多元協調', 
-      mission:'🎯 專屬任務：系統架構師、穩定維護者、多元協調者', 
-      localName:'台灣系統守護者', 
-      description:'你是台灣的系統守護者，用穩定的力量建構更好的環境！',
-      image: 'img/gouchen-male.png'  // 使用男生圖片
-    }
-  },
-  '螣蛇': {
-    male: { 
-      name:'洞察靈蛇超人', 
-      ability:'🦸‍♂️ 超能力：讀心感知 + 協調力場 + 時機掌控', 
-      mission:'🎯 專屬任務：人際關係調解員、策略分析師、危機預警系統', 
-      localName:'台灣和事佬', 
-      description:'你是台灣的人際雷達，總能洞察人心、化解衝突！',
-      image: 'img/tengshe-male.png'
-    },
-    female: { 
-      name:'洞察靈蛇女俠', 
-      ability:'🦸‍♀️ 超能力：直覺感知 + 情感協調 + 時機洞察', 
-      mission:'🎯 專屬任務：情感調解師、團隊潤滑劑、危機預防專家', 
-      localName:'台灣心靈導師', 
-      description:'你是台灣的心靈導師，用直覺與智慧引導他人！',
-      image: 'img/tengshe-female.png'
-    },
-    other: { 
-      name:'洞察靈蛇使者', 
-      ability:'🦸 超能力：多元感知 + 關係協調 + 時機判斷', 
-      mission:'🎯 專屬任務：關係橋樑、多元協調者、時機分析師', 
-      localName:'台灣協調專家', 
-      description:'你是台灣的協調專家，用智慧連結不同的人際網絡！',
-      image: 'img/tengshe-male.png'  // 使用男生圖片
-    }
-  },
-  '白虎': {
-    male: { 
-      name:'疾風戰神超人', 
-      ability:'🦸‍♂️ 超能力：決斷力場 + 行動加速 + 目標鎖定', 
-      mission:'🎯 專屬任務：緊急救援隊長、專案領導者、效率優化師', 
-      localName:'台灣急先鋒', 
-      description:'你是台灣的行動派，像疾風一樣快速解決問題！',
-      image: 'img/baihu-male.png'
-    },
-    female: { 
-      name:'疾風戰神女俠', 
-      ability:'🦸‍♀️ 超能力：果斷決策 + 高效執行 + 目標達成', 
-      mission:'🎯 專屬任務：危機處理專家、效率領導者、目標達成師', 
-      localName:'台灣行動女神', 
-      description:'你是台灣的行動女神，用效率與決斷力完成任務！',
-      image: 'img/baihu-female.png'
-    },
-    other: { 
-      name:'疾風戰神使者', 
-      ability:'🦸 超能力：多元決策 + 高效協調 + 目標管理', 
-      mission:'🎯 專屬任務：效率協調者、多元領導者、目標管理師', 
-      localName:'台灣效率專家', 
-      description:'你是台灣的效率專家，用多元視角達成目標！',
-      image: 'img/baihu-male.png'  // 使用男生圖片
-    }
-  '玄武': {
-    male: { 
-      name:'智慧龜仙超人', 
-      ability:'🦸‍♂️ 超能力：深度思考 + 策略規劃 + 冷靜屏障', 
-      mission:'🎯 專屬任務：長遠規劃師、技術研發專家、智慧決策顧問', 
-      localName:'台灣諸葛亮', 
-      description:'你是台灣的智慧寶庫，像龜甲一樣保護重要決策！',
-      image: 'img/xuanwu-male.png'
-    },
-    female: { 
-      name:'智慧龜仙女俠', 
-      ability:'🦸‍♀️ 超能力：深度分析 + 策略思考 + 冷靜智慧', 
-      mission:'🎯 專屬任務：策略規劃師、智慧顧問、冷靜決策者', 
-      localName:'台灣智慧女神', 
-      description:'你是台灣的智慧女神，用深謀遠慮指引方向！',
-      image: 'img/xuanwu-female.png'
-    },
-    other: { 
-      name:'智慧龜仙使者', 
-      ability:'🦸 超能力：多元思考 + 策略協調 + 冷靜分析', 
-      mission:'🎯 專屬任務：智慧橋樑、策略協調者、多元顧問', 
-      localName:'台灣智囊團', 
-      description:'你是台灣的智囊團，用多元智慧解決複雜問題！',
-      image: 'img/xuanwu-male.png'  // 使用男生圖片
-    }
-  }
-};};
-
 function showSuperhero(beastType) {
   const gender = document.querySelector('input[name="gender"]:checked').value;
   const beastData = superheroData[beastType];
@@ -970,17 +972,9 @@ function showSuperhero(beastType) {
     document.getElementById("superhero-mission").textContent = genderData.mission;
     document.getElementById("superhero-local").textContent = `🏮 台灣在地版：${genderData.localName} - ${genderData.description}`;
     
-    // 設定預設圖片
-    const defaultImages = {
-      '青龍': 'img/qinglong-male.png/300x300/4A5568/FFFFFF?text=青龍',
-      '朱雀': 'img/zhuque-male.png/300x300/E53E3E/FFFFFF?text=朱雀',
-      '勾陳': 'img/gouchen-male.png/300x300/38A169/FFFFFF?text=勾陳',
-      '螣蛇': 'img/tengshe-male.png/300x300/805AD5/FFFFFF?text=螣蛇',
-      '白虎': 'img/baihu-male.png/300x300/718096/FFFFFF?text=白虎',
-      '玄武': 'img/xuanwu-male.png/300x300/2B6CB0/FFFFFF?text=玄武'
-    };
+    // 直接使用 superheroData 中的圖片路徑
+    document.getElementById("superhero-image").src = genderData.image;
     
-    document.getElementById("superhero-image").src = defaultImages[beastType];
     document.getElementById("superheroReport").style.display = "block";
   }
 }
@@ -1088,44 +1082,7 @@ function printAnalysis() {
 }
 
 // 全域變數
-let BANK = [];
 window.currentBeastType = '';
-
-// 初始化BANK資料
-document.addEventListener('DOMContentLoaded', function() {
-  BANK = [
-    {t: "我常有突如其來的靈感並想立即嘗試。", b: "青龍"},
-    {t: "我喜歡打破常規尋找新方法。", b: "青龍"},
-    {t: "遇阻力時我會靈活轉向。", b: "青龍"},
-    {t: "我富想像力，喜歡創新思考。", b: "青龍"},
-    {t: "我熱愛探索未知事物。", b: "青龍"},
-    {t: "我喜歡在人群中表達自己。", b: "朱雀"},
-    {t: "我用情緒帶動他人。", b: "朱雀"},
-    {t: "別人的反應會影響我。", b: "朱雀"},
-    {t: "我擅長說服與演說。", b: "朱雀"},
-    {t: "我重視被傾聽與關注。", b: "朱雀"},
-    {t: "我喜歡按計畫行事。", b: "勾陳"},
-    {t: "我重視安全感與穩定。", b: "勾陳"},
-    {t: "我責任感強。", b: "勾陳"},
-    {t: "我傾向維持現狀。", b: "勾陳"},
-    {t: "我注重細節與程序。", b: "勾陳"},
-    {t: "我對他人情緒很敏感。", b: "螣蛇"},
-    {t: "我擅長觀察與傾聽。", b: "螣蛇"},
-    {t: "我常思考背後的動機。", b: "螣蛇"},
-    {t: "我思考事情會考量時機與人心。", b: "螣蛇"},
-    {t: "我善於協調不同觀點。", b: "螣蛇"},
-    {t: "我講求效率與結果。", b: "白虎"},
-    {t: "我會主動做決策。", b: "白虎"},
-    {t: "我以數據與成果為導向。", b: "白虎"},
-    {t: "我願意承擔壓力以完成任務。", b: "白虎"},
-    {t: "我偏好明確的規範與標準。", b: "白虎"},
-    {t: "我喜歡獨自思考。", b: "玄武"},
-    {t: "我傾向謹慎評估後行動。", b: "玄武"},
-    {t: "我擅長規劃長遠目標。", b: "玄武"},
-    {t: "我重視邏輯與分析。", b: "玄武"},
-    {t: "我習慣冷靜看待問題。", b: "玄武"}
-  ];
-});
 </script>
 </body>
 </html>
