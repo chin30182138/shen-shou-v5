@@ -119,7 +119,113 @@
       transform: scale(1.1);
     }
 
-    .print-only { display: none; }
+    /* 重新設計的列印標頭 - 簡潔專業 */
+    .print-header {
+      display: none;
+      margin-bottom: 25px;
+      border-bottom: 3px solid #b6822b;
+      padding-bottom: 15px;
+    }
+    
+    .print-header-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 15px;
+    }
+    
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .print-logo-img {
+      width: 65px;
+      height: 65px;
+      border-radius: 8px;
+      border: 2px solid #e5e7eb;
+    }
+    
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .print-logo-title {
+      font-weight: bold;
+      font-size: 20px;
+      color: #b6822b;
+      margin-bottom: 4px;
+    }
+    
+    .print-logo-subtitle {
+      font-size: 14px;
+      color: #666;
+    }
+    
+    .header-right {
+      text-align: right;
+      background: #f8f9fa;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+    }
+    
+    .print-qrcode-title {
+      font-weight: bold;
+      font-size: 14px;
+      color: #b6822b;
+      margin-bottom: 4px;
+    }
+    
+    .print-qrcode-subtitle {
+      font-size: 12px;
+      color: #666;
+      margin-bottom: 8px;
+    }
+    
+    .print-qrcode-img {
+      width: 80px;
+      height: 80px;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+    }
+    
+    .header-title-container {
+      text-align: center;
+      margin: 15px 0;
+      padding: 15px 0;
+      border-top: 2px solid #f0f0f0;
+      border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .report-main-title {
+      font-size: 28px;
+      font-weight: bold;
+      color: #b6822b;
+      margin-bottom: 8px;
+    }
+    
+    .report-subtitle {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 5px;
+    }
+    
+    .print-date {
+      text-align: center;
+      font-size: 13px;
+      color: #888;
+      margin-top: 10px;
+    }
+    
+    .accent-bar {
+      height: 4px;
+      background: linear-gradient(90deg, #b6822b, #d4a017, #b6822b);
+      margin: 10px 0;
+      border-radius: 2px;
+    }
     
     @media screen {
       #radar { width: 100% !important; height: 300px !important; }
@@ -132,14 +238,33 @@
     /* 列印樣式 */
     @media print { 
       .no-print { display: none !important; } 
+      .print-header { 
+        display: block !important; 
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
       body { 
         background: white !important; 
         font-size: 14px !important; 
         color: black !important; 
-        -webkit-print-color-adjust: exact; 
-        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
       }
-      /* 其他列印樣式保持不變 */
+      .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+      }
+      #beastSVG svg {
+        width: 100% !important;
+        height: auto !important;
+      }
+      .accent-bar {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+      }
     }
   </style>
 </head>
@@ -147,7 +272,7 @@
 <main class="max-w-5xl mx-auto p-4 sm:p-6">
   <header class="mb-4 flex justify-between items-center no-print">
     <div class="flex items-center gap-3">
-      <img src="pic/logo.png" class="h-10 w-auto rounded" alt="仙人指路 Logo" />
+      <img src="img/logo.png" class="h-10 w-auto rounded" alt="仙人指路 Logo" />
       <div>
         <h1 class="text-2xl sm:text-3xl font-extrabold brand">神獸七十二型人格 測驗＋AI智能分析</h1>
         <p class="text-sm text-slate-600">六獸雷達圖・主型解析・三欄建議・AI分析報告</p>
@@ -245,30 +370,32 @@
     </div>
   </form>
 
-  <!-- 列印標頭 -->
-  <div class="print-only print-header">
-    <div class="header-top-border"></div>
-    <div class="header-main-content">
+  <!-- 重新設計的列印標頭 - 簡潔專業 -->
+  <div class="print-header">
+    <div class="print-header-top">
       <div class="header-left">
-        <img src="pic/logo.png" alt="Logo" class="print-logo-img">
+        <img src="img/logo.png" alt="Logo" class="print-logo-img">
         <div class="logo-text">
             <div class="print-logo-title">仙人指路占卜研究學會</div>
             <div class="print-logo-subtitle">專業命理諮詢服務</div>
         </div>
       </div>
       <div class="header-right">
-        <div class="qrcode-text">
-            <div id="print-qrcode-title" class="print-qrcode-title"></div>
-            <div id="print-qrcode-subtitle" class="print-qrcode-subtitle"></div>
-        </div>
+        <div class="print-qrcode-title" id="print-qrcode-title">掃碼預約一對一諮詢</div>
+        <div class="print-qrcode-subtitle" id="print-qrcode-subtitle">Line ID: @immortalguiide</div>
         <img id="print-qrcode-img" src="https://via.placeholder.com/80x80.png?text=QR+Code" alt="QR Code" class="print-qrcode-img">
       </div>
     </div>
+    
+    <div class="accent-bar"></div>
+    
     <div class="header-title-container">
       <h1 class="report-main-title">仙人指路神獸七十二型人格</h1>
       <p class="report-subtitle">個人化深度分析報告</p>
+      <div class="print-date">報告生成時間：<span id="report-date"></span></div>
     </div>
-    <div class="print-date">報告生成時間：<span id="report-date"></span></div>
+    
+    <div class="accent-bar"></div>
   </div>
 
   <!-- 測驗結果 -->
@@ -622,6 +749,9 @@ function initializeSettings() {
     qrCodePreview.src = savedSettings.qrDataUrl;
   }
   
+  // 更新列印標頭
+  updatePrintHeader();
+  
   // 應用主題
   applyTheme(savedSettings.theme || 'warm', savedSettings.hue || 40);
   
@@ -632,10 +762,24 @@ function initializeSettings() {
       const reader = new FileReader();
       reader.onload = function(e) {
         qrCodePreview.src = e.target.result;
+        updatePrintHeader();
       };
       reader.readAsDataURL(file);
     }
   });
+}
+
+// 更新列印標頭
+function updatePrintHeader() {
+  const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
+  
+  document.getElementById('print-qrcode-title').textContent = savedSettings.title || '掃碼預約一對一諮詢';
+  document.getElementById('print-qrcode-subtitle').textContent = savedSettings.line1 || 'Line ID: @immortalguiide';
+  
+  const qrCodeImg = document.getElementById('print-qrcode-img');
+  if (savedSettings.qrDataUrl) {
+    qrCodeImg.src = savedSettings.qrDataUrl;
+  }
 }
 
 // ========== 事件監聽器初始化 ==========
@@ -702,6 +846,7 @@ function saveSettings() {
   };
   
   localStorage.setItem('reportContactSettings', JSON.stringify(settings));
+  updatePrintHeader();
   alert('設定已儲存！');
 }
 
