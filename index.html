@@ -79,12 +79,6 @@
       position: relative;
     }
     
-    .beast-svg {
-      width: 100%;
-      height: 100%;
-      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.1));
-    }
-    
     .ai-analysis-section { background: linear-gradient(135deg, #f8f9fa, #ffffff); border: 1px solid #e9ecef; border-radius: 12px; padding: 12px; margin: 8px 0; }
     .ai-analysis-header { display: flex; align-items: center; margin-bottom: 8px; padding-bottom: 6px; border-bottom: 2px solid #e9ecef; }
     .ai-analysis-icon { font-size: 1.5em; margin-right: 8px; }
@@ -683,23 +677,110 @@ const superheroData = {
 // ========== AI分析資料庫 ==========
 const aiAnalysisData = {
   '青龍': {
-    personality: `青龍型人格的你，內心蘊藏著一股生生不息的創造活水。你的思維如同春雷破曉，總能在平凡中看見不凡，在框架外找到新路。`,
-    strengths: `你最大的優勢在於那無人能及的「靈感爆發力」與「靈活應變性」。`,
-    career: `在職業選擇上，你如同翱翔的巨龍，最適合在需要源源不絕創意的領域發光發熱。`,
-    relationships: `在關係中追求新鮮感和成長，需要足夠的個人空間和探索自由。`,
-    growth: `學習將創意落地執行，培養持續性和專注力。`,
-    money: `財富能量如活水源頭，源源不絕但需要正確引導。`
+    personality: `青龍型人格的你，內心蘊藏著一股生生不息的創造活水。你的思維如同春雷破曉，總能在平凡中看見不凡，在框架外找到新路。
+
+在團隊中，你往往是那個提出「為什麼不試試看這樣做？」的人。你的思考模式跳脫傳統線性邏輯，更傾向於發散性思維，能夠在不同領域間建立意想不到的連結。
+
+你的內心世界豐富多彩，常常同時進行多個思考線程。這種多元思考的能力讓你成為優秀的問題解決者，但也可能導致注意力分散。學習專注於當下，將創意轉化為實際成果，是你重要的成長課題。`,
+
+    strengths: `你最大的優勢在於那無人能及的「靈感爆發力」與「靈活應變性」。當團隊陷入僵局時，你總能提出石破天驚的觀點，為困境帶來新的曙光。
+
+你的創新思維不僅體現在想法上，更表現在行動中。你善於將抽象概念具體化，把天馬行空的創意轉化為可行的方案。這種能力在快速變化的現代社會中極為珍貴。
+
+此外，你具備優秀的學習適應能力。面對新環境、新技術，你總能快速掌握核心要領，並提出獨特的應用方式。`,
+
+    career: `在職業選擇上，你如同翱翔的巨龍，最適合在需要源源不絕創意的領域發光發熱。
+
+<strong>最適職業領域：</strong>
+• 創新創業領域
+• 產品設計與開發  
+• 市場策略規劃
+• 創意內容製作
+• 新興科技應用
+
+<strong>職場優勢：</strong>在快速變化的環境中表現出色，能夠為團隊帶來創新思維和突破性解決方案。
+
+<strong>發展建議：</strong>建議選擇允許創意發揮的工作環境，同時學習項目管理技能來確保創意落地。`,
+
+    relationships: `<strong>情感模式：</strong>在關係中追求新鮮感和成長，需要足夠的個人空間和探索自由。喜歡與伴侶共同學習和體驗新事物，避免一成不變的相處模式。
+
+<strong>溝通風格：</strong>富有想像力和啟發性，喜歡用比喻和故事來表達想法。
+
+<strong>親密關係建議：</strong>在親密關係中需要保持一定的新鮮感和探索空間，與伴侶共同制定冒險計劃可以增進感情。
+
+<strong>情感相容類型：</strong>勾陳型、玄武型、螣蛇型`,
+
+    growth: `<strong>主要成長課題：</strong>學習將創意落地執行，培養持續性和專注力，避免過度分散注意力。需要建立系統性的工作習慣，將靈感轉化為實際成果。
+
+<strong>具體改進方向：</strong>
+• 每天設定具體的執行目標
+• 學習時間管理和優先級排序
+• 建立創意項目的完成儀式
+• 練習專注力訓練和冥想
+• 尋找創意落地的合作夥伴`,
+
+    money: `<strong>財富能量：</strong>財富能量如活水源頭，源源不絕但需要正確引導。適合開創性投資和創新項目。
+
+<strong>適合的理財方式：</strong>新創公司、科技股、創意產業、教育培訓、個人品牌
+
+<strong>金錢卦象解讀：</strong>乾為天卦，象徵創造與開拓。財運如龍騰九天，宜把握創新機會，但需注意風險控制。適合投資新興產業和創意項目。
+
+<strong>財富發展建議：</strong>建議將創意與商業模式結合，尋找可靠的合作夥伴來協助執行，避免過度分散投資。`
   },
   '朱雀': {
-    personality: `朱雀型人格的你，生來就是舞台的焦點，人群中的發光體。`,
-    strengths: `你與生俱來的「溝通魅力」和「超凡感染力」是你最強大的武器。`,
-    career: `你的天賦在於所有需要與「人」打交道的工作。`,
-    relationships: `熱情而投入，重視情感表達和深度連結。`,
-    growth: `平衡情感表達與理性思考，學習獨處和自我反思。`,
-    money: `財富能量如火焰燃燒，熱情旺盛但需要穩定燃料。`
+    personality: `朱雀型人格的你，生來就是舞台的焦點，人群中的發光體。你的內心燃燒著一團熱情的火焰，能夠照亮周圍的每一個角落。
+
+你天生具備優秀的表達能力和情感感染力，能夠輕易地與他人建立深度連結。在社交場合中，你總是能夠敏銳地感知氣氛變化，並適時地帶動情緒。
+
+你的情感豐富而真摯，這讓你成為優秀的傾聽者和支持者。然而，你也需要學習在付出關愛的同時，保護自己的情感能量，避免過度消耗。`,
+
+    strengths: `你與生俱來的「溝通魅力」和「超凡感染力」是你最強大的武器。無論是在職場還是在生活中，你都能夠有效地傳遞想法和激發熱情。
+
+你的情感智慧讓你能夠準確讀懂他人的需求和情緒，這在人際關係和團隊合作中是無價的資產。你能夠創造溫暖包容的環境，讓每個人都感受到被重視。
+
+此外，你的適應性和社交直覺讓你能夠在不同群體中游刃有餘，建立廣泛而深入的人際網絡。`,
+
+    career: `你的天賦在於所有需要與「人」打交道的工作。
+
+<strong>最適職業領域：</strong>
+• 公關與媒體傳播
+• 教育培訓行業
+• 銷售與客戶關係
+• 活動策劃執行
+• 人力資源管理
+
+<strong>職場優勢：</strong>優秀的團隊建設者和激勵者，能夠創造積極的工作氛圍並有效管理客戶關係。
+
+<strong>發展建議：</strong>建議發展公關或培訓相關技能，同時學習情緒管理來保持工作生活平衡。`,
+
+    relationships: `<strong>情感模式：</strong>熱情而投入，重視情感表達和深度連結，需要被關注和認可。在關係中善於營造浪漫氛圍，但也需要得到同等的情感回饋。
+
+<strong>溝通風格：</strong>熱情洋溢且富有感染力，善於用情感語言建立連結。
+
+<strong>親密關係建議：</strong>需要定期的情感交流和深度連結，學習表達真實需求的同時也給予伴侶足夠的關注。
+
+<strong>情感相容類型：</strong>玄武型、白虎型、青龍型`,
+
+    growth: `<strong>主要成長課題：</strong>平衡情感表達與理性思考，學習獨處和自我反思，避免過度依賴外部認可。需要發展內在安全感，建立健康的邊界感。
+
+<strong>具體改進方向：</strong>
+• 建立個人獨處的定期時間
+• 學習情緒日記和自我反思
+• 發展不依賴外部的自我價值
+• 練習設定健康的人際邊界
+• 培養個人興趣和獨立活動`,
+
+    money: `<strong>財富能量：</strong>財富能量如火焰燃燒，熱情旺盛但需要穩定燃料。適合人脈相關和服務性行業。
+
+<strong>適合的理財方式：</strong>服務業、娛樂產業、公關公司、教育機構、社交平台
+
+<strong>金錢卦象解讀：</strong>離為火卦，象徵光明與連結。財運如鳳舞雲端，宜發展人脈資源，但需避免過度消費。適合從事與人相關的行業。
+
+<strong>財富發展建議：</strong>建議利用人脈資源發展事業，建立個人品牌影響力，同時注意財務紀律和儲蓄計劃。`
   },
+  // 其他神獸的詳細分析內容...
   '勾陳': {
-    personality: `勾陳型人格的你，如同大地的守護者，為周圍的一切提供穩定和安全感。`,
+    personality: `勾陳型人格的你，如同大地的守護者，為周圍的一切提供穩定和安全感。你的存在本身就是一種可靠的力量。`,
     strengths: `你最大的優勢在於無與倫比的可靠性和組織能力。`,
     career: `在職業選擇上，你適合需要穩定性和系統思維的領域。`,
     relationships: `在關係中，你提供堅實的支持和長久的承諾。`,
@@ -1028,7 +1109,7 @@ function renderRadar(scores) {
 }
 
 function renderReport(summary, scores) {
-  // 顯示六獸圖 - 使用改進版SVG
+  // 顯示六獸圖
   document.getElementById("beastSVG").innerHTML = beastSVG(summary.top);
   
   // 顯示主型資訊
@@ -1054,133 +1135,37 @@ function renderReport(summary, scores) {
     adviceHTML("養生建議", advice.養生);
 }
 
-// ========== 改進版神獸SVG - 解決iOS列印問題 ==========
+// ========== 神獸SVG ==========
 function beastSVG(beast) {
   const color = "#B6822B";
   const fill = "none";
-  const strokeWidth = "2";
-  
-  const path = d => `<path d='${d}' fill='${fill}' stroke='${color}' stroke-width='${strokeWidth}' stroke-linecap='round' stroke-linejoin='round'/>`;
-  const circle = (cx, cy, r) => `<circle cx='${cx}' cy='${cy}' r='${r}' fill='${fill}' stroke='${color}' stroke-width='${strokeWidth}'/>`;
-  
-  const wrap = content => `
-    <svg viewBox='0 0 120 120' class='beast-svg' xmlns='http://www.w3.org/2000/svg' style="display: block;">
-      <!-- 背景光暈 -->
-      <defs>
-        <radialGradient id="grad${beast}" cx="50%" cy="50%" r="50%" fx="50%" fy="50%">
-          <stop offset="0%" stop-color="rgba(182,130,43,0.2)" />
-          <stop offset="100%" stop-color="rgba(182,130,43,0)" />
-        </radialGradient>
-      </defs>
-      <circle cx="60" cy="60" r="55" fill="url(#grad${beast})" />
-      
-      <!-- 神獸圖形 -->
-      <g transform="translate(60,60)">
-        ${content}
-      </g>
-    </svg>`;
+  const path = d => `<path d='${d}' fill='${fill}' stroke='${color}' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/>`;
+  const wrap = content => `<svg viewBox='0 0 100 100' class='w-full h-auto' xmlns='http://www.w3.org/2000/svg'>
+    <defs><radialGradient id='g' cx='50%' cy='50%' r='60%'>
+      <stop offset='0%' stop-color='rgba(182,130,43,0.25)'/><stop offset='100%' stop-color='rgba(182,130,43,0)'/>
+    </radialGradient></defs><rect width='100' height='100' fill='url(#g)'/>${content}</svg>`;
   
   switch(beast) {
-    case "青龍":
-      return wrap(`
-        <!-- 龍身 -->
-        ${path("M-25,0 C-15,-15 -5,-20 5,-15 C15,-10 20,0 15,10 C10,20 0,25 -10,20 C-20,15 -25,10 -25,0")}
-        <!-- 龍頭 -->
-        ${path("M5,-15 L10,-20 L15,-15 L10,-10 Z")}
-        <!-- 龍角 -->
-        ${path("M8,-18 L5,-25")}
-        ${path("M12,-18 L15,-25")}
-        <!-- 龍尾 -->
-        ${path("M-25,0 L-35,5 L-30,10")}
-        <!-- 龍爪 -->
-        ${path("M-10,5 L-15,10 L-10,15")}
-        ${path("M5,8 L0,13 L5,18")}
-      `);
-      
-    case "朱雀":
-      return wrap(`
-        <!-- 鳥身 -->
-        ${path("M0,-20 C10,-25 20,-20 20,-10 C20,0 10,15 0,20 C-10,15 -20,0 -20,-10 C-20,-20 -10,-25 0,-20")}
-        <!-- 翅膀 -->
-        ${path("M5,-15 L15,-5 L10,5")}
-        ${path("M-5,-15 L-15,-5 L-10,5")}
-        <!-- 頭部 -->
-        ${circle(0,-25,5)}
-        <!-- 尾巴 -->
-        ${path("M0,20 L-10,30 L0,25 L10,30 Z")}
-      `);
-      
-    case "勾陳":
-      return wrap(`
-        <!-- 方形基底 -->
-        ${path("M-20,-20 L20,-20 L20,20 L-20,20 Z")}
-        <!-- 內部結構 -->
-        ${path("M-15,-15 L15,-15")}
-        ${path("M-15,-5 L15,-5")}
-        ${path("M-15,5 L15,5")}
-        ${path("M-15,15 L15,15")}
-        ${path("M-15,-15 L-15,15")}
-        ${path("M0,-15 L0,15")}
-        ${path("M15,-15 L15,15")}
-        <!-- 中心點 -->
-        ${circle(0,0,3)}
-      `);
-      
-    case "螣蛇":
-      return wrap(`
-        <!-- 蛇身 -->
-        ${path("M-20,-10 C-10,-20 10,-20 20,-10 C10,0 0,10 -10,10 C-20,10 -25,0 -20,-10")}
-        <!-- 蛇頭 -->
-        ${circle(20,-10,5)}
-        <!-- 眼睛 -->
-        ${circle(18,-12,1)}
-        <!-- 蛇信 -->
-        ${path("M22,-8 L25,-5 L22,-6")}
-        <!-- 身體紋路 -->
-        ${path("M-10,-15 L-5,-10")}
-        ${path("M5,-12 L10,-8")}
-        ${path("M0,0 L5,5")}
-      `);
-      
-    case "白虎":
-      return wrap(`
-        <!-- 虎身 -->
-        ${path("M-25,-5 C-15,-15 15,-15 25,-5 C15,5 -15,5 -25,-5")}
-        <!-- 虎頭 -->
-        ${circle(0,-20,8)}
-        <!-- 耳朵 -->
-        ${path("M-5,-25 L-10,-30 L-3,-27")}
-        ${path("M5,-25 L10,-30 L3,-27")}
-        <!-- 眼睛 -->
-        ${circle(-3,-22,1.5)}
-        ${circle(3,-22,1.5)}
-        <!-- 條紋 -->
-        ${path("M-15,-10 L-20,0")}
-        ${path("M15,-10 L20,0")}
-        ${path("M-5,0 L-10,8")}
-        ${path("M5,0 L10,8")}
-      `);
-      
-    case "玄武":
-      return wrap(`
-        <!-- 龜殼 -->
-        ${path("M0,-20 C15,-10 15,10 0,20 C-15,10 -15,-10 0,-20")}
-        <!-- 頭部 -->
-        ${circle(0,-25,5)}
-        <!-- 腳 -->
-        ${path("M-15,-5 L-20,0 L-15,5")}
-        ${path("M15,-5 L20,0 L15,5")}
-        ${path("M-10,15 L-15,20 L-10,25")}
-        ${path("M10,15 L15,20 L10,25")}
-        <!-- 尾巴 -->
-        ${path("M0,20 L0,25 L-5,23 L0,20")}
-        <!-- 殼紋 -->
-        ${circle(0,0,12)}
-        ${circle(0,0,6)}
-      `);
-      
-    default: 
-      return wrap(`<text x="0" y="0" text-anchor="middle" fill="${color}" font-size="12" font-family="Arial">${beast}</text>`);
+    case "青龍": return wrap(
+      path("M15 60 C25 40, 45 35, 55 45 C65 55, 75 35, 85 45 M45 45 q5 -12 16 -10 m-6 6 l6 4 m-36 20 q10 -6 18 2 m12 -2 q8 -6 18 2") +
+      path("M30 70 q10 8 20 0 q10 -8 20 0")
+    );
+    case "朱雀": return wrap(
+      path("M20 60 q15 -30 30 -30 q15 0 30 30 M50 30 l0 12 M35 55 q15 -8 30 0 M25 62 q10 8 25 8 q15 0 25 -8")
+    );
+    case "勾陳": return wrap(
+      path("M20 70 h60 v-20 h-60 v20 z M30 50 v-10 h40 v10 M35 65 h10 M55 65 h10")
+    );
+    case "螣蛇": return wrap(
+      path("M20 70 q20 -30 40 -10 q10 8 20 -2 q-10 20 -30 10 q-10 -6 -30 2 M60 48 q6 -6 12 0")
+    );
+    case "白虎": return wrap(
+      path("M20 65 q15 -20 30 -20 q15 0 30 20 M30 60 h40 M35 70 h30 M38 52 l4 6 M58 52 l-4 6")
+    );
+    case "玄武": return wrap(
+      path("M30 65 q20 15 40 0 q5 -12 -15 -22 q-20 10 -25 22 M55 50 q10 -8 20 2 M25 55 q-8 -6 -10 6")
+    );
+    default: return wrap("");
   }
 }
 
