@@ -506,6 +506,24 @@
         </div>
       </div>
       
+      <!-- AI API 設定 -->
+      <div>
+        <label class="font-semibold text-slate-700 block mb-2">AI 分析設定</label>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm mb-1">API Key：</label>
+            <input type="password" id="apiKey" class="w-full p-2 border rounded" placeholder="輸入 OpenAI API Key">
+          </div>
+          <div>
+            <label class="block text-sm mb-1">AI 模型：</label>
+            <select id="aiModel" class="w-full p-2 border rounded">
+              <option value="gpt-4">GPT-4</option>
+              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      
       <div>
         <label class="font-semibold text-slate-700 block mb-2">選擇色系主題：</label>
         <div class="grid grid-cols-2 gap-3">
@@ -924,56 +942,9 @@ const superheroData = {
   }
 };
 
-// ========== AI分析資料庫 ==========
-const aiAnalysisData = {
-  '青龍': {
-    personality: `青龍型人格的你，內心蘊藏著一股生生不息的創造活水。你的思維如同春雷破曉，總能在平凡中看見不凡，在框架外找到新路。`,
-    strengths: `你最大的優勢在於那無人能及的「靈感爆發力」與「靈活應變性」。當團隊陷入僵局時，你總能提出石破天驚的觀點。`,
-    career: `<strong>最適職業領域：</strong>創新創業、產品設計、市場策略規劃、創意內容製作`,
-    relationships: `<strong>情感模式：</strong>在關係中追求新鮮感和成長，需要足夠的個人空間和探索自由。`,
-    growth: `<strong>主要成長課題：</strong>學習將創意落地執行，培養持續性和專注力。`,
-    money: `<strong>財富能量：</strong>財富能量如活水源頭，源源不絕但需要正確引導。`
-  },
-  '朱雀': {
-    personality: `朱雀型人格的你，生來就是舞台的焦點，人群中的發光體。你的內心燃燒著一團熱情的火焰。`,
-    strengths: `你與生俱來的「溝通魅力」和「超凡感染力」是你最強大的武器。`,
-    career: `<strong>最適職業領域：</strong>公關與媒體傳播、教育培訓、銷售與客戶關係`,
-    relationships: `<strong>情感模式：</strong>熱情而投入，重視情感表達和深度連結。`,
-    growth: `<strong>主要成長課題：</strong>平衡情感表達與理性思考，學習獨處和自我反思。`,
-    money: `<strong>財富能量：</strong>財富能量如火焰燃燒，熱情旺盛但需要穩定燃料。`
-  },
-  '勾陳': {
-    personality: `勾陳型人格的你，如同大地的守護者，為周圍的一切提供穩定和安全感。`,
-    strengths: `你最大的優勢在於無與倫比的可靠性和組織能力。`,
-    career: `<strong>最適職業領域：</strong>項目管理、品質控制、財務與會計、系統分析`,
-    relationships: `<strong>情感模式：</strong>在關係中提供堅實的支持和長久的承諾。`,
-    growth: `<strong>主要成長課題：</strong>學習接受變化和不確定性，培養靈活性。`,
-    money: `<strong>財富能量：</strong>財富能量穩定增長，適合長期投資策略。`
-  },
-  '螣蛇': {
-    personality: `螣蛇型人格的你，擁有敏銳的直覺和洞察力，能夠感知他人未說出口的需求。`,
-    strengths: `你最大的優勢在於人際洞察和時機把握能力。`,
-    career: `<strong>最適職業領域：</strong>人力資源、心理諮詢、商業談判、市場研究`,
-    relationships: `<strong>情感模式：</strong>在關係中追求深度理解和心靈契合。`,
-    growth: `<strong>主要成長課題：</strong>需要學習建立明確的個人邊界，培養果斷力。`,
-    money: `<strong>財富能量：</strong>財富能量靈活多變，適合時機性投資。`
-  },
-  '白虎': {
-    personality: `白虎型人格的你，行動力強且目標明確，具有天生的領導氣質。`,
-    strengths: `你最大的優勢在於快速決策和高效執行。`,
-    career: `<strong>最適職業領域：</strong>企業管理、緊急救援、銷售與業務開發`,
-    relationships: `<strong>情感模式：</strong>在關係中直接而保護，重視行動證明。`,
-    growth: `<strong>主要成長課題：</strong>需要培養耐心和團隊合作能力。`,
-    money: `<strong>財富能量：</strong>財富能量迅猛，適合主動投資策略。`
-  },
-  '玄武': {
-    personality: `玄武型人格的你，深思熟慮且理性冷靜，具有優秀的分析能力。`,
-    strengths: `你最大的優勢在於深度思考和策略規劃。`,
-    career: `<strong>最適職業領域：</strong>研究開發、數據分析、戰略規劃、技術研發`,
-    relationships: `<strong>情感模式：</strong>在關係中追求智慧碰撞和深度交流。`,
-    growth: `<strong>主要成長課題：</strong>需要加強行動力和情感表達。`,
-    money: `<strong>財富能量：</strong>財富能量深藏，適合長期智慧投資。`
-  }
+// ========== AI分析配置 ==========
+const AIConfig = {
+  endpoint: 'https://api.openai.com/v1/chat/completions'
 };
 
 // ========== 分頁模式變數 ==========
@@ -1128,6 +1099,8 @@ function initializeSettings() {
   document.getElementById('hueValue').textContent = savedSettings.hue || 40;
   document.getElementById('pageMode').value = savedSettings.pageMode || 'multi10';
   document.getElementById('reportFontSize').value = savedSettings.reportFontSize || 'medium';
+  document.getElementById('apiKey').value = savedSettings.apiKey || '';
+  document.getElementById('aiModel').value = savedSettings.aiModel || 'gpt-4';
   
   // 同步分頁模式選擇器
   document.getElementById('pageModeSelect').value = savedSettings.pageMode || 'multi10';
@@ -1321,7 +1294,9 @@ function saveSettings() {
     theme: document.getElementById('themeSelect').value,
     hue: document.getElementById('hueSlider').value,
     pageMode: document.getElementById('pageMode').value,
-    reportFontSize: document.getElementById('reportFontSize').value
+    reportFontSize: document.getElementById('reportFontSize').value,
+    apiKey: document.getElementById('apiKey').value,
+    aiModel: document.getElementById('aiModel').value
   };
   
   localStorage.setItem('reportContactSettings', JSON.stringify(settings));
@@ -1411,24 +1386,21 @@ function showSuperhero(beastType) {
 }
 
 // ========== AI分析功能 ==========
-function fillAIAnalysis(beastType) {
-  const data = aiAnalysisData[beastType] || aiAnalysisData['青龍'];
-  
-  document.getElementById("ai-personality").innerHTML = data.personality;
-  document.getElementById("ai-strengths").innerHTML = data.strengths;
-  document.getElementById("ai-career").innerHTML = data.career;
-  document.getElementById("ai-relationships").innerHTML = data.relationships;
-  document.getElementById("ai-growth").innerHTML = data.growth;
-  document.getElementById("ai-money").innerHTML = data.money;
-}
-
-function generateAIAnalysis() {
+async function generateAIAnalysis() {
   const saved = JSON.parse(localStorage.getItem("shen-shou-result") || "null");
   if (!saved) {
     alert("⚠️請先完成測驗。");
     return;
   }
+
+  const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
+  const apiKey = savedSettings.apiKey;
   
+  if (!apiKey) {
+    alert("⚠️請先在設定中輸入 OpenAI API Key");
+    return;
+  }
+
   const loadingEl = document.getElementById("ai-loading");
   const contentEl = document.getElementById("ai-analysis-content");
   const btnAI = document.getElementById("btnAI");
@@ -1438,18 +1410,147 @@ function generateAIAnalysis() {
   contentEl.style.display = "none";
   btnRetry.style.display = "none";
   btnAI.disabled = true;
-  
-  simulateProgress();
-  
-  // 模擬AI分析過程
-  setTimeout(() => {
-    fillAIAnalysis(saved.summary.top);
+
+  try {
+    // 顯示分析進度
+    simulateProgress();
     
+    // 生成個性化提示詞
+    const prompt = generateAnalysisPrompt(saved);
+    
+    // 呼叫 OpenAI API
+    const analysis = await callOpenAI(apiKey, prompt, savedSettings.aiModel || 'gpt-4');
+    
+    // 解析並顯示分析結果
+    displayAIAnalysis(analysis);
+    
+  } catch (error) {
+    console.error('AI分析錯誤:', error);
+    alert('AI分析失敗：' + error.message);
+  } finally {
     loadingEl.style.display = "none";
     contentEl.style.display = "block";
     btnRetry.style.display = "inline-block";
     btnAI.disabled = false;
-  }, 3000);
+  }
+}
+
+// ========== 生成分析提示詞 ==========
+function generateAnalysisPrompt(saved) {
+  const { scores, summary, gender } = saved;
+  const genderText = gender === 'male' ? '男性' : gender === 'female' ? '女性' : '其他';
+  
+  return `你是一位資深心理分析師和命理專家，請根據以下測驗結果提供深度個人化分析：
+
+【基本資訊】
+• 性別：${genderText}
+• 主型：${summary.top}${summary.variant}型
+• 能量分數：${Object.entries(scores).map(([beast, score]) => `${beast}:${score}`).join(', ')}
+
+【測驗結果詳情】
+${Object.entries(scores).map(([beast, score]) => {
+  const questions = BANK.filter(q => q.b === beast).map(q => q.t);
+  return `${beast}型能量（${score}分）相關特質：${questions.join('；')}`;
+}).join('\n')}
+
+【分析要求】
+請提供以下四個面向的深度分析，每個面向至少300字，要具體、深入且具實用性：
+
+1. 【人格特質分析】
+   - 核心性格特徵
+   - 思考模式與行為傾向
+   - 潛在的心理動機
+
+2. 【能量優勢分析】  
+   - 主要優勢能力
+   - 天賦潛能開發
+   - 如何在生活中發揮最大效益
+
+3. 【成長發展建議】
+   - 職場發展路徑與適合領域
+   - 人際關係經營建議
+   - 個人成長與突破方向
+
+4. 【五行金錢卦解析】
+   - 財富能量流動分析
+   - 適合的投資理財方式
+   - 金錢卦象與運勢解讀
+
+請用專業但親切的語氣，結合心理學、命理學和實際生活應用，提供真正有價值的個人化分析。`;
+}
+
+// ========== 呼叫 OpenAI API ==========
+async function callOpenAI(apiKey, prompt, model) {
+  const response = await fetch(AIConfig.endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: model,
+      messages: [
+        {
+          role: 'system',
+          content: '你是一位融合心理學、命理學和個人發展的資深分析師，擅長提供深度、實用且具啟發性的個人化分析。'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      max_tokens: 4000,
+      temperature: 0.7
+    })
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.error?.message || 'API請求失敗');
+  }
+
+  const data = await response.json();
+  return data.choices[0].message.content;
+}
+
+// ========== 顯示AI分析結果 ==========
+function displayAIAnalysis(analysis) {
+  // 簡單解析分析內容並分配到對應區塊
+  // 這裡可以根據實際的AI回應格式進行更複雜的解析
+  const sections = analysis.split(/(?=【[^】]+】)/g);
+  
+  sections.forEach(section => {
+    if (section.includes('人格特質分析')) {
+      document.getElementById("ai-personality").innerHTML = formatAIContent(section);
+    } else if (section.includes('能量優勢分析')) {
+      document.getElementById("ai-strengths").innerHTML = formatAIContent(section);
+    } else if (section.includes('職場發展')) {
+      document.getElementById("ai-career").innerHTML = formatAIContent(section);
+    } else if (section.includes('人際關係')) {
+      document.getElementById("ai-relationships").innerHTML = formatAIContent(section);
+    } else if (section.includes('個人成長')) {
+      document.getElementById("ai-growth").innerHTML = formatAIContent(section);
+    } else if (section.includes('五行金錢卦解析')) {
+      document.getElementById("ai-money").innerHTML = formatAIContent(section);
+    }
+  });
+}
+
+// ========== 格式化AI內容 ==========
+function formatAIContent(content) {
+  // 移除標題，保留內容
+  content = content.replace(/【[^】]+】/, '').trim();
+  
+  // 簡單的格式化處理
+  return content.split('\n')
+    .filter(line => line.trim())
+    .map(line => {
+      if (line.match(/^[•\-]/)) {
+        return `<div style="margin: 8px 0; padding-left: 10px;">${line}</div>`;
+      }
+      return `<p style="margin: 12px 0; line-height: 1.6;">${line}</p>`;
+    })
+    .join('');
 }
 
 function simulateProgress() {
