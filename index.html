@@ -20,6 +20,19 @@
       border-radius: 8px;
     }
     
+    .page-controls-bottom {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 20px 0 10px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 8px;
+      position: sticky;
+      bottom: 10px;
+      z-index: 10;
+    }
+    
     .font-controls {
       display: flex;
       align-items: center;
@@ -523,7 +536,7 @@
   <form id="form" class="card p-4 mb-4 no-print">
     <h2 class="font-bold mb-3">📋 請回答下列30題（1＝不同意，5＝非常同意）</h2>
     
-    <!-- 分頁控制 -->
+    <!-- 分頁控制 - 上方 -->
     <div class="page-controls no-print">
       <div class="font-controls">
         <label for="pageModeSelect" class="text-sm font-medium">顯示模式：</label>
@@ -561,6 +574,15 @@
     <!-- 分頁容器 -->
     <div id="questionPages" class="space-y-3">
       <!-- 題目將通過JavaScript動態生成 -->
+    </div>
+    
+    <!-- 分頁控制 - 下方 -->
+    <div class="page-controls-bottom no-print">
+      <div class="pagination-buttons flex gap-2">
+        <button type="button" id="prevPageBottom" class="px-4 py-2 border rounded hover:bg-gray-50 transition" disabled>上一頁</button>
+        <span id="pageIndicatorBottom" class="px-4 py-2 text-sm font-medium">第 1 頁，共 3 頁</span>
+        <button type="button" id="nextPageBottom" class="px-4 py-2 border rounded hover:bg-gray-50 transition">下一頁</button>
+      </div>
     </div>
     
     <!-- 進度顯示 -->
@@ -742,6 +764,58 @@ const BANK = [
   {t: "我習慣冷靜看待問題。", b: "玄武"}
 ];
 
+// ========== AI分析資料庫 ==========
+const aiAnalysisData = {
+  '青龍': {
+    personality: `青龍型人格的你，內心蘊藏著一股生生不息的創造活水。你的思維如同春雷破曉，總能在平凡中看見不凡，在框架外找到新路。`,
+    strengths: `你最大的優勢在於那無人能及的「靈感爆發力」與「靈活應變性」。當團隊陷入僵局時，你總能提出石破天驚的觀點。`,
+    career: `<strong>最適職業領域：</strong>創新創業、產品設計、市場策略規劃、創意內容製作`,
+    relationships: `<strong>情感模式：</strong>在關係中追求新鮮感和成長，需要足夠的個人空間和探索自由。`,
+    growth: `<strong>主要成長課題：</strong>學習將創意落地執行，培養持續性和專注力。`,
+    money: `<strong>財富能量：</strong>財富能量如活水源頭，源源不絕但需要正確引導。`
+  },
+  '朱雀': {
+    personality: `朱雀型人格的你，生來就是舞台的焦點，人群中的發光體。你的內心燃燒著一團熱情的火焰。`,
+    strengths: `你與生俱來的「溝通魅力」和「超凡感染力」是你最強大的武器。`,
+    career: `<strong>最適職業領域：</strong>公關與媒體傳播、教育培訓、銷售與客戶關係`,
+    relationships: `<strong>情感模式：</strong>熱情而投入，重視情感表達和深度連結。`,
+    growth: `<strong>主要成長課題：</strong>平衡情感表達與理性思考，學習獨處和自我反思。`,
+    money: `<strong>財富能量：</strong>財富能量如火焰燃燒，熱情旺盛但需要穩定燃料。`
+  },
+  '勾陳': {
+    personality: `勾陳型人格的你，如同大地的守護者，為周圍的一切提供穩定和安全感。`,
+    strengths: `你最大的優勢在於無與倫比的可靠性和組織能力。`,
+    career: `<strong>最適職業領域：</strong>項目管理、品質控制、財務與會計、系統分析`,
+    relationships: `<strong>情感模式：</strong>在關係中提供堅實的支持和長久的承諾。`,
+    growth: `<strong>主要成長課題：</strong>學習接受變化和不確定性，培養靈活性。`,
+    money: `<strong>財富能量：</strong>財富能量穩定增長，適合長期投資策略。`
+  },
+  '螣蛇': {
+    personality: `螣蛇型人格的你，擁有敏銳的直覺和洞察力，能夠感知他人未說出口的需求。`,
+    strengths: `你最大的優勢在於人際洞察和時機把握能力。`,
+    career: `<strong>最適職業領域：</strong>人力資源、心理諮詢、商業談判、市場研究`,
+    relationships: `<strong>情感模式：</strong>在關係中追求深度理解和心靈契合。`,
+    growth: `<strong>主要成長課題：</strong>需要學習建立明確的個人邊界，培養果斷力。`,
+    money: `<strong>財富能量：</strong>財富能量靈活多變，適合時機性投資。`
+  },
+  '白虎': {
+    personality: `白虎型人格的你，行動力強且目標明確，具有天生的領導氣質。`,
+    strengths: `你最大的優勢在於快速決策和高效執行。`,
+    career: `<strong>最適職業領域：</strong>企業管理、緊急救援、銷售與業務開發`,
+    relationships: `<strong>情感模式：</strong>在關係中直接而保護，重視行動證明。`,
+    growth: `<strong>主要成長課題：</strong>需要培養耐心和團隊合作能力。`,
+    money: `<strong>財富能量：</strong>財富能量迅猛，適合主動投資策略。`
+  },
+  '玄武': {
+    personality: `玄武型人格的你，深思熟慮且理性冷靜，具有優秀的分析能力。`,
+    strengths: `你最大的優勢在於深度思考和策略規劃。`,
+    career: `<strong>最適職業領域：</strong>研究開發、數據分析、戰略規劃、技術研發`,
+    relationships: `<strong>情感模式：</strong>在關係中追求智慧碰撞和深度交流。`,
+    growth: `<strong>主要成長課題：</strong>需要加強行動力和情感表達。`,
+    money: `<strong>財富能量：</strong>財富能量深藏，適合長期智慧投資。`
+  }
+};
+
 // ========== 分頁模式變數 ==========
 let currentPage = 0;
 let questionsPerPage = 10; // 預設10題一頁
@@ -850,18 +924,27 @@ function initializeOptionCards() {
 
 // ========== 更新分頁指示器 ==========
 function updatePageIndicator() {
+  const pageMode = document.getElementById('pageModeSelect').value;
+  
+  // 更新上方指示器
   document.getElementById('pageIndicator').textContent = `${currentPage + 1}/${totalPages}`;
+  
+  // 更新下方指示器
+  document.getElementById('pageIndicatorBottom').textContent = `第 ${currentPage + 1} 頁，共 ${totalPages} 頁`;
   
   // 更新按鈕狀態
   document.getElementById('prevPage').disabled = currentPage === 0;
   document.getElementById('nextPage').disabled = currentPage === totalPages - 1;
+  document.getElementById('prevPageBottom').disabled = currentPage === 0;
+  document.getElementById('nextPageBottom').disabled = currentPage === totalPages - 1;
   
   // 如果是全部顯示模式，隱藏分頁控制
-  const pageMode = document.getElementById('pageModeSelect').value;
   if (pageMode === 'all') {
     document.querySelector('.pagination-buttons').style.display = 'none';
+    document.querySelector('.page-controls-bottom').style.display = 'none';
   } else {
     document.querySelector('.pagination-buttons').style.display = 'flex';
+    document.querySelector('.page-controls-bottom').style.display = 'flex';
   }
 }
 
@@ -960,24 +1043,24 @@ function initializeEventListeners() {
     applyReportFontSize(document.getElementById('reportFontSizeSelect').value);
   });
   
-  // 上一頁按鈕
+  // 上一頁按鈕 (上方)
   document.getElementById('prevPage').addEventListener('click', function() {
-    if (currentPage > 0) {
-      document.getElementById(`page-${currentPage}`).classList.remove('active');
-      currentPage--;
-      document.getElementById(`page-${currentPage}`).classList.add('active');
-      updatePageIndicator();
-    }
+    goToPreviousPage();
   });
   
-  // 下一頁按鈕
+  // 下一頁按鈕 (上方)
   document.getElementById('nextPage').addEventListener('click', function() {
-    if (currentPage < totalPages - 1) {
-      document.getElementById(`page-${currentPage}`).classList.remove('active');
-      currentPage++;
-      document.getElementById(`page-${currentPage}`).classList.add('active');
-      updatePageIndicator();
-    }
+    goToNextPage();
+  });
+  
+  // 上一頁按鈕 (下方)
+  document.getElementById('prevPageBottom').addEventListener('click', function() {
+    goToPreviousPage();
+  });
+  
+  // 下一頁按鈕 (下方)
+  document.getElementById('nextPageBottom').addEventListener('click', function() {
+    goToNextPage();
   });
   
   // 測驗表單提交
@@ -1010,6 +1093,29 @@ function initializeEventListeners() {
   document.getElementById('btnShare').addEventListener('click', function() {
     shareResult();
   });
+}
+
+// ========== 分頁導航函數 ==========
+function goToPreviousPage() {
+  if (currentPage > 0) {
+    document.getElementById(`page-${currentPage}`).classList.remove('active');
+    currentPage--;
+    document.getElementById(`page-${currentPage}`).classList.add('active');
+    updatePageIndicator();
+    // 滾動到頂部
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
+
+function goToNextPage() {
+  if (currentPage < totalPages - 1) {
+    document.getElementById(`page-${currentPage}`).classList.remove('active');
+    currentPage++;
+    document.getElementById(`page-${currentPage}`).classList.add('active');
+    updatePageIndicator();
+    // 滾動到頂部
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
 
 // ========== 報表字體大小應用 ==========
@@ -1120,11 +1226,73 @@ function submitQuiz() {
   showSuperhero(summary.top);
 }
 
-// ========== 其餘函數保持不變 ==========
-// 由於篇幅限制，這裡只顯示修改的部分，其餘函數保持原樣
-// 請將原本程式中的其餘函數複製到這裡
+// ========== AI分析功能 ==========
+function fillAIAnalysis(beastType) {
+  const data = aiAnalysisData[beastType] || aiAnalysisData['青龍'];
+  
+  document.getElementById("ai-personality").innerHTML = data.personality;
+  document.getElementById("ai-strengths").innerHTML = data.strengths;
+  document.getElementById("ai-career").innerHTML = data.career;
+  document.getElementById("ai-relationships").innerHTML = data.relationships;
+  document.getElementById("ai-growth").innerHTML = data.growth;
+  document.getElementById("ai-money").innerHTML = data.money;
+}
 
-// 簡化版本的其他函數（實際使用時請替換為完整版本）
+function generateAIAnalysis() {
+  const saved = JSON.parse(localStorage.getItem("shen-shou-result") || "null");
+  if (!saved) {
+    alert("⚠️請先完成測驗。");
+    return;
+  }
+  
+  const loadingEl = document.getElementById("ai-loading");
+  const contentEl = document.getElementById("ai-analysis-content");
+  const btnAI = document.getElementById("btnAI");
+  const btnRetry = document.getElementById("btnRetry");
+  
+  loadingEl.style.display = "block";
+  contentEl.style.display = "none";
+  btnRetry.style.display = "none";
+  btnAI.disabled = true;
+  
+  simulateProgress();
+  
+  // 模擬AI分析過程
+  setTimeout(() => {
+    fillAIAnalysis(saved.summary.top);
+    
+    loadingEl.style.display = "none";
+    contentEl.style.display = "block";
+    btnRetry.style.display = "inline-block";
+    btnAI.disabled = false;
+  }, 3000);
+}
+
+function simulateProgress() {
+  const progressBar = document.getElementById("progress-bar");
+  const loadingStep = document.getElementById("loading-step");
+  const steps = [
+    {percent: 20, text: "分析人格特質..."},
+    {percent: 40, text: "解析能量分布..."},
+    {percent: 60, text: "生成發展建議..."},
+    {percent: 80, text: "計算五行金錢卦..."},
+    {percent: 95, text: "最終整合報告..."},
+    {percent: 100, text: "分析完成！"}
+  ];
+  
+  let currentStep = 0;
+  const interval = setInterval(() => {
+    if (currentStep < steps.length) {
+      progressBar.style.width = steps[currentStep].percent + "%";
+      loadingStep.textContent = steps[currentStep].text;
+      currentStep++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 500);
+}
+
+// ========== 其餘函數保持不變 ==========
 function summarize(scores) {
   const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
   const top = entries[0];
@@ -1231,12 +1399,6 @@ function generateAdvice(mainBeast, secondaryBeast, scores, variant) {
 function showSuperhero(beastType) {
   // 簡化版的超人顯示
   document.getElementById("superheroReport").style.display = "block";
-}
-
-function generateAIAnalysis() {
-  // 簡化版的AI分析
-  document.getElementById("ai-personality").innerHTML = "AI分析內容...";
-  document.getElementById("aiReport").style.display = "block";
 }
 
 function updatePrintHeader() {
