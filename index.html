@@ -125,6 +125,10 @@
             overflow: hidden;
             border: 3px solid var(--accent);
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            background: linear-gradient(135deg, #f8f9fa, #ffffff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .superhero-image {
@@ -198,6 +202,23 @@
             padding-bottom: 15px;
             page-break-before: always;
         }
+
+        .color-preview {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .color-sample {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            border: 2px solid #e5e7eb;
+            cursor: pointer;
+        }
+        .color-sample.active {
+            border-color: #333;
+            transform: scale(1.1);
+        }
         
         @media print {
             .no-print { display: none !important; }
@@ -243,23 +264,71 @@
         <form id="reportSettingsForm" class="card p-4 mb-4 no-print slide-toggle hidden">
             <h2 class="font-bold mb-3">⚙️ 報表資訊設定</h2>
             <div class="space-y-4 text-sm">
-                <div class="grid grid-cols-2 gap-3">
+                <div class="flex items-center gap-4">
                     <div>
-                        <label class="block text-sm mb-1">題目顯示：</label>
-                        <select id="pageMode" class="w-full p-2 border rounded">
-                            <option value="single">單題模式</option>
-                            <option value="multi10" selected>10題模式</option>
-                            <option value="all">全部顯示</option>
-                        </select>
+                        <label for="qrCodeUploader" class="font-semibold text-slate-700 block mb-1">上傳 QR Code 圖片：</label>
+                        <input type="file" id="qrCodeUploader" accept="image/*" class="text-slate-600">
                     </div>
                     <div>
-                        <label class="block text-sm mb-1">報表字體大小：</label>
-                        <select id="reportFontSize" class="w-full p-2 border rounded">
-                            <option value="small">小</option>
-                            <option value="medium" selected>中</option>
-                            <option value="large">大</option>
-                            <option value="xlarge">特大</option>
-                        </select>
+                        <label class="font-semibold text-slate-700 block mb-1">圖片預覽：</label>
+                        <img id="qrCodePreview" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='10' fill='%236b7280'%3EQR Code%3C/text%3E%3C/svg%3E" alt="QR Code 預覽" class="w-20 h-20 border rounded p-1 bg-white object-contain">
+                    </div>
+                </div>
+                <div>
+                    <label for="contactTitle" class="font-semibold text-slate-700">聯絡標題：</label>
+                    <input type="text" id="contactTitle" class="w-full mt-1 p-2 border rounded" value="掃碼預約一對一諮詢">
+                </div>
+                <div>
+                    <label for="contactLine1" class="font-semibold text-slate-700">聯絡資訊 (第一行)：</label>
+                    <input type="text" id="contactLine1" class="w-full mt-1 p-2 border rounded" value="Line ID: @immortalguiide">
+                </div>
+                <div>
+                    <label for="contactLine2" class="font-semibold text-slate-700">聯絡資訊 (第二行)：</label>
+                    <input type="text" id="contactLine2" class="w-full mt-1 p-2 border rounded" value="專業諮詢預約">
+                </div>
+                
+                <!-- 分頁模式和字體大小設定 -->
+                <div>
+                    <label class="font-semibold text-slate-700 block mb-2">測驗顯示模式：</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm mb-1">題目顯示：</label>
+                            <select id="pageMode" class="w-full p-2 border rounded">
+                                <option value="single">單題模式</option>
+                                <option value="multi10" selected>10題模式</option>
+                                <option value="all">全部顯示</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">報表字體大小：</label>
+                            <select id="reportFontSize" class="w-full p-2 border rounded">
+                                <option value="small">小</option>
+                                <option value="medium" selected>中</option>
+                                <option value="large">大</option>
+                                <option value="xlarge">特大</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="font-semibold text-slate-700 block mb-2">選擇色系主題：</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm mb-1">主要色系：</label>
+                            <select id="themeSelect" class="w-full p-2 border rounded">
+                                <option value="warm">暖色系</option>
+                                <option value="cool">冷色系</option>
+                                <option value="nature">自然系</option>
+                                <option value="modern">現代系</option>
+                                <option value="classic">經典系</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-1">色調調整：</label>
+                            <input type="range" id="hueSlider" min="0" max="360" value="40" class="w-full slider">
+                            <div class="text-xs text-gray-500 mt-1">色調值: <span id="hueValue">40</span>°</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -342,13 +411,32 @@
             <button type="button" id="applyFontSize" class="px-3 py-1 bg-blue-600 text-white rounded text-sm hover:bg-blue-700 transition">套用</button>
         </div>
 
-        <!-- 列印標頭 -->
+        <!-- 改善的列印標頭 -->
         <div class="print-header">
+            <div class="print-header-top">
+                <div class="header-left">
+                    <div class="h-16 w-16 rounded bg-amber-500 flex items-center justify-center text-white font-bold text-2xl">仙</div>
+                    <div class="logo-text">
+                        <div class="print-logo-title">仙人指路占卜研究學會</div>
+                        <div class="print-logo-subtitle">專業命理諮詢服務</div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <div class="print-qrcode-title" id="print-qrcode-title">掃碼預約一對一諮詢</div>
+                    <div class="print-qrcode-subtitle" id="print-qrcode-subtitle">Line ID: @immortalguiide</div>
+                    <img id="print-qrcode-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80' viewBox='0 0 80 80'%3E%3Crect width='80' height='80' fill='%23f3f4f6'/%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Arial' font-size='10' fill='%236b7280'%3EQR Code%3C/text%3E%3C/svg%3E" alt="QR Code" class="print-qrcode-img">
+                </div>
+            </div>
+            
+            <div class="accent-bar"></div>
+            
             <div class="header-title-container">
                 <h1 class="report-main-title">仙人指路神獸七十二型人格</h1>
                 <p class="report-subtitle">個人化深度分析報告</p>
                 <div class="print-date">報告生成時間：<span id="report-date"></span></div>
             </div>
+            
+            <div class="accent-bar"></div>
         </div>
 
         <!-- 測驗結果 -->
@@ -387,9 +475,7 @@
             <h2 class="font-bold mb-2">🦸‍♂️ 你的神獸超人身分</h2>
             <div id="superhero-display" class="superhero-card">
                 <div class="superhero-image-container">
-                    <div class="beast-simple" id="superhero-beast">
-                        <!-- 神獸名稱將通過JavaScript動態生成 -->
-                    </div>
+                    <img id="superhero-image" src="" alt="神獸超人圖片" class="superhero-image">
                 </div>
                 <div id="superhero-name" class="superhero-title"></div>
                 <div id="superhero-ability" class="superhero-ability"></div>
@@ -442,8 +528,9 @@
 
         <footer class="text-center text-xs text-slate-500 mt-6 no-print">
             <div class="flex justify-center items-center gap-4 mb-1">
-                <span>© 2025 仙人指路占卜研究學會</span><span>|</span><span>測驗僅供覺察與教學用途</span>
+                <span>© 2025 仙人指路占卜研究學會</span><span>|</span><span>Line: @immortalguiide</span>
             </div>
+            <p>測驗僅供覺察與教學用途</p>
         </footer>
     </main>
 
@@ -495,21 +582,24 @@
                     ability:'🦸‍♂️ 超能力：靈感爆發 + 快速應變 + 突破框架', 
                     mission:'🎯 專屬任務：創新專案發起人、危機處理專家、新領域開拓者', 
                     localName:'台灣點子王', 
-                    description:'你就像台灣的創新引擎，總能想出讓人驚艷的點子！'
+                    description:'你就像台灣的創新引擎，總能想出讓人驚艷的點子！',
+                    image: 'https://via.placeholder.com/150x150/4F46E5/FFFFFF?text=🐉'
                 },
                 female: { 
                     name:'創意飛龍女俠', 
                     ability:'🦸‍♀️ 超能力：靈感爆發 + 直覺洞察 + 跨界融合', 
                     mission:'🎯 專屬任務：創意策劃師、團隊協調者、美感引導者', 
                     localName:'台灣創意女神', 
-                    description:'你是台灣的創意女神，總能將靈感轉化為動人的作品！'
+                    description:'你是台灣的創意女神，總能將靈感轉化為動人的作品！',
+                    image: 'https://via.placeholder.com/150x150/7C3AED/FFFFFF?text=🐉'
                 },
                 other: { 
                     name:'創意飛龍使者', 
                     ability:'🦸 超能力：靈感爆發 + 多元視角 + 跨界連結', 
                     mission:'🎯 專屬任務：創意橋樑、多元文化融合者、創新催化劑', 
                     localName:'台灣創意大使', 
-                    description:'你是台灣的創意大使，用多元視角連結不同領域！'
+                    description:'你是台灣的創意大使，用多元視角連結不同領域！',
+                    image: 'https://via.placeholder.com/150x150/059669/FFFFFF?text=🐉'
                 }
             },
             '朱雀': {
@@ -518,21 +608,24 @@
                     ability:'🦸‍♂️ 超能力：感染力場 + 溝通大師 + 激勵光環', 
                     mission:'🎯 專屬任務：團隊士氣充電站、公關溝通達人、教育推廣先鋒', 
                     localName:'台灣熱情大使', 
-                    description:'你是台灣的人氣王，用熱情感染身邊的每一個人！'
+                    description:'你是台灣的人氣王，用熱情感染身邊的每一個人！',
+                    image: 'https://via.placeholder.com/150x150/DC2626/FFFFFF?text=🔥'
                 },
                 female: { 
                     name:'熱情鳳凰女俠', 
                     ability:'🦸‍♀️ 超能力：情感共鳴 + 溝通藝術 + 溫暖療癒', 
                     mission:'🎯 專屬任務：情感支持者、團隊凝聚者、心靈療癒師', 
                     localName:'台灣暖心天使', 
-                    description:'你是台灣的暖心天使，用真誠與溫暖照亮他人！'
+                    description:'你是台灣的暖心天使，用真誠與溫暖照亮他人！',
+                    image: 'https://via.placeholder.com/150x150/EA580C/FFFFFF?text=🔥'
                 },
                 other: { 
                     name:'熱情鳳凰使者', 
                     ability:'🦸 超能力：情感連結 + 多元溝通 + 社群凝聚', 
                     mission:'🎯 專屬任務：社群橋樑、情感支持者、多元文化推廣者', 
                     localName:'台灣情感連結者', 
-                    description:'你是台灣的情感連結者，用真誠連結不同的心靈！'
+                    description:'你是台灣的情感連結者，用真誠連結不同的心靈！',
+                    image: 'https://via.placeholder.com/150x150/D97706/FFFFFF?text=🔥'
                 }
             },
             '勾陳': {
@@ -541,21 +634,24 @@
                     ability:'🦸‍♂️ 超能力：可靠防護 + 細節掌控 + 執行力場', 
                     mission:'🎯 專屬任務：系統穩定守護者、品質把關專家、長期規劃師', 
                     localName:'台灣地基主', 
-                    description:'你是台灣的穩定力量，像堅固的地基一樣可靠！'
+                    description:'你是台灣的穩定力量，像堅固的地基一樣可靠！',
+                    image: 'https://via.placeholder.com/150x150/475569/FFFFFF?text=🏰'
                 },
                 female: { 
                     name:'穩固城牆女俠', 
                     ability:'🦸‍♀️ 超能力：細心守護 + 組織協調 + 穩定支持', 
                     mission:'🎯 專屬任務：系統維護者、品質守護者、團隊穩定劑', 
                     localName:'台灣守護天使', 
-                    description:'你是台灣的守護天使，用細心與穩定支持著每個人！'
+                    description:'你是台灣的守護天使，用細心與穩定支持著每個人！',
+                    image: 'https://via.placeholder.com/150x150/64748B/FFFFFF?text=🏰'
                 },
                 other: { 
                     name:'穩固城牆使者', 
                     ability:'🦸 超能力：系統思維 + 穩定建構 + 多元協調', 
                     mission:'🎯 專屬任務：系統架構師、穩定維護者、多元協調者', 
                     localName:'台灣系統守護者', 
-                    description:'你是台灣的系統守護者，用穩定的力量建構更好的環境！'
+                    description:'你是台灣的系統守護者，用穩定的力量建構更好的環境！',
+                    image: 'https://via.placeholder.com/150x150/334155/FFFFFF?text=🏰'
                 }
             },
             '螣蛇': {
@@ -564,21 +660,24 @@
                     ability:'🦸‍♂️ 超能力：讀心感知 + 協調力場 + 時機掌控', 
                     mission:'🎯 專屬任務：人際關係調解員、策略分析師、危機預警系統', 
                     localName:'台灣和事佬', 
-                    description:'你是台灣的人際雷達，總能洞察人心、化解衝突！'
+                    description:'你是台灣的人際雷達，總能洞察人心、化解衝突！',
+                    image: 'https://via.placeholder.com/150x150/059669/FFFFFF?text=🐍'
                 },
                 female: { 
                     name:'洞察靈蛇女俠', 
                     ability:'🦸‍♀️ 超能力：直覺感知 + 情感協調 + 時機洞察', 
                     mission:'🎯 專屬任務：情感調解師、團隊潤滑劑、危機預防專家', 
                     localName:'台灣心靈導師', 
-                    description:'你是台灣的心靈導師，用直覺與智慧引導他人！'
+                    description:'你是台灣的心靈導師，用直覺與智慧引導他人！',
+                    image: 'https://via.placeholder.com/150x150/10B981/FFFFFF?text=🐍'
                 },
                 other: { 
                     name:'洞察靈蛇使者', 
                     ability:'🦸 超能力：多元感知 + 關係協調 + 時機判斷', 
                     mission:'🎯 專屬任務：關係橋樑、多元協調者、時機分析師', 
                     localName:'台灣協調專家', 
-                    description:'你是台灣的協調專家，用智慧連結不同的人際網絡！'
+                    description:'你是台灣的協調專家，用智慧連結不同的人際網絡！',
+                    image: 'https://via.placeholder.com/150x150/047857/FFFFFF?text=🐍'
                 }
             },
             '白虎': {
@@ -587,21 +686,24 @@
                     ability:'🦸‍♂️ 超能力：決斷力場 + 行動加速 + 目標鎖定', 
                     mission:'🎯 專屬任務：緊急救援隊長、專案領導者、效率優化師', 
                     localName:'台灣急先鋒', 
-                    description:'你是台灣的行動派，像疾風一樣快速解決問題！'
+                    description:'你是台灣的行動派，像疾風一樣快速解決問題！',
+                    image: 'https://via.placeholder.com/150x150/1E40AF/FFFFFF?text=⚡'
                 },
                 female: { 
                     name:'疾風戰神女俠', 
                     ability:'🦸‍♀️ 超能力：果斷決策 + 高效執行 + 目標達成', 
                     mission:'🎯 專屬任務：危機處理專家、效率領導者、目標達成師', 
                     localName:'台灣行動女神', 
-                    description:'你是台灣的行動女神，用效率與決斷力完成任務！'
+                    description:'你是台灣的行動女神，用效率與決斷力完成任務！',
+                    image: 'https://via.placeholder.com/150x150/3730A3/FFFFFF?text=⚡'
                 },
                 other: { 
                     name:'疾風戰神使者', 
                     ability:'🦸 超能力：多元決策 + 高效協調 + 目標管理', 
                     mission:'🎯 專屬任務：效率協調者、多元領導者、目標管理師', 
                     localName:'台灣效率專家', 
-                    description:'你是台灣的效率專家，用多元視角達成目標！'
+                    description:'你是台灣的效率專家，用多元視角達成目標！',
+                    image: 'https://via.placeholder.com/150x150/312E81/FFFFFF?text=⚡'
                 }
             },
             '玄武': {
@@ -610,28 +712,31 @@
                     ability:'🦸‍♂️ 超能力：深度思考 + 策略規劃 + 冷靜屏障', 
                     mission:'🎯 專屬任務：長遠規劃師、技術研發專家、智慧決策顧問', 
                     localName:'台灣諸葛亮', 
-                    description:'你是台灣的智慧寶庫，像龜甲一樣保護重要決策！'
+                    description:'你是台灣的智慧寶庫，像龜甲一樣保護重要決策！',
+                    image: 'https://via.placeholder.com/150x150/0F766E/FFFFFF?text=🐢'
                 },
                 female: { 
                     name:'智慧龜仙女俠', 
                     ability:'🦸‍♀️ 超能力：深度分析 + 策略思考 + 冷靜智慧', 
                     mission:'🎯 專屬任務：策略規劃師、智慧顧問、冷靜決策者', 
                     localName:'台灣智慧女神', 
-                    description:'你是台灣的智慧女神，用深謀遠慮指引方向！'
+                    description:'你是台灣的智慧女神，用深謀遠慮指引方向！',
+                    image: 'https://via.placeholder.com/150x150/0D9488/FFFFFF?text=🐢'
                 },
                 other: { 
                     name:'智慧龜仙使者', 
                     ability:'🦸 超能力：多元思考 + 策略協調 + 冷靜分析', 
                     mission:'🎯 專屬任務：智慧橋樑、策略協調者、多元顧問', 
                     localName:'台灣智囊團', 
-                    description:'你是台灣的智囊團，用多元智慧解決複雜問題！'
+                    description:'你是台灣的智囊團，用多元智慧解決複雜問題！',
+                    image: 'https://via.placeholder.com/150x150/0F766E/FFFFFF?text=🐢'
                 }
             }
         };
 
         // ========== 分頁模式變數 ==========
         let currentPage = 0;
-        let questionsPerPage = 10; // 預設10題一頁
+        let questionsPerPage = 10;
         let totalPages = 0;
         let shuffledBANK = [];
         let radarChart = null;
@@ -646,7 +751,7 @@
                 minute: '2-digit' 
             });
 
-            // 初始化測驗題目（使用分頁模式）
+            // 初始化測驗題目
             initializeQuestionsWithPagination();
             
             // 初始化設定面板
@@ -671,7 +776,7 @@
             } else if (pageMode === 'multi10') {
                 questionsPerPage = 10;
             } else {
-                questionsPerPage = shuffledBANK.length; // 全部顯示
+                questionsPerPage = shuffledBANK.length;
             }
             
             totalPages = Math.ceil(shuffledBANK.length / questionsPerPage);
@@ -707,13 +812,8 @@
                 questionPages.appendChild(pageDiv);
             }
             
-            // 更新分頁指示器
             updatePageIndicator();
-            
-            // 為選項卡片添加事件監聽
             initializeOptionCards();
-            
-            // 更新進度
             updateProgress();
         }
 
@@ -721,16 +821,11 @@
         function initializeOptionCards() {
             document.querySelectorAll('.option-card').forEach(card => {
                 card.addEventListener('click', function() {
-                    // 移除同一問題中所有選項的選中狀態
                     const parent = this.closest('.options');
                     parent.querySelectorAll('.option-card').forEach(c => {
                         c.classList.remove('selected');
                     });
-                    
-                    // 設定當前選項為選中狀態
                     this.classList.add('selected');
-                    
-                    // 更新進度
                     updateProgress();
                 });
             });
@@ -740,19 +835,14 @@
         function updatePageIndicator() {
             const pageMode = document.getElementById('pageModeSelect').value;
             
-            // 更新上方指示器
             document.getElementById('pageIndicator').textContent = `${currentPage + 1}/${totalPages}`;
-            
-            // 更新下方指示器
             document.getElementById('pageIndicatorBottom').textContent = `第 ${currentPage + 1} 頁，共 ${totalPages} 頁`;
             
-            // 更新按鈕狀態
             document.getElementById('prevPage').disabled = currentPage === 0;
             document.getElementById('nextPage').disabled = currentPage === totalPages - 1;
             document.getElementById('prevPageBottom').disabled = currentPage === 0;
             document.getElementById('nextPageBottom').disabled = currentPage === totalPages - 1;
             
-            // 如果是全部顯示模式，隱藏分頁控制
             if (pageMode === 'all') {
                 document.querySelector('.pagination-buttons').style.display = 'none';
                 document.querySelector('.page-controls-bottom').style.display = 'none';
@@ -774,6 +864,12 @@
             const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
             
             // 設定表單值
+            document.getElementById('contactTitle').value = savedSettings.title || '掃碼預約一對一諮詢';
+            document.getElementById('contactLine1').value = savedSettings.line1 || 'Line ID: @immortalguiide';
+            document.getElementById('contactLine2').value = savedSettings.line2 || '專業諮詢預約';
+            document.getElementById('themeSelect').value = savedSettings.theme || 'warm';
+            document.getElementById('hueSlider').value = savedSettings.hue || 40;
+            document.getElementById('hueValue').textContent = savedSettings.hue || 40;
             document.getElementById('pageMode').value = savedSettings.pageMode || 'multi10';
             document.getElementById('reportFontSize').value = savedSettings.reportFontSize || 'medium';
             
@@ -781,8 +877,84 @@
             document.getElementById('pageModeSelect').value = savedSettings.pageMode || 'multi10';
             document.getElementById('reportFontSizeSelect').value = savedSettings.reportFontSize || 'medium';
             
+            // QR Code 圖片
+            const qrCodePreview = document.getElementById('qrCodePreview');
+            if (savedSettings.qrDataUrl) {
+                qrCodePreview.src = savedSettings.qrDataUrl;
+            }
+            
+            // 更新列印標頭
+            updatePrintHeader();
+            
+            // 應用主題
+            applyTheme(savedSettings.theme || 'warm', savedSettings.hue || 40);
+            
             // 應用字體大小
             applyReportFontSize(savedSettings.reportFontSize || 'medium');
+            
+            // QR Code 上傳處理
+            document.getElementById('qrCodeUploader').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        qrCodePreview.src = e.target.result;
+                        updatePrintHeader();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+
+        // ========== 更新列印標頭 ==========
+        function updatePrintHeader() {
+            const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
+            
+            document.getElementById('print-qrcode-title').textContent = savedSettings.title || '掃碼預約一對一諮詢';
+            document.getElementById('print-qrcode-subtitle').textContent = savedSettings.line1 || 'Line ID: @immortalguiide';
+            
+            const qrCodeImg = document.getElementById('print-qrcode-img');
+            if (savedSettings.qrDataUrl) {
+                qrCodeImg.src = savedSettings.qrDataUrl;
+            }
+        }
+
+        // ========== 應用主題 ==========
+        function applyTheme(theme, hue) {
+            const root = document.documentElement;
+            let primary, secondary, accent;
+            
+            switch(theme) {
+                case 'warm':
+                    primary = `hsl(${hue}, 60%, 45%)`;
+                    secondary = `hsl(${hue + 20}, 70%, 50%)`;
+                    accent = `hsl(220, 70%, 50%)`;
+                    break;
+                case 'cool':
+                    primary = `hsl(${hue}, 70%, 45%)`;
+                    secondary = `hsl(${hue + 30}, 80%, 55%)`;
+                    accent = `hsl(280, 60%, 45%)`;
+                    break;
+                case 'nature':
+                    primary = `hsl(${hue}, 50%, 40%)`;
+                    secondary = `hsl(${hue + 40}, 60%, 45%)`;
+                    accent = `hsl(140, 50%, 40%)`;
+                    break;
+                case 'modern':
+                    primary = `hsl(${hue}, 65%, 45%)`;
+                    secondary = `hsl(${hue + 10}, 75%, 50%)`;
+                    accent = `hsl(200, 70%, 45%)`;
+                    break;
+                case 'classic':
+                    primary = `hsl(${hue}, 55%, 40%)`;
+                    secondary = `hsl(${hue + 15}, 65%, 45%)`;
+                    accent = `hsl(30, 60%, 40%)`;
+                    break;
+            }
+            
+            root.style.setProperty('--primary', primary);
+            root.style.setProperty('--secondary', secondary);
+            root.style.setProperty('--accent', accent);
         }
 
         // ========== 事件監聽器初始化 ==========
@@ -799,7 +971,18 @@
                 saveSettings();
             });
             
-            // 分頁模式選擇 - 修正：立即重新初始化題目
+            // 色調滑桿
+            document.getElementById('hueSlider').addEventListener('input', function() {
+                document.getElementById('hueValue').textContent = this.value;
+                applyTheme(document.getElementById('themeSelect').value, this.value);
+            });
+            
+            // 主題選擇
+            document.getElementById('themeSelect').addEventListener('change', function() {
+                applyTheme(this.value, document.getElementById('hueSlider').value);
+            });
+            
+            // 分頁模式選擇
             document.getElementById('pageModeSelect').addEventListener('change', function() {
                 currentPage = 0;
                 initializeQuestionsWithPagination();
@@ -815,25 +998,11 @@
                 applyReportFontSize(document.getElementById('reportFontSizeSelect').value);
             });
             
-            // 上一頁按鈕 (上方)
-            document.getElementById('prevPage').addEventListener('click', function() {
-                goToPreviousPage();
-            });
-            
-            // 下一頁按鈕 (上方)
-            document.getElementById('nextPage').addEventListener('click', function() {
-                goToNextPage();
-            });
-            
-            // 上一頁按鈕 (下方)
-            document.getElementById('prevPageBottom').addEventListener('click', function() {
-                goToPreviousPage();
-            });
-            
-            // 下一頁按鈕 (下方)
-            document.getElementById('nextPageBottom').addEventListener('click', function() {
-                goToNextPage();
-            });
+            // 分頁導航
+            document.getElementById('prevPage').addEventListener('click', goToPreviousPage);
+            document.getElementById('nextPage').addEventListener('click', goToNextPage);
+            document.getElementById('prevPageBottom').addEventListener('click', goToPreviousPage);
+            document.getElementById('nextPageBottom').addEventListener('click', goToNextPage);
             
             // 測驗表單提交
             document.getElementById('form').addEventListener('submit', function(e) {
@@ -874,7 +1043,6 @@
                 currentPage--;
                 document.getElementById(`page-${currentPage}`).classList.add('active');
                 updatePageIndicator();
-                // 滾動到頂部
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
@@ -885,7 +1053,6 @@
                 currentPage++;
                 document.getElementById(`page-${currentPage}`).classList.add('active');
                 updatePageIndicator();
-                // 滾動到頂部
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }
         }
@@ -901,21 +1068,13 @@
             
             const selectedSize = sizes[size] || sizes.medium;
             
-            // 應用字體大小到結果區域
             const resultSection = document.getElementById('result');
-            if (resultSection) {
-                resultSection.style.fontSize = selectedSize.body;
-            }
-            
             const aiReport = document.getElementById('aiReport');
-            if (aiReport) {
-                aiReport.style.fontSize = selectedSize.body;
-            }
-            
             const superheroReport = document.getElementById('superheroReport');
-            if (superheroReport) {
-                superheroReport.style.fontSize = selectedSize.body;
-            }
+            
+            if (resultSection) resultSection.style.fontSize = selectedSize.body;
+            if (aiReport) aiReport.style.fontSize = selectedSize.body;
+            if (superheroReport) superheroReport.style.fontSize = selectedSize.body;
             
             // 儲存設定
             const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
@@ -926,6 +1085,12 @@
         // ========== 設定相關函數 ==========
         function saveSettings() {
             const settings = {
+                qrDataUrl: document.getElementById('qrCodePreview').src,
+                title: document.getElementById('contactTitle').value,
+                line1: document.getElementById('contactLine1').value,
+                line2: document.getElementById('contactLine2').value,
+                theme: document.getElementById('themeSelect').value,
+                hue: document.getElementById('hueSlider').value,
                 pageMode: document.getElementById('pageMode').value,
                 reportFontSize: document.getElementById('reportFontSize').value
             };
@@ -943,6 +1108,7 @@
             // 應用字體大小
             applyReportFontSize(settings.reportFontSize);
             
+            updatePrintHeader();
             alert('設定已儲存！');
         }
 
@@ -950,7 +1116,6 @@
         function submitQuiz() {
             const scores = {青龍:0, 朱雀:0, 勾陳:0, 螣蛇:0, 白虎:0, 玄武:0};
             
-            // 收集所有已回答的问题
             const answeredQuestions = document.querySelectorAll('.option-card.selected');
             
             if (answeredQuestions.length < BANK.length) {
@@ -958,7 +1123,7 @@
                 return;
             }
             
-            // 計算分數 - 根據問題索引對應到原始BANK
+            // 計算分數
             document.querySelectorAll('.question-item').forEach(questionItem => {
                 const questionIndex = parseInt(questionItem.getAttribute('data-question-index'));
                 const selectedOption = questionItem.querySelector('.option-card.selected');
@@ -1005,9 +1170,10 @@
                 document.getElementById("superhero-mission").textContent = genderData.mission;
                 document.getElementById("superhero-local").textContent = `🏮 台灣在地版：${genderData.localName} - ${genderData.description}`;
                 
-                // 設置神獸顯示
-                const superheroBeast = document.getElementById("superhero-beast");
-                superheroBeast.textContent = beastType;
+                // 設置超人圖片
+                const superheroImage = document.getElementById("superhero-image");
+                superheroImage.src = genderData.image;
+                superheroImage.alt = genderData.name + "圖片";
                 
                 // 顯示超人報告區塊
                 document.getElementById("superheroReport").style.display = "block";
@@ -1041,10 +1207,10 @@
                     scores: saved.scores,
                     summary: saved.summary,
                     gender: saved.gender,
-                    questions: BANK // 傳送題庫資料供分析使用
+                    questions: BANK
                 };
                 
-                // 呼叫後端 API
+                // 呼叫後端 API - 修復 JSON 解析錯誤
                 const analysis = await callBackendAPI(requestData);
                 
                 // 顯示分析結果
@@ -1052,12 +1218,17 @@
                 
             } catch (error) {
                 console.error('AI分析錯誤:', error);
-                alert('AI分析失敗：' + error.message);
                 
                 // 如果API失敗，提供模擬分析作為備用
                 const fallbackAnalysis = await simulateAIAnalysis(saved);
                 displayAIAnalysis(fallbackAnalysis);
-                alert('使用備用分析模式，部分功能可能受限');
+                
+                // 顯示更友好的錯誤訊息
+                if (error.message.includes('JSON')) {
+                    alert('AI服務暫時無法連接，已為您提供基礎分析報告');
+                } else {
+                    alert('AI分析暫時不可用，已為您提供基礎分析報告');
+                }
             } finally {
                 loadingEl.style.display = "none";
                 contentEl.style.display = "block";
@@ -1068,21 +1239,37 @@
 
         // ========== 呼叫後端 API ==========
         async function callBackendAPI(requestData) {
-            const response = await fetch('/api/ai', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestData)
-            });
+            try {
+                const response = await fetch('/api/ai', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'API請求失敗');
+                // 檢查響應狀態
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                // 檢查響應內容類型
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('伺服器返回的不是 JSON 格式');
+                }
+
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || 'API請求失敗');
+                }
+
+                return data.analysis;
+            } catch (error) {
+                // 重新拋出錯誤，讓上層處理
+                throw error;
             }
-
-            const data = await response.json();
-            return data.analysis;
         }
 
         // ========== 備用模擬分析（API失敗時使用）==========
@@ -1210,7 +1397,6 @@
         function formatAIContent(content) {
             if (!content) return '<div class="text-gray-500 text-center py-3">暫無分析內容</div>';
             
-            // 簡單的格式化處理
             return content.split('\n')
                 .filter(line => line.trim())
                 .map(line => {
