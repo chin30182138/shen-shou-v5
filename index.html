@@ -37,17 +37,20 @@
     .option-card {
       border: 2px solid #e5e7eb;
       border-radius: 12px;
-      padding: 20px;
-      margin: 10px 0;
+      padding: 15px 10px;
+      margin: 8px 0;
       cursor: pointer;
       transition: all 0.3s ease;
       text-align: center;
       font-weight: 500;
+      font-size: 14px;
+      position: relative;
     }
     
     .option-card:hover {
       background-color: #f8f9fa;
       border-color: #b6822b;
+      transform: translateY(-2px);
     }
     
     .option-card.selected {
@@ -63,7 +66,7 @@
       height: 20px;
       border: 2px solid #ccc;
       border-radius: 50%;
-      margin-right: 10px;
+      margin-right: 8px;
       vertical-align: middle;
       transition: all 0.3s ease;
     }
@@ -76,9 +79,12 @@
     
     .option-card.selected::after {
       content: '✓';
+      position: absolute;
       color: white;
-      font-size: 14px;
-      margin-left: -15px;
+      font-size: 12px;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
     }
 
     /* 報表字體大小控制 */
@@ -471,7 +477,7 @@
             <label class="block text-sm mb-1">題目顯示：</label>
             <select id="pageMode" class="w-full p-2 border rounded">
               <option value="single">單題模式</option>
-              <option value="multi10">10題模式</option>
+              <option value="multi10" selected>10題模式</option>
               <option value="all">全部顯示</option>
             </select>
           </div>
@@ -523,7 +529,7 @@
         <label for="pageModeSelect" class="text-sm font-medium">顯示模式：</label>
         <select id="pageModeSelect" class="text-sm border rounded p-1">
           <option value="single">單題模式</option>
-          <option value="multi10">10題模式</option>
+          <option value="multi10" selected>10題模式</option>
           <option value="all">全部顯示</option>
         </select>
       </div>
@@ -556,6 +562,9 @@
     <div id="questionPages" class="space-y-3">
       <!-- 題目將通過JavaScript動態生成 -->
     </div>
+    
+    <!-- 進度顯示 -->
+    <div id="progress" class="text-right text-sm mt-4">0/30</div>
     
     <div class="mt-4 flex gap-3">
       <button type="submit" class="bg-amber-600 text-white px-5 py-2 rounded hover:bg-amber-700 transition">送出測驗</button>
@@ -737,6 +746,7 @@ const BANK = [
 let currentPage = 0;
 let questionsPerPage = 10; // 預設10題一頁
 let totalPages = 0;
+let shuffledBANK = [];
 
 function initializeApp() {
   // 設定報告日期
@@ -764,7 +774,7 @@ function initializeQuestionsWithPagination() {
   questionPages.innerHTML = '';
   
   // 隨機排序題目
-  const shuffledBANK = [...BANK].sort(() => 0.5 - Math.random());
+  shuffledBANK = [...BANK].sort(() => 0.5 - Math.random());
   
   // 根據選擇的模式設定每頁題數
   const pageMode = document.getElementById('pageModeSelect').value;
@@ -790,15 +800,16 @@ function initializeQuestionsWithPagination() {
     
     for (let i = startIndex; i < endIndex; i++) {
       const question = shuffledBANK[i];
+      const questionNumber = i + 1;
       pageHTML += `
-        <div class="mb-4 p-3 border rounded">
-          <p class="font-medium mb-2">${i+1}. ${question.t}</p>
-          <div class="options flex gap-2">
-            <div class="option-card flex-1" data-value="1">不同意</div>
-            <div class="option-card flex-1" data-value="2">有點不同意</div>
-            <div class="option-card flex-1" data-value="3">普通</div>
-            <div class="option-card flex-1" data-value="4">有點同意</div>
-            <div class="option-card flex-1" data-value="5">非常同意</div>
+        <div class="mb-4 p-3 border rounded question-item" data-question-index="${i}">
+          <p class="font-medium mb-2">${questionNumber}. ${question.t}</p>
+          <div class="options grid grid-cols-5 gap-2">
+            <div class="option-card" data-value="1">1<br><span class="text-xs">不同意</span></div>
+            <div class="option-card" data-value="2">2<br><span class="text-xs">有點不同意</span></div>
+            <div class="option-card" data-value="3">3<br><span class="text-xs">普通</span></div>
+            <div class="option-card" data-value="4">4<br><span class="text-xs">有點同意</span></div>
+            <div class="option-card" data-value="5">5<br><span class="text-xs">非常同意</span></div>
           </div>
         </div>
       `;
@@ -813,6 +824,9 @@ function initializeQuestionsWithPagination() {
   
   // 為選項卡片添加事件監聽
   initializeOptionCards();
+  
+  // 更新進度
+  updateProgress();
 }
 
 // ========== 初始化選項卡片事件 ==========
@@ -841,6 +855,14 @@ function updatePageIndicator() {
   // 更新按鈕狀態
   document.getElementById('prevPage').disabled = currentPage === 0;
   document.getElementById('nextPage').disabled = currentPage === totalPages - 1;
+  
+  // 如果是全部顯示模式，隱藏分頁控制
+  const pageMode = document.getElementById('pageModeSelect').value;
+  if (pageMode === 'all') {
+    document.querySelector('.pagination-buttons').style.display = 'none';
+  } else {
+    document.querySelector('.pagination-buttons').style.display = 'flex';
+  }
 }
 
 // ========== 更新進度顯示 ==========
@@ -922,7 +944,7 @@ function initializeEventListeners() {
     applyTheme(this.value, document.getElementById('hueSlider').value);
   });
   
-  // 分頁模式選擇
+  // 分頁模式選擇 - 修正：立即重新初始化題目
   document.getElementById('pageModeSelect').addEventListener('change', function() {
     currentPage = 0;
     initializeQuestionsWithPagination();
@@ -966,13 +988,14 @@ function initializeEventListeners() {
   
   // 全部填3按鈕
   document.getElementById('btnFillMid').addEventListener('click', function() {
-    document.querySelectorAll('.option-card').forEach(card => {
-      if (card.getAttribute('data-value') === '3') {
-        const parent = card.closest('.options');
-        parent.querySelectorAll('.option-card').forEach(c => {
-          c.classList.remove('selected');
+    document.querySelectorAll('.question-item').forEach(questionItem => {
+      const options = questionItem.querySelector('.options');
+      const option3 = options.querySelector('.option-card[data-value="3"]');
+      if (option3) {
+        options.querySelectorAll('.option-card').forEach(card => {
+          card.classList.remove('selected');
         });
-        card.classList.add('selected');
+        option3.classList.add('selected');
       }
     });
     updateProgress();
@@ -1064,19 +1087,15 @@ function submitQuiz() {
     return;
   }
   
-  // 計算分數 - 需要重新映射問題和答案
-  const questionElements = document.querySelectorAll('.question-page .mb-4');
-  
-  questionElements.forEach((questionElement, index) => {
-    const selectedOption = questionElement.querySelector('.option-card.selected');
-    if (selectedOption) {
+  // 計算分數 - 根據問題索引對應到原始BANK
+  document.querySelectorAll('.question-item').forEach(questionItem => {
+    const questionIndex = parseInt(questionItem.getAttribute('data-question-index'));
+    const selectedOption = questionItem.querySelector('.option-card.selected');
+    
+    if (selectedOption && questionIndex < shuffledBANK.length) {
       const scoreValue = parseInt(selectedOption.getAttribute('data-value'));
-      // 這裡需要根據實際問題與BANK的對應關係進行調整
-      // 簡化處理：假設問題順序與BANK一致
-      if (index < BANK.length) {
-        const question = BANK[index];
-        scores[question.b] += scoreValue;
-      }
+      const question = shuffledBANK[questionIndex];
+      scores[question.b] += scoreValue;
     }
   });
   
@@ -1102,11 +1121,139 @@ function submitQuiz() {
 }
 
 // ========== 其餘函數保持不變 ==========
-// ... (summarize, renderRadar, renderReport, beastSVG, generateAdvice, showSuperhero, 
-// fillAIAnalysis, generateAIAnalysis, simulateProgress, shareResult, printAnalysis 等函數)
-
 // 由於篇幅限制，這裡只顯示修改的部分，其餘函數保持原樣
 // 請將原本程式中的其餘函數複製到這裡
+
+// 簡化版本的其他函數（實際使用時請替換為完整版本）
+function summarize(scores) {
+  const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const top = entries[0];
+  const secondary = entries[1];
+  const dual = top[1] - secondary[1] <= 2 ? [top[0], secondary[0]] : null;
+  
+  const total = Object.values(scores).reduce((sum, score) => sum + score, 0);
+  const variantIndex = total % 12;
+  const variants = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+  
+  return {
+    top: top[0],
+    dual: dual,
+    ranking: entries,
+    variant: variants[variantIndex],
+    total: total,
+    scores: scores
+  };
+}
+
+let radarChart = null;
+
+function renderRadar(scores) {
+  const canvas = document.getElementById("radar");
+  if (radarChart) {
+    radarChart.destroy();
+  }
+  
+  radarChart = new Chart(canvas, {
+    type: "radar",
+    data: {
+      labels: Object.keys(scores),
+      datasets: [{
+        label: "六獸能量",
+        data: Object.values(scores),
+        backgroundColor: "rgba(182,130,43,0.15)",
+        borderColor: "#b6822b",
+        pointBackgroundColor: "#b6822b",
+        pointBorderColor: "#fff",
+        pointHoverBackgroundColor: "#fff",
+        pointHoverBorderColor: "#b6822b"
+      }]
+    },
+    options: {
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 25,
+          ticks: {
+            stepSize: 5
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      maintainAspectRatio: false
+    }
+  });
+}
+
+function renderReport(summary, scores) {
+  // 顯示六獸圖 - 使用簡單文字版
+  document.getElementById("beastSVG").innerHTML = `
+    <div class="beast-text-container">
+      ${summary.top}
+    </div>
+  `;
+  
+  // 顯示主型資訊
+  document.getElementById("mainBeastTitle").textContent = summary.dual ? 
+    `雙獸${summary.variant}型：${summary.top} × ${summary.dual[1]}` : 
+    `主${summary.variant}型：${summary.top}`;
+  
+  document.getElementById("dualHint").textContent = summary.dual ? 
+    `第二主導能量：${summary.dual[1]}` : "";
+  
+  document.getElementById("mainBeastSummary").textContent = 
+    `你的主型為 ${summary.top}${summary.variant}型，融合${summary.top}能量與${summary.variant}地支特質。`;
+  
+  // 顯示建議
+  const advice = generateAdvice(summary.top, summary.dual ? summary.dual[1] : null, scores, summary.variant);
+  
+  const adviceHTML = (title, items) => 
+    `<div class='border rounded p-2'><b>${title}</b><ul class='list-disc pl-5'>${items.map(item => `<li>${item}</li>`).join("")}</ul></div>`;
+  
+  document.getElementById("adviceCols").innerHTML = 
+    adviceHTML("職場建議", advice.職場) +
+    adviceHTML("感情建議", advice.感情) +
+    adviceHTML("養生建議", advice.養生);
+}
+
+function generateAdvice(mainBeast, secondaryBeast, scores, variant) {
+  // 簡化版的建議生成
+  return {
+    職場: ["發揮你的優勢", "注意團隊合作"],
+    感情: ["真誠表達", "互相理解"],
+    養生: ["保持運動", "均衡飲食"]
+  };
+}
+
+function showSuperhero(beastType) {
+  // 簡化版的超人顯示
+  document.getElementById("superheroReport").style.display = "block";
+}
+
+function generateAIAnalysis() {
+  // 簡化版的AI分析
+  document.getElementById("ai-personality").innerHTML = "AI分析內容...";
+  document.getElementById("aiReport").style.display = "block";
+}
+
+function updatePrintHeader() {
+  // 簡化版的更新列印標頭
+}
+
+function applyTheme(theme, hue) {
+  // 簡化版的主題應用
+}
+
+function shareResult() {
+  alert("分享功能");
+}
+
+function printAnalysis() {
+  window.print();
+}
 
 </script>
 </body>
