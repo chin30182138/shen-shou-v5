@@ -1,26 +1,41 @@
 const express = require('express');
 const router = express.Router();
 
+// 添加 CORS 支援
+router.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+});
+
 // AI分析處理函數
 router.post('/', async (req, res) => {
     try {
+        console.log('收到 AI 分析請求');
+        
         const { scores, summary, gender, questions } = req.body;
         
         // 驗證必要資料
         if (!scores || !summary) {
+            console.log('缺少必要的測驗資料');
             return res.status(400).json({
                 success: false,
                 error: '缺少必要的測驗資料'
             });
         }
         
-        // 調用AI分析服務（這裡可以整合 OpenAI API 或其他AI服務）
+        console.log('開始生成 AI 分析...');
+        
+        // 調用AI分析服務
         const analysis = await generateAIAnalysis({
             scores,
             summary,
             gender,
             questions
         });
+        
+        console.log('AI 分析生成完成');
         
         res.json({
             success: true,
@@ -41,12 +56,7 @@ async function generateAIAnalysis(data) {
     const { scores, summary, gender, questions } = data;
     const beastType = summary.top;
     
-    // 這裡可以整合真正的AI服務，例如：
-    // - OpenAI GPT API
-    // - 其他AI分析服務
-    // - 自建的機器學習模型
-    
-    // 目前先提供基於規則的深度分析
+    // 這裡可以整合真正的AI服務
     const analysis = {
         personality: await generatePersonalityAnalysis(beastType, gender, scores),
         strengths: await generateStrengthsAnalysis(beastType, scores),
@@ -126,7 +136,7 @@ async function generateStrengthsAnalysis(beastType, scores) {
 • 多元角度思考問題
 
 📊 能量分布分析：
-您的創意能量（${scores['青龍']}分）讓您在需要創新和變革的環境中如魚得水。這種能量特別適合應對快速變化的挑戰。`,
+您的創意能量（${scores['青龍']}分）讓您在需要創新和變革的環境中如魚得水。`,
 
         '朱雀': `您的朱雀能量在六獸中表現突出，具體優勢包括：
 
@@ -137,7 +147,7 @@ async function generateStrengthsAnalysis(beastType, scores) {
 • 公開演說與說服力
 
 📊 能量分布分析：
-您的表達能量（${scores['朱雀']}分）讓您在需要人際互動和情感連結的場合中表現出色。這種能量是團隊凝聚的重要力量。`,
+您的表達能量（${scores['朱雀']}分）讓您在需要人際互動和情感連結的場合中表現出色。`,
 
         '勾陳': `您的勾陳能量在六獸中表現突出，具體優勢包括：
 
@@ -148,7 +158,7 @@ async function generateStrengthsAnalysis(beastType, scores) {
 • 長期堅持與耐力
 
 📊 能量分布分析：
-您的穩定能量（${scores['勾陳']}分）讓您在需要可靠性和持續性的工作中表現卓越。這種能量是組織運作的基礎。`,
+您的穩定能量（${scores['勾陳']}分）讓您在需要可靠性和持續性的工作中表現卓越。`,
 
         '螣蛇': `您的螣蛇能量在六獸中表現突出，具體優勢包括：
 
@@ -159,7 +169,7 @@ async function generateStrengthsAnalysis(beastType, scores) {
 • 團隊和諧與凝聚力
 
 📊 能量分布分析：
-您的洞察能量（${scores['螣蛇']}分）讓您在需要敏感度和協調能力的環境中發揮關鍵作用。這種能量是人際網絡的潤滑劑。`,
+您的洞察能量（${scores['螣蛇']}分）讓您在需要敏感度和協調能力的環境中發揮關鍵作用。`,
 
         '白虎': `您的白虎能量在六獸中表現突出，具體優勢包括：
 
@@ -170,7 +180,7 @@ async function generateStrengthsAnalysis(beastType, scores) {
 • 行動領導與結果導向
 
 📊 能量分布分析：
-您的行動能量（${scores['白虎']}分）讓您在需要速度和決斷力的情境中表現優異。這種能量是突破困境的利器。`,
+您的行動能量（${scores['白虎']}分）讓您在需要速度和決斷力的情境中表現優異。`,
 
         '玄武': `您的玄武能量在六獸中表現突出，具體優勢包括：
 
@@ -181,7 +191,7 @@ async function generateStrengthsAnalysis(beastType, scores) {
 • 知識積累與智慧應用
 
 📊 能量分布分析：
-您的智慧能量（${scores['玄武']}分）讓您在需要深思熟慮和戰略規劃的任務中表現出色。這種能量是持續發展的基石。`
+您的智慧能量（${scores['玄武']}分）讓您在需要深思熟慮和戰略規劃的任務中表現出色。`
     };
 
     return strengthsData[beastType] || '您的能量分布具有獨特性，需要進一步分析。';
@@ -198,13 +208,10 @@ async function generateCareerAnalysis(beastType, summary) {
 • 研發部門：技術創新、產品迭代
 
 🚀 職場發展策略：
-1. 尋找能發揮創意的環境，避免過度僵化的組織
+1. 尋找能發揮創意的環境
 2. 主動爭取創新專案的領導機會
 3. 建立創意作品集，展示您的獨特價值
-4. 與不同領域人才交流，激發更多靈感
-
-📈 晉升路徑：
-初階 → 創意專員 → 創新經理 → 策略總監`,
+4. 與不同領域人才交流，激發更多靈感`,
 
         '朱雀': `💼 最適合您的職場領域：
 
@@ -217,10 +224,7 @@ async function generateCareerAnalysis(beastType, summary) {
 1. 選擇需要人際互動的工作環境
 2. 發展公眾演說和表達能力
 3. 建立廣泛的人脈網絡
-4. 學習情緒管理，保持專業形象
-
-📈 晉升路徑：
-初階 → 溝通專員 → 團隊領導 → 關係總監`,
+4. 學習情緒管理，保持專業形象`,
 
         '勾陳': `💼 最適合您的職場領域：
 
@@ -233,10 +237,7 @@ async function generateCareerAnalysis(beastType, summary) {
 1. 選擇制度完善的組織環境
 2. 建立個人專業信譽和可靠性
 3. 學習系統化思考和流程優化
-4. 培養危機預防和管理能力
-
-📈 晉升路徑：
-初階 → 專員 → 經理 → 總監`,
+4. 培養危機預防和管理能力`,
 
         '螣蛇': `💼 最適合您的職場領域：
 
@@ -249,10 +250,7 @@ async function generateCareerAnalysis(beastType, summary) {
 1. 選擇需要人際敏感度的工作
 2. 發展衝突管理和協調技巧
 3. 建立信任關係網絡
-4. 學習組織行為和心理學知識
-
-📈 晉升路徑：
-初階 → 協調專員 → 關係經理 → 策略顧問`,
+4. 學習組織行為和心理學知識`,
 
         '白虎': `💼 最適合您的職場領域：
 
@@ -265,10 +263,7 @@ async function generateCareerAnalysis(beastType, summary) {
 1. 選擇結果導向的工作環境
 2. 發展目標管理和績效追蹤能力
 3. 學習風險評估和決策技巧
-4. 培養團隊領導和激勵能力
-
-📈 晉升路徑：
-初階 → 專員 → 經理 → 總監`,
+4. 培養團隊領導和激勵能力`,
 
         '玄武': `💼 最適合您的職場領域：
 
@@ -281,10 +276,7 @@ async function generateCareerAnalysis(beastType, summary) {
 1. 選擇需要深度思考的工作環境
 2. 發展專業知識和技術能力
 3. 學習系統分析和策略規劃
-4. 培養知識管理和分享能力
-
-📈 晉升路徑：
-初階 → 分析師 → 策略師 → 首席顧問`
+4. 培養知識管理和分享能力`
     };
 
     return careerData[beastType] || '您的職場發展需要根據具體情況進行規劃。';
