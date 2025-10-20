@@ -151,11 +151,11 @@
       align-items: center; 
       justify-content: center;
       background: radial-gradient(circle, rgba(182,130,43,0.1) 0%, rgba(182,130,43,0) 70%);
-      border: 2px solid #b6822b;
+      border: 2px solid var(--brand);
       border-radius: 12px;
       font-size: 1.8em;
       font-weight: bold;
-      color: #b6822b;
+      color: var(--brand);
       text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
       padding: 10px;
       text-align: center;
@@ -182,7 +182,7 @@
     .print-header {
       display: none;
       margin-bottom: 25px;
-      border-bottom: 3px solid #b6822b;
+      border-bottom: 3px solid var(--brand);
       padding-bottom: 15px;
       font-family: var(--report-font);
       font-size: var(--report-font-size);
@@ -520,6 +520,680 @@ const BANK = [
   {t: "我習慣冷靜看待問題。", b: "玄武"}
 ];
 
+// ========== 修復的AI分析函數 ==========
+
+// ========== 修復API請求格式 ==========
+async function callExistingVercelAPI(userData) {
+  const API_URL = window.location.origin + '/api/ai';
+  
+  // 修復：按照後端期望的格式發送數據
+  const requestData = {
+    scores: userData.scores,
+    summary: userData.summary,
+    gender: userData.gender,
+    questions: BANK // 傳送題庫資料
+  };
+
+  console.log('📤 發送請求到:', API_URL);
+  console.log('📊 請求數據格式:', requestData);
+
+  // 添加超時處理
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000);
+
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      let errorText = '未知錯誤';
+      try {
+        errorText = await response.text();
+      } catch (e) {
+        errorText = `HTTP ${response.status} - ${response.statusText}`;
+      }
+      throw new Error(`API請求失敗: ${response.status} - ${errorText}`);
+    }
+
+    const result = await response.json();
+    
+    if (!result) {
+      throw new Error('API返回空數據');
+    }
+    
+    if (!result.success) {
+      throw new Error(result.error || 'API返回錯誤');
+    }
+    
+    return result.analysis; // 返回 analysis 字段
+
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('請求超時，請稍後再試');
+    }
+    throw error;
+  }
+}
+
+// ========== 適配後端響應格式 ==========
+function displayRealAIAnalysis(analysisResult) {
+  console.log('📝 顯示分析結果:', analysisResult);
+  
+  if (!analysisResult) {
+    throw new Error('API返回空數據');
+  }
+
+  let personality, strengths, career, relationships, growth, money;
+
+  // 適配您的後端響應格式
+  if (typeof analysisResult === 'string') {
+    // 如果後端返回單一字符串
+    personality = analysisResult;
+    strengths = "基於您的人格特質分析...";
+    career = "職場發展建議生成中...";
+    relationships = "人際關係建議生成中...";
+    growth = "個人成長建議生成中...";
+    money = "金錢卦象解析生成中...";
+  } else if (analysisResult.personality) {
+    // 如果後端返回結構化數據
+    personality = analysisResult.personality;
+    strengths = analysisResult.strengths;
+    career = analysisResult.career;
+    relationships = analysisResult.relationships;
+    growth = analysisResult.growth;
+    money = analysisResult.money;
+  } else {
+    // 未知格式，顯示原始數據
+    personality = `AI分析完成！\n\n${JSON.stringify(analysisResult, null, 2)}`;
+    strengths = "請查看人格特質分析部分";
+    career = "請查看人格特質分析部分";
+    relationships = "請查看人格特質分析部分";
+    growth = "請查看人格特質分析部分";
+    money = "請查看人格特質分析部分";
+  }
+
+  // 更新各個部分的內容
+  document.getElementById("ai-personality").innerHTML = formatAIContent(personality);
+  document.getElementById("ai-strengths").innerHTML = formatAIContent(strengths);
+  document.getElementById("ai-career").innerHTML = formatAIContent(career);
+  document.getElementById("ai-relationships").innerHTML = formatAIContent(relationships);
+  document.getElementById("ai-growth").innerHTML = formatAIContent(growth);
+  document.getElementById("ai-money").innerHTML = formatAIContent(money);
+}
+
+// ========== 改進的內容格式化 ==========
+function formatAIContent(content) {
+  if (!content) return '<div class="text-gray-500">暫無內容</div>';
+  
+  if (typeof content === 'string') {
+    // 處理換行和基本格式化
+    const formattedContent = content
+      .split('\n')
+      .map(line => {
+        const trimmedLine = line.trim();
+        if (trimmedLine === '') return '<br>';
+        if (trimmedLine.startsWith('## ')) return `<h3 class="font-bold text-lg mt-4 mb-2 text-amber-700">${trimmedLine.replace('## ', '')}</h3>`;
+        if (trimmedLine.startsWith('### ')) return `<h4 class="font-bold mt-3 mb-2 text-amber-600">${trimmedLine.replace('### ', '')}</h4>`;
+        if (trimmedLine.startsWith('- ') || trimmedLine.startsWith('• ')) return `<li class="ml-4 mb-1">${trimmedLine.substring(2)}</li>`;
+        if (trimmedLine.startsWith('**') && trimmedLine.endsWith('**')) return `<strong class="text-amber-700">${trimmedLine.slice(2, -2)}</strong>`;
+        return `<p class="mb-2">${line}</p>`;
+      })
+      .join('');
+    
+    return `<div class="ai-content">${formattedContent}</div>`;
+  }
+  
+  return `<pre class="whitespace-pre-wrap bg-gray-100 p-3 rounded">${JSON.stringify(content, null, 2)}</pre>`;
+}
+
+// ========== 完整的AI分析函數 ==========
+async function generateRealAIAnalysis() {
+  const saved = JSON.parse(localStorage.getItem("shen-shou-result") || "null");
+  if (!saved) {
+    alert("⚠️請先完成測驗。");
+    return;
+  }
+
+  const loadingEl = document.getElementById("ai-loading");
+  const contentEl = document.getElementById("ai-analysis-content");
+  const btnAI = document.getElementById("btnAI");
+  const btnRetry = document.getElementById("btnRetry");
+  
+  // 重置顯示狀態
+  loadingEl.style.display = "block";
+  contentEl.style.display = "none";
+  btnRetry.style.display = "none";
+  btnAI.disabled = true;
+
+  // 清空之前的內容
+  document.getElementById("ai-personality").innerHTML = '<div class="text-gray-500">分析中...</div>';
+  document.getElementById("ai-strengths").innerHTML = '<div class="text-gray-500">分析中...</div>';
+  document.getElementById("ai-career").innerHTML = '<div class="text-gray-500">分析中...</div>';
+  document.getElementById("ai-relationships").innerHTML = '<div class="text-gray-500">分析中...</div>';
+  document.getElementById("ai-growth").innerHTML = '<div class="text-gray-500">分析中...</div>';
+  document.getElementById("ai-money").innerHTML = '<div class="text-gray-500">分析中...</div>';
+
+  try {
+    console.log('🎯 開始AI分析...', {
+      主型: saved.summary.top,
+      分數: saved.scores,
+      性別: saved.gender,
+      變體: saved.summary.variant
+    });
+    
+    // 顯示真實進度
+    simulateRealProgress();
+    
+    // 調用API - 使用修復後的格式
+    const analysisResult = await callExistingVercelAPI(saved);
+    console.log('✅ AI分析成功:', analysisResult);
+    
+    // 顯示結果
+    displayRealAIAnalysis(analysisResult);
+    
+  } catch (error) {
+    console.error('❌ AI分析失敗:', error);
+    showAIFallbackMessage(error.message);
+  } finally {
+    loadingEl.style.display = "none";
+    contentEl.style.display = "block";
+    btnRetry.style.display = "inline-block";
+    btnAI.disabled = false;
+  }
+}
+
+// ========== 改進的錯誤處理 ==========
+function showAIFallbackMessage(errorMsg = '') {
+  const saved = JSON.parse(localStorage.getItem("shen-shou-result") || "null");
+  if (!saved) return;
+
+  const errorHtml = `
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+      <div class="flex items-center">
+        <div class="text-red-500 mr-2">⚠️</div>
+        <div>
+          <div class="font-semibold text-red-800">AI分析暫時不可用</div>
+          <div class="text-red-600 text-sm mt-1">${errorMsg || '請檢查網路連線或稍後再試'}</div>
+          <div class="text-red-600 text-xs mt-1">如問題持續，請聯繫技術支持</div>
+        </div>
+      </div>
+    </div>
+    <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+      <div class="font-semibold text-amber-800 mb-2">基礎分析報告 - ${saved.summary.top}型</div>
+      <div class="text-amber-700">${getBasicAnalysis(saved.summary.top)}</div>
+    </div>
+  `;
+
+  document.getElementById("ai-personality").innerHTML = errorHtml;
+  document.getElementById("ai-strengths").innerHTML = getBasicAnalysis(saved.summary.top);
+  document.getElementById("ai-career").innerHTML = getBasicAnalysis(saved.summary.top);
+  document.getElementById("ai-relationships").innerHTML = getBasicAnalysis(saved.summary.top);
+  document.getElementById("ai-growth").innerHTML = getBasicAnalysis(saved.summary.top);
+  document.getElementById("ai-money").innerHTML = getBasicAnalysis(saved.summary.top);
+}
+
+function getBasicAnalysis(beastType) {
+  const basicAnalysis = {
+    '青龍': '您具有創新思維和豐富的想像力，適合從事創意、設計、創業等需要突破傳統框架的工作。在人際關係中，您需要保持新鮮感和探索空間。',
+    '朱雀': '您擅長溝通表達，具有很強的感染力，適合教育、銷售、公關等人際互動相關工作。情感豐富是您的優勢，但也需要注意情緒管理。',
+    '勾陳': '您重視穩定和安全，做事有條理，適合行政、管理、會計等需要細心和耐心的工作。您的可靠性讓您在團隊中備受信賴。',
+    '螣蛇': '您洞察力強，善於協調人際關係，適合人力資源、諮詢、協調等需要溝通技巧的工作。您的直覺能力讓您能準確理解他人需求。',
+    '白虎': '您行動力強，目標導向明確，適合管理、業務、執行等需要決斷力和執行力的工作。您的效率讓您在競爭中脫穎而出。',
+    '玄武': '您思考深入，具有很好的分析能力，適合研究、分析、規劃等需要深度思考的工作。您的智慧讓您能夠解決複雜問題。'
+  };
+  return basicAnalysis[beastType] || '暫無分析數據';
+}
+
+function simulateRealProgress() {
+  const progressBar = document.getElementById("progress-bar");
+  const loadingStep = document.getElementById("loading-step");
+  
+  const steps = [
+    {percent: 10, text: "連線AI分析伺服器..."},
+    {percent: 25, text: "分析人格特質數據..."},
+    {percent: 40, text: "生成個人化洞察..."},
+    {percent: 60, text: "計算最佳發展建議..."},
+    {percent: 75, text: "生成金錢卦象解析..."},
+    {percent: 90, text: "整合分析報告..."},
+    {percent: 100, text: "分析完成！"}
+  ];
+  
+  let currentStep = 0;
+  const interval = setInterval(() => {
+    if (currentStep < steps.length) {
+      progressBar.style.width = steps[currentStep].percent + "%";
+      loadingStep.textContent = steps[currentStep].text;
+      currentStep++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 800);
+}
+
+// ========== 顏色主題設定功能 ==========
+function applyThemeSettings(theme, hueValue) {
+  let brandColor, primaryColor, secondaryColor, accentColor;
+  
+  switch(theme) {
+    case 'warm':
+      brandColor = `hsl(${hueValue}, 60%, 45%)`;
+      primaryColor = `hsl(${hueValue}, 60%, 45%)`;
+      secondaryColor = `hsl(${hueValue + 10}, 70%, 50%)`;
+      accentColor = `hsl(210, 60%, 45%)`;
+      break;
+    case 'cool':
+      brandColor = `hsl(${hueValue}, 70%, 40%)`;
+      primaryColor = `hsl(${hueValue}, 70%, 40%)`;
+      secondaryColor = `hsl(${hueValue + 20}, 80%, 45%)`;
+      accentColor = `hsl(280, 60%, 45%)`;
+      break;
+    case 'nature':
+      brandColor = `hsl(${hueValue}, 50%, 40%)`;
+      primaryColor = `hsl(${hueValue}, 50%, 40%)`;
+      secondaryColor = `hsl(${hueValue + 15}, 60%, 45%)`;
+      accentColor = `hsl(120, 40%, 40%)`;
+      break;
+    case 'modern':
+      brandColor = `hsl(${hueValue}, 80%, 35%)`;
+      primaryColor = `hsl(${hueValue}, 80%, 35%)`;
+      secondaryColor = `hsl(${hueValue + 5}, 90%, 40%)`;
+      accentColor = `hsl(0, 70%, 45%)`;
+      break;
+    case 'classic':
+      brandColor = `hsl(${hueValue}, 40%, 35%)`;
+      primaryColor = `hsl(${hueValue}, 40%, 35%)`;
+      secondaryColor = `hsl(${hueValue + 8}, 50%, 40%)`;
+      accentColor = `hsl(30, 50%, 40%)`;
+      break;
+    default:
+      brandColor = `hsl(40, 60%, 45%)`;
+      primaryColor = `hsl(40, 60%, 45%)`;
+      secondaryColor = `hsl(50, 70%, 50%)`;
+      accentColor = `hsl(210, 60%, 45%)`;
+  }
+  
+  // 應用顏色到CSS變數
+  document.documentElement.style.setProperty('--brand', brandColor);
+  document.documentElement.style.setProperty('--primary', primaryColor);
+  document.documentElement.style.setProperty('--secondary', secondaryColor);
+  document.documentElement.style.setProperty('--accent', accentColor);
+  
+  // 更新slider顏色
+  document.querySelectorAll('.slider').forEach(slider => {
+    slider.style.accentColor = brandColor;
+  });
+  
+  console.log('🎨 應用主題:', theme, '色調:', hueValue, '品牌色:', brandColor);
+}
+
+// ========== 初始化應用 ==========
+document.addEventListener('DOMContentLoaded', function() {
+  initializeApp();
+});
+
+function initializeApp() {
+  document.getElementById('report-date').textContent = new Date().toLocaleDateString('zh-TW', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric', 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+
+  initializeQuestions();
+  initializeSettings();
+  initializeEventListeners();
+}
+
+function initializeQuestions() {
+  const shuffledBANK = [...BANK].sort(() => 0.5 - Math.random());
+  const qWrap = document.getElementById("qWrap");
+  qWrap.innerHTML = '';
+  
+  shuffledBANK.forEach((q, i) => {
+    qWrap.innerHTML += `
+      <li class="question-item">
+        <p class="font-medium mb-2">${i+1}. ${q.t}</p>
+        <div class="slider-container">
+          <input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'>
+          <div class="slider-labels">
+            <span>非常不同意</span>
+            <span>不同意</span>
+            <span>普通</span>
+            <span>同意</span>
+            <span>非常同意</span>
+          </div>
+        </div>
+      </li>`;
+  });
+  
+  qWrap.innerHTML += '<div id="progress" class="text-right text-sm mt-4">0/30</div>';
+  
+  document.querySelectorAll('input[type="range"]').forEach(slider => {
+    slider.addEventListener('input', () => {
+      const answered = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== "3").length;
+      document.getElementById("progress").textContent = `${answered}/30`;
+    });
+  });
+}
+
+function initializeSettings() {
+  const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
+  
+  document.getElementById('contactTitle').value = savedSettings.title || '掃碼預約一對一諮詢';
+  document.getElementById('contactLine1').value = savedSettings.line1 || 'Line ID: @immortalguiide';
+  document.getElementById('contactLine2').value = savedSettings.line2 || '專業諮詢預約';
+  document.getElementById('themeSelect').value = savedSettings.theme || 'warm';
+  document.getElementById('hueSlider').value = savedSettings.hue || 40;
+  document.getElementById('hueValue').textContent = savedSettings.hue || 40;
+  
+  const savedFont = savedSettings.font || "'Noto Sans TC', sans-serif";
+  document.documentElement.style.setProperty('--report-font', savedFont);
+  
+  const savedFontSize = savedSettings.fontSize || 14;
+  document.getElementById('fontSizeSlider').value = savedFontSize;
+  document.getElementById('fontSizeValue').textContent = savedFontSize;
+  updateFontSizePreview(savedFontSize);
+  
+  document.querySelectorAll('.font-option').forEach(option => {
+    if (option.dataset.font === savedFont) {
+      option.classList.add('active');
+    } else {
+      option.classList.remove('active');
+    }
+  });
+  
+  const qrCodePreview = document.getElementById('qrCodePreview');
+  if (savedSettings.qrDataUrl) {
+    qrCodePreview.src = savedSettings.qrDataUrl;
+  }
+  
+  // 應用保存的顏色設定
+  applyThemeSettings(savedSettings.theme || 'warm', savedSettings.hue || 40);
+  
+  updatePrintHeader();
+}
+
+function updateFontSizePreview(size) {
+  const preview = document.getElementById('fontSizePreview');
+  preview.style.fontSize = size + 'px';
+  document.documentElement.style.setProperty('--report-font-size', size + 'px');
+}
+
+function initializeEventListeners() {
+  document.getElementById('toggleSettingsBtn').addEventListener('click', function() {
+    const settingsPanel = document.getElementById('reportSettingsForm');
+    settingsPanel.classList.toggle('hidden');
+  });
+  
+  document.getElementById('closeSettingsBtn').addEventListener('click', function() {
+    document.getElementById('reportSettingsForm').classList.add('hidden');
+  });
+  
+  document.getElementById('reportSettingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveSettings();
+  });
+  
+  document.querySelectorAll('.font-option').forEach(option => {
+    option.addEventListener('click', function() {
+      document.querySelectorAll('.font-option').forEach(opt => opt.classList.remove('active'));
+      this.classList.add('active');
+      const selectedFont = this.dataset.font;
+      document.documentElement.style.setProperty('--report-font', selectedFont);
+    });
+  });
+  
+  document.getElementById('fontSizeSlider').addEventListener('input', function() {
+    const size = this.value;
+    document.getElementById('fontSizeValue').textContent = size;
+    updateFontSizePreview(size);
+  });
+  
+  document.getElementById('hueSlider').addEventListener('input', function() {
+    const hueValue = this.value;
+    document.getElementById('hueValue').textContent = hueValue;
+    // 即時預覽顏色變化
+    const currentTheme = document.getElementById('themeSelect').value;
+    applyThemeSettings(currentTheme, hueValue);
+  });
+  
+  document.getElementById('themeSelect').addEventListener('change', function() {
+    const theme = this.value;
+    const hueValue = document.getElementById('hueSlider').value;
+    applyThemeSettings(theme, hueValue);
+  });
+  
+  document.getElementById('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    submitQuiz();
+  });
+  
+  document.getElementById('btnFillMid').addEventListener('click', function() {
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+      slider.value = 3;
+    });
+    const answered = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== "3").length;
+    document.getElementById("progress").textContent = `${answered}/30`;
+  });
+  
+  // AI分析按鈕 - 使用修復後的函數
+  document.getElementById('btnAI').addEventListener('click', function() {
+    generateRealAIAnalysis();
+  });
+  
+  document.getElementById('btnRetry').addEventListener('click', function() {
+    generateRealAIAnalysis();
+  });
+  
+  document.getElementById('btnShare').addEventListener('click', function() {
+    shareResult();
+  });
+}
+
+function saveSettings() {
+  const selectedFont = document.querySelector('.font-option.active').dataset.font;
+  const fontSize = document.getElementById('fontSizeSlider').value;
+  const theme = document.getElementById('themeSelect').value;
+  const hue = document.getElementById('hueSlider').value;
+  
+  const settings = {
+    qrDataUrl: document.getElementById('qrCodePreview').src,
+    title: document.getElementById('contactTitle').value,
+    line1: document.getElementById('contactLine1').value,
+    line2: document.getElementById('contactLine2').value,
+    theme: theme,
+    hue: hue,
+    font: selectedFont,
+    fontSize: fontSize
+  };
+  
+  localStorage.setItem('reportContactSettings', JSON.stringify(settings));
+  
+  // 應用顏色設定
+  applyThemeSettings(theme, hue);
+  
+  updatePrintHeader();
+  alert('設定已儲存！');
+  document.getElementById('reportSettingsForm').classList.add('hidden');
+}
+
+function updatePrintHeader() {
+  const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
+  document.getElementById('print-qrcode-title').textContent = savedSettings.title || '掃碼預約一對一諮詢';
+  document.getElementById('print-qrcode-subtitle').textContent = savedSettings.line1 || 'Line ID: @immortalguiide';
+  const qrCodeImg = document.getElementById('print-qrcode-img');
+  if (savedSettings.qrDataUrl) {
+    qrCodeImg.src = savedSettings.qrDataUrl;
+  }
+}
+
+// ========== 測驗相關函數 ==========
+function submitQuiz() {
+  const scores = {青龍:0, 朱雀:0, 勾陳:0, 螣蛇:0, 白虎:0, 玄武:0};
+  
+  for (let i = 0; i < 30; i++) {
+    const slider = document.getElementById(`q${i}`);
+    if (slider) {
+      const question = BANK[i];
+      scores[question.b] += parseInt(slider.value);
+    }
+  }
+  
+  const summary = summarize(scores);
+  window.currentBeastType = summary.top;
+  
+  renderRadar(scores);
+  renderReport(summary, scores);
+  
+  const gender = document.querySelector('input[name="gender"]:checked').value;
+  localStorage.setItem("shen-shou-result", JSON.stringify({
+    scores: scores,
+    summary: summary,
+    gender: gender
+  }));
+  
+  document.getElementById("result").style.display = "grid";
+  document.getElementById("aiReport").style.display = "block";
+  
+  showSuperhero(summary.top);
+}
+
+function summarize(scores) {
+  const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const top = entries[0];
+  const secondary = entries[1];
+  const dual = top[1] - secondary[1] <= 2 ? [top[0], secondary[0]] : null;
+  const total = Object.values(scores).reduce((sum, score) => sum + score, 0);
+  const variantIndex = total % 12;
+  const variants = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+  
+  return {
+    top: top[0],
+    dual: dual,
+    ranking: entries,
+    variant: variants[variantIndex],
+    total: total,
+    scores: scores
+  };
+}
+
+let radarChart = null;
+
+function renderRadar(scores) {
+  const canvas = document.getElementById("radar");
+  if (radarChart) {
+    radarChart.destroy();
+  }
+  
+  radarChart = new Chart(canvas, {
+    type: "radar",
+    data: {
+      labels: Object.keys(scores),
+      datasets: [{
+        label: "六獸能量",
+        data: Object.values(scores),
+        backgroundColor: "rgba(182,130,43,0.15)",
+        borderColor: "#b6822b",
+        pointBackgroundColor: "#b6822b",
+        pointBorderColor: "#fff",
+        pointHoverBackgroundColor: "#fff",
+        pointHoverBorderColor: "#b6822b"
+      }]
+    },
+    options: {
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 25,
+          ticks: {
+            stepSize: 5
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      maintainAspectRatio: false
+    }
+  });
+}
+
+function renderReport(summary, scores) {
+  document.getElementById("beastSVG").innerHTML = `
+    <div class="beast-text-container">
+      ${summary.top}
+    </div>
+  `;
+  
+  document.getElementById("mainBeastTitle").textContent = summary.dual ? 
+    `雙獸${summary.variant}型：${summary.top} × ${summary.dual[1]}` : 
+    `主${summary.variant}型：${summary.top}`;
+  
+  document.getElementById("dualHint").textContent = summary.dual ? 
+    `第二主導能量：${summary.dual[1]}` : "";
+  
+  document.getElementById("mainBeastSummary").textContent = 
+    `你的主型為 ${summary.top}${summary.variant}型，融合${summary.top}能量與${summary.variant}地支特質。`;
+  
+  const advice = generateAdvice(summary.top);
+  const adviceHTML = (title, items) => 
+    `<div class='border rounded p-2'><b>${title}</b><ul class='list-disc pl-5'>${items.map(item => `<li>${item}</li>`).join("")}</ul></div>`;
+  
+  document.getElementById("adviceCols").innerHTML = 
+    adviceHTML("職場建議", advice.職場) +
+    adviceHTML("感情建議", advice.感情) +
+    adviceHTML("養生建議", advice.養生);
+}
+
+function generateAdvice(mainBeast) {
+  const adviceBank = {
+    青龍: {
+      職場: ["創新領頭，勇於嘗試新方法","帶領團隊突破傳統框架","開拓新市場或業務領域"],
+      感情: ["保持關係中的新鮮感","共同探索新體驗","開放溝通創新想法"],
+      養生: ["戶外運動釋放能量","嘗試新的運動方式","保持生活多樣性"]
+    },
+    朱雀: {
+      職場: ["發揮表達與溝通優勢","激勵團隊士氣","建立廣泛人際網絡"],
+      感情: ["真誠表達情感需求","創造浪漫驚喜時刻","保持關係中的熱情"],
+      養生: ["藝術創作抒發情感","社交活動保持活力","表達性運動如舞蹈"]
+    },
+    勾陳: {
+      職場: ["建立穩定工作流程","確保任務按時完成","注重細節與品質"],
+      感情: ["建立信任與安全感","保持承諾與一致性","穩定表達關心"],
+      養生: ["規律作息保持平衡","均衡飲食與運動","建立健康生活習慣"]
+    },
+    螣蛇: {
+      職場: ["發揮洞察與協調能力","理解團隊成員需求","妥善處理人際關係"],
+      感情: ["深入理解伴侶感受","敏感體貼對方需求","建立深度情感連結"],
+      養生: ["冥想與內省練習","情緒管理與釋放","溫和調理身心"]
+    },
+    白虎: {
+      職場: ["果斷決策追求效率","設定明確目標","承擔領導責任"],
+      感情: ["直接表達愛與承諾","保護與支持伴侶","明確關係界線"],
+      養生: ["高強度運動釋壓","挑戰體能極限","培養紀律性"]
+    },
+    玄武: {
+      職場: ["策略規劃長遠發展","深入分析問題本質","獨立思考與判斷"],
+      感情: ["深度交流思想","理性分析關係","保持個人空間"],
+      養生: ["靜坐與閱讀","深度思考與反思","獨立運動如游泳"]
+    }
+  };
+  
+  return adviceBank[mainBeast] || adviceBank['青龍'];
+}
+
 // ========== 超人顯示資料 ==========
 const superheroData = {
   '青龍': {
@@ -679,487 +1353,6 @@ const superheroData = {
     }
   }
 };
-
-// ========== 初始化應用 ==========
-document.addEventListener('DOMContentLoaded', function() {
-  initializeApp();
-});
-
-function initializeApp() {
-  document.getElementById('report-date').textContent = new Date().toLocaleDateString('zh-TW', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric', 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  });
-
-  initializeQuestions();
-  initializeSettings();
-  initializeEventListeners();
-}
-
-function initializeQuestions() {
-  const shuffledBANK = [...BANK].sort(() => 0.5 - Math.random());
-  const qWrap = document.getElementById("qWrap");
-  qWrap.innerHTML = '';
-  
-  shuffledBANK.forEach((q, i) => {
-    qWrap.innerHTML += `
-      <li class="question-item">
-        <p class="font-medium mb-2">${i+1}. ${q.t}</p>
-        <div class="slider-container">
-          <input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'>
-          <div class="slider-labels">
-            <span>非常不同意</span>
-            <span>不同意</span>
-            <span>普通</span>
-            <span>同意</span>
-            <span>非常同意</span>
-          </div>
-        </div>
-      </li>`;
-  });
-  
-  qWrap.innerHTML += '<div id="progress" class="text-right text-sm mt-4">0/30</div>';
-  
-  document.querySelectorAll('input[type="range"]').forEach(slider => {
-    slider.addEventListener('input', () => {
-      const answered = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== "3").length;
-      document.getElementById("progress").textContent = `${answered}/30`;
-    });
-  });
-}
-
-function initializeSettings() {
-  const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
-  
-  document.getElementById('contactTitle').value = savedSettings.title || '掃碼預約一對一諮詢';
-  document.getElementById('contactLine1').value = savedSettings.line1 || 'Line ID: @immortalguiide';
-  document.getElementById('contactLine2').value = savedSettings.line2 || '專業諮詢預約';
-  document.getElementById('themeSelect').value = savedSettings.theme || 'warm';
-  document.getElementById('hueSlider').value = savedSettings.hue || 40;
-  document.getElementById('hueValue').textContent = savedSettings.hue || 40;
-  
-  const savedFont = savedSettings.font || "'Noto Sans TC', sans-serif";
-  document.documentElement.style.setProperty('--report-font', savedFont);
-  
-  const savedFontSize = savedSettings.fontSize || 14;
-  document.getElementById('fontSizeSlider').value = savedFontSize;
-  document.getElementById('fontSizeValue').textContent = savedFontSize;
-  updateFontSizePreview(savedFontSize);
-  
-  document.querySelectorAll('.font-option').forEach(option => {
-    if (option.dataset.font === savedFont) {
-      option.classList.add('active');
-    } else {
-      option.classList.remove('active');
-    }
-  });
-  
-  const qrCodePreview = document.getElementById('qrCodePreview');
-  if (savedSettings.qrDataUrl) {
-    qrCodePreview.src = savedSettings.qrDataUrl;
-  }
-  
-  updatePrintHeader();
-}
-
-function updateFontSizePreview(size) {
-  const preview = document.getElementById('fontSizePreview');
-  preview.style.fontSize = size + 'px';
-  document.documentElement.style.setProperty('--report-font-size', size + 'px');
-}
-
-function initializeEventListeners() {
-  document.getElementById('toggleSettingsBtn').addEventListener('click', function() {
-    const settingsPanel = document.getElementById('reportSettingsForm');
-    settingsPanel.classList.toggle('hidden');
-  });
-  
-  document.getElementById('closeSettingsBtn').addEventListener('click', function() {
-    document.getElementById('reportSettingsForm').classList.add('hidden');
-  });
-  
-  document.getElementById('reportSettingsForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    saveSettings();
-  });
-  
-  document.querySelectorAll('.font-option').forEach(option => {
-    option.addEventListener('click', function() {
-      document.querySelectorAll('.font-option').forEach(opt => opt.classList.remove('active'));
-      this.classList.add('active');
-      const selectedFont = this.dataset.font;
-      document.documentElement.style.setProperty('--report-font', selectedFont);
-    });
-  });
-  
-  document.getElementById('fontSizeSlider').addEventListener('input', function() {
-    const size = this.value;
-    document.getElementById('fontSizeValue').textContent = size;
-    updateFontSizePreview(size);
-  });
-  
-  document.getElementById('hueSlider').addEventListener('input', function() {
-    document.getElementById('hueValue').textContent = this.value;
-  });
-  
-  document.getElementById('form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    submitQuiz();
-  });
-  
-  document.getElementById('btnFillMid').addEventListener('click', function() {
-    document.querySelectorAll('input[type="range"]').forEach(slider => {
-      slider.value = 3;
-    });
-    const answered = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== "3").length;
-    document.getElementById("progress").textContent = `${answered}/30`;
-  });
-  
-  // AI分析按鈕 - 使用真正的API
-  document.getElementById('btnAI').addEventListener('click', function() {
-    generateRealAIAnalysis();
-  });
-  
-  document.getElementById('btnRetry').addEventListener('click', function() {
-    generateRealAIAnalysis();
-  });
-  
-  document.getElementById('btnShare').addEventListener('click', function() {
-    shareResult();
-  });
-}
-
-function saveSettings() {
-  const selectedFont = document.querySelector('.font-option.active').dataset.font;
-  const fontSize = document.getElementById('fontSizeSlider').value;
-  
-  const settings = {
-    qrDataUrl: document.getElementById('qrCodePreview').src,
-    title: document.getElementById('contactTitle').value,
-    line1: document.getElementById('contactLine1').value,
-    line2: document.getElementById('contactLine2').value,
-    theme: document.getElementById('themeSelect').value,
-    hue: document.getElementById('hueSlider').value,
-    font: selectedFont,
-    fontSize: fontSize
-  };
-  
-  localStorage.setItem('reportContactSettings', JSON.stringify(settings));
-  updatePrintHeader();
-  alert('設定已儲存！');
-  document.getElementById('reportSettingsForm').classList.add('hidden');
-}
-
-function updatePrintHeader() {
-  const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
-  document.getElementById('print-qrcode-title').textContent = savedSettings.title || '掃碼預約一對一諮詢';
-  document.getElementById('print-qrcode-subtitle').textContent = savedSettings.line1 || 'Line ID: @immortalguiide';
-  const qrCodeImg = document.getElementById('print-qrcode-img');
-  if (savedSettings.qrDataUrl) {
-    qrCodeImg.src = savedSettings.qrDataUrl;
-  }
-}
-
-// ========== 真正的AI分析功能 ==========
-async function generateRealAIAnalysis() {
-  const saved = JSON.parse(localStorage.getItem("shen-shou-result") || "null");
-  if (!saved) {
-    alert("⚠️請先完成測驗。");
-    return;
-  }
-
-  const loadingEl = document.getElementById("ai-loading");
-  const contentEl = document.getElementById("ai-analysis-content");
-  const btnAI = document.getElementById("btnAI");
-  const btnRetry = document.getElementById("btnRetry");
-  
-  loadingEl.style.display = "block";
-  contentEl.style.display = "none";
-  btnRetry.style.display = "none";
-  btnAI.disabled = true;
-
-  try {
-    simulateRealProgress();
-    
-    const analysisResult = await callExistingVercelAPI(saved);
-    displayRealAIAnalysis(analysisResult);
-    
-  } catch (error) {
-    console.error('AI分析失敗:', error);
-    showAIFallbackMessage();
-  } finally {
-    loadingEl.style.display = "none";
-    contentEl.style.display = "block";
-    btnRetry.style.display = "inline-block";
-    btnAI.disabled = false;
-  }
-}
-
-// ========== 調用您現有的 Vercel API ==========
-async function callExistingVercelAPI(userData) {
-  const API_URL = '/api/ai';
-  
-  const requestData = {
-    beastType: userData.summary.top,
-    scores: userData.scores,
-    gender: userData.gender,
-    variant: userData.summary.variant,
-  };
-
-  console.log('發送AI分析請求:', requestData);
-
-  const response = await fetch(API_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(requestData)
-  });
-
-  if (!response.ok) {
-    throw new Error(`API請求失敗: ${response.status}`);
-  }
-
-  const result = await response.json();
-  console.log('AI分析響應:', result);
-  return result;
-}
-
-// ========== 顯示真正的AI分析結果 ==========
-function displayRealAIAnalysis(analysisResult) {
-  document.getElementById("ai-personality").innerHTML = 
-    formatAIContent(analysisResult.personality || analysisResult.personality_analysis);
-  document.getElementById("ai-strengths").innerHTML = 
-    formatAIContent(analysisResult.strengths || analysisResult.strengths_analysis);
-  document.getElementById("ai-career").innerHTML = 
-    formatAIContent(analysisResult.career || analysisResult.career_advice);
-  document.getElementById("ai-relationships").innerHTML = 
-    formatAIContent(analysisResult.relationships || analysisResult.relationship_advice);
-  document.getElementById("ai-growth").innerHTML = 
-    formatAIContent(analysisResult.growth || analysisResult.growth_recommendations);
-  document.getElementById("ai-money").innerHTML = 
-    formatAIContent(analysisResult.money || analysisResult.money_insights);
-}
-
-function formatAIContent(content) {
-  if (typeof content === 'string') {
-    return content
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/- (.*?)(?=\n|$)/g, '<li>$1</li>')
-      .replace(/(?:\n|^)([^<].*?)(?=\n|$)/g, '<p>$1</p>')
-      .replace(/<p><li>/g, '<li>')
-      .replace(/<\/li><\/p>/g, '</li>');
-  }
-  return content;
-}
-
-// ========== 錯誤處理 ==========
-function showAIFallbackMessage() {
-  const saved = JSON.parse(localStorage.getItem("shen-shou-result") || "null");
-  if (!saved) return;
-
-  document.getElementById("ai-personality").innerHTML = 
-    '<div class="text-amber-600 font-semibold">AI分析暫時不可用，已為您提供基礎分析報告</div>' + 
-    '<div class="mt-2">' + getBasicAnalysis(saved.summary.top) + '</div>';
-}
-
-function getBasicAnalysis(beastType) {
-  const basicAnalysis = {
-    '青龍': '您具有創新思維和豐富的想像力，適合從事創意相關工作。',
-    '朱雀': '您擅長溝通表達，具有很強的感染力，適合人際互動相關工作。',
-    '勾陳': '您重視穩定和安全，做事有條理，適合需要細心和耐心的工作。',
-    '螣蛇': '您洞察力強，善於協調人際關係，適合需要溝通協調的工作。',
-    '白虎': '您行動力強，目標導向明確，適合需要決斷力和執行力的工作。',
-    '玄武': '您思考深入，具有很好的分析能力，適合研究和分析相關工作。'
-  };
-  return basicAnalysis[beastType] || '暫無分析數據';
-}
-
-function simulateRealProgress() {
-  const progressBar = document.getElementById("progress-bar");
-  const loadingStep = document.getElementById("loading-step");
-  
-  const steps = [
-    {percent: 10, text: "連線AI分析伺服器..."},
-    {percent: 25, text: "分析人格特質數據..."},
-    {percent: 40, text: "生成個人化洞察..."},
-    {percent: 60, text: "計算最佳發展建議..."},
-    {percent: 75, text: "生成金錢卦象解析..."},
-    {percent: 90, text: "整合分析報告..."},
-    {percent: 100, text: "分析完成！"}
-  ];
-  
-  let currentStep = 0;
-  const interval = setInterval(() => {
-    if (currentStep < steps.length) {
-      progressBar.style.width = steps[currentStep].percent + "%";
-      loadingStep.textContent = steps[currentStep].text;
-      currentStep++;
-    } else {
-      clearInterval(interval);
-    }
-  }, 800);
-}
-
-function submitQuiz() {
-  const scores = {青龍:0, 朱雀:0, 勾陳:0, 螣蛇:0, 白虎:0, 玄武:0};
-  
-  for (let i = 0; i < 30; i++) {
-    const slider = document.getElementById(`q${i}`);
-    if (slider) {
-      const question = BANK[i];
-      scores[question.b] += parseInt(slider.value);
-    }
-  }
-  
-  const summary = summarize(scores);
-  window.currentBeastType = summary.top;
-  
-  renderRadar(scores);
-  renderReport(summary, scores);
-  
-  const gender = document.querySelector('input[name="gender"]:checked').value;
-  localStorage.setItem("shen-shou-result", JSON.stringify({
-    scores: scores,
-    summary: summary,
-    gender: gender
-  }));
-  
-  document.getElementById("result").style.display = "grid";
-  document.getElementById("aiReport").style.display = "block";
-  
-  showSuperhero(summary.top);
-}
-
-function summarize(scores) {
-  const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-  const top = entries[0];
-  const secondary = entries[1];
-  const dual = top[1] - secondary[1] <= 2 ? [top[0], secondary[0]] : null;
-  const total = Object.values(scores).reduce((sum, score) => sum + score, 0);
-  const variantIndex = total % 12;
-  const variants = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
-  
-  return {
-    top: top[0],
-    dual: dual,
-    ranking: entries,
-    variant: variants[variantIndex],
-    total: total,
-    scores: scores
-  };
-}
-
-let radarChart = null;
-
-function renderRadar(scores) {
-  const canvas = document.getElementById("radar");
-  if (radarChart) {
-    radarChart.destroy();
-  }
-  
-  radarChart = new Chart(canvas, {
-    type: "radar",
-    data: {
-      labels: Object.keys(scores),
-      datasets: [{
-        label: "六獸能量",
-        data: Object.values(scores),
-        backgroundColor: "rgba(182,130,43,0.15)",
-        borderColor: "#b6822b",
-        pointBackgroundColor: "#b6822b",
-        pointBorderColor: "#fff",
-        pointHoverBackgroundColor: "#fff",
-        pointHoverBorderColor: "#b6822b"
-      }]
-    },
-    options: {
-      scales: {
-        r: {
-          beginAtZero: true,
-          max: 25,
-          ticks: {
-            stepSize: 5
-          }
-        }
-      },
-      plugins: {
-        legend: {
-          display: false
-        }
-      },
-      maintainAspectRatio: false
-    }
-  });
-}
-
-function renderReport(summary, scores) {
-  document.getElementById("beastSVG").innerHTML = `
-    <div class="beast-text-container">
-      ${summary.top}
-    </div>
-  `;
-  
-  document.getElementById("mainBeastTitle").textContent = summary.dual ? 
-    `雙獸${summary.variant}型：${summary.top} × ${summary.dual[1]}` : 
-    `主${summary.variant}型：${summary.top}`;
-  
-  document.getElementById("dualHint").textContent = summary.dual ? 
-    `第二主導能量：${summary.dual[1]}` : "";
-  
-  document.getElementById("mainBeastSummary").textContent = 
-    `你的主型為 ${summary.top}${summary.variant}型，融合${summary.top}能量與${summary.variant}地支特質。`;
-  
-  const advice = generateAdvice(summary.top);
-  const adviceHTML = (title, items) => 
-    `<div class='border rounded p-2'><b>${title}</b><ul class='list-disc pl-5'>${items.map(item => `<li>${item}</li>`).join("")}</ul></div>`;
-  
-  document.getElementById("adviceCols").innerHTML = 
-    adviceHTML("職場建議", advice.職場) +
-    adviceHTML("感情建議", advice.感情) +
-    adviceHTML("養生建議", advice.養生);
-}
-
-function generateAdvice(mainBeast) {
-  const adviceBank = {
-    青龍: {
-      職場: ["創新領頭，勇於嘗試新方法","帶領團隊突破傳統框架","開拓新市場或業務領域"],
-      感情: ["保持關係中的新鮮感","共同探索新體驗","開放溝通創新想法"],
-      養生: ["戶外運動釋放能量","嘗試新的運動方式","保持生活多樣性"]
-    },
-    朱雀: {
-      職場: ["發揮表達與溝通優勢","激勵團隊士氣","建立廣泛人際網絡"],
-      感情: ["真誠表達情感需求","創造浪漫驚喜時刻","保持關係中的熱情"],
-      養生: ["藝術創作抒發情感","社交活動保持活力","表達性運動如舞蹈"]
-    },
-    勾陳: {
-      職場: ["建立穩定工作流程","確保任務按時完成","注重細節與品質"],
-      感情: ["建立信任與安全感","保持承諾與一致性","穩定表達關心"],
-      養生: ["規律作息保持平衡","均衡飲食與運動","建立健康生活習慣"]
-    },
-    螣蛇: {
-      職場: ["發揮洞察與協調能力","理解團隊成員需求","妥善處理人際關係"],
-      感情: ["深入理解伴侶感受","敏感體貼對方需求","建立深度情感連結"],
-      養生: ["冥想與內省練習","情緒管理與釋放","溫和調理身心"]
-    },
-    白虎: {
-      職場: ["果斷決策追求效率","設定明確目標","承擔領導責任"],
-      感情: ["直接表達愛與承諾","保護與支持伴侶","明確關係界線"],
-      養生: ["高強度運動釋壓","挑戰體能極限","培養紀律性"]
-    },
-    玄武: {
-      職場: ["策略規劃長遠發展","深入分析問題本質","獨立思考與判斷"],
-      感情: ["深度交流思想","理性分析關係","保持個人空間"],
-      養生: ["靜坐與閱讀","深度思考與反思","獨立運動如游泳"]
-    }
-  };
-  
-  return adviceBank[mainBeast] || adviceBank['青龍'];
-}
 
 function showSuperhero(beastType) {
   const gender = document.querySelector('input[name="gender"]:checked').value;
