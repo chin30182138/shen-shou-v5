@@ -486,7 +486,7 @@
 </main>
 
 <script>
-// 測驗題庫
+// ========== 測驗題庫 ==========
 const BANK = [
   {t: "我常有突如其來的靈感並想立即嘗試。", b: "青龍"},
   {t: "我喜歡打破常規尋找新方法。", b: "青龍"},
@@ -520,490 +520,6 @@ const BANK = [
   {t: "我習慣冷靜看待問題。", b: "玄武"}
 ];
 
-// AI分析資料庫 - 豐富版本
-const aiAnalysisData = {
-  '青龍': {
-    personality: `青龍型人格的你，內心蘊藏著一股生生不息的創造活水。你的思維如同春雷破曉，總能在平凡中看見不凡，在框架外找到新路。`,
-    strengths: `你最大的優勢在於那無人能及的「靈感爆發力」與「靈活應變性」。`,
-    career: `在職業選擇上，你如同翱翔的巨龍，最適合在需要源源不絕創意的領域發光發熱。`,
-    relationships: `在關係中追求新鮮感和成長，需要足夠的個人空間和探索自由。`,
-    growth: `學習將創意落地執行，培養持續性和專注力，避免過度分散注意力。`,
-    money: `財富能量如活水源頭，源源不絕但需要正確引導。適合開創性投資和創新項目。`
-  },
-  '朱雀': {
-    personality: `朱雀型人格的你，生來就是舞台的焦點，人群中的發光體。`,
-    strengths: `你與生俱來的「溝通魅力」和「超凡感染力」是你最強大的武器。`,
-    career: `你的天賦在於所有需要與「人」打交道的工作。`,
-    relationships: `熱情而投入，重視情感表達和深度連結，需要被關注和認可。`,
-    growth: `平衡情感表達與理性思考，學習獨處和自我反思。`,
-    money: `財富能量如火焰燃燒，熱情旺盛但需要穩定燃料。`
-  },
-  '勾陳': {
-    personality: `勾陳型人格的你，如同大地的守護者，為周圍的一切提供穩定和安全感。`,
-    strengths: `你最大的優勢在於無與倫比的可靠性和組織能力。`,
-    career: `在職業選擇上，你適合需要穩定性和系統思維的領域。`,
-    relationships: `在關係中提供堅實的支持和長久的承諾，重視穩定和安全。`,
-    growth: `學習接受變化和不確定性，培養靈活性和冒險精神。`,
-    money: `財富能量穩定增長，適合長期投資策略。`
-  },
-  '螣蛇': {
-    personality: `螣蛇型人格的你，擁有敏銳的直覺和洞察力，能夠感知他人未說出口的需求。`,
-    strengths: `你最大的優勢在於人際洞察和時機把握能力。`,
-    career: `適合從事需要協調和洞察力的工作。`,
-    relationships: `在關係中追求深度理解和心靈契合，重視情感的細膩交流。`,
-    growth: `需要學習建立明確的個人邊界，培養果斷力和行動力。`,
-    money: `財富能量靈活多變，適合時機性投資。`
-  },
-  '白虎': {
-    personality: `白虎型人格的你，行動力強且目標明確，具有天生的領導氣質。`,
-    strengths: `你最大的優勢在於快速決策和高效執行。`,
-    career: `適合需要決斷力和行動力的職業。`,
-    relationships: `在關係中直接而保護，重視行動證明和實際付出。`,
-    growth: `需要培養耐心和團隊合作能力，學習傾聽和理解他人觀點。`,
-    money: `財富能量迅猛，適合主動投資策略。`
-  },
-  '玄武': {
-    personality: `玄武型人格的你，深思熟慮且理性冷靜，具有優秀的分析能力。`,
-    strengths: `你最大的優勢在於深度思考和策略規劃。`,
-    career: `適合研究和分析型的工作環境。`,
-    relationships: `在關係中追求智慧碰撞和深度交流，重視思想的共鳴。`,
-    growth: `需要加強行動力和情感表達，學習將想法轉化為實際行動。`,
-    money: `財富能量深藏，適合長期智慧投資。`
-  }
-};
-
-// 初始化應用
-document.addEventListener('DOMContentLoaded', function() {
-  initializeApp();
-});
-
-function initializeApp() {
-  // 設定報告日期
-  document.getElementById('report-date').textContent = new Date().toLocaleDateString('zh-TW', { 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric', 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  });
-
-  // 初始化測驗題目
-  initializeQuestions();
-  
-  // 初始化設定面板
-  initializeSettings();
-  
-  // 初始化事件監聽器
-  initializeEventListeners();
-}
-
-function initializeQuestions() {
-  const shuffledBANK = [...BANK].sort(() => 0.5 - Math.random());
-  const qWrap = document.getElementById("qWrap");
-  qWrap.innerHTML = '';
-  
-  shuffledBANK.forEach((q, i) => {
-    qWrap.innerHTML += `
-      <li class="question-item">
-        <p class="font-medium mb-2">${i+1}. ${q.t}</p>
-        <div class="slider-container">
-          <input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'>
-          <div class="slider-labels">
-            <span>非常不同意</span>
-            <span>不同意</span>
-            <span>普通</span>
-            <span>同意</span>
-            <span>非常同意</span>
-          </div>
-        </div>
-      </li>`;
-  });
-  
-  qWrap.innerHTML += '<div id="progress" class="text-right text-sm mt-4">0/30</div>';
-  
-  // 更新進度顯示
-  document.querySelectorAll('input[type="range"]').forEach(slider => {
-    slider.addEventListener('input', () => {
-      const answered = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== "3").length;
-      document.getElementById("progress").textContent = `${answered}/30`;
-    });
-  });
-}
-
-function initializeSettings() {
-  const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
-  
-  // 設定表單值
-  document.getElementById('contactTitle').value = savedSettings.title || '掃碼預約一對一諮詢';
-  document.getElementById('contactLine1').value = savedSettings.line1 || 'Line ID: @immortalguiide';
-  document.getElementById('contactLine2').value = savedSettings.line2 || '專業諮詢預約';
-  document.getElementById('themeSelect').value = savedSettings.theme || 'warm';
-  document.getElementById('hueSlider').value = savedSettings.hue || 40;
-  document.getElementById('hueValue').textContent = savedSettings.hue || 40;
-  
-  // 字體設定
-  const savedFont = savedSettings.font || "'Noto Sans TC', sans-serif";
-  document.documentElement.style.setProperty('--report-font', savedFont);
-  
-  // 字體大小設定
-  const savedFontSize = savedSettings.fontSize || 14;
-  document.getElementById('fontSizeSlider').value = savedFontSize;
-  document.getElementById('fontSizeValue').textContent = savedFontSize;
-  updateFontSizePreview(savedFontSize);
-  
-  // 更新字體選擇按鈕狀態
-  document.querySelectorAll('.font-option').forEach(option => {
-    if (option.dataset.font === savedFont) {
-      option.classList.add('active');
-    } else {
-      option.classList.remove('active');
-    }
-  });
-  
-  // QR Code 圖片
-  const qrCodePreview = document.getElementById('qrCodePreview');
-  if (savedSettings.qrDataUrl) {
-    qrCodePreview.src = savedSettings.qrDataUrl;
-  }
-  
-  updatePrintHeader();
-}
-
-function updateFontSizePreview(size) {
-  const preview = document.getElementById('fontSizePreview');
-  preview.style.fontSize = size + 'px';
-  document.documentElement.style.setProperty('--report-font-size', size + 'px');
-}
-
-function initializeEventListeners() {
-  // 設定面板開關
-  document.getElementById('toggleSettingsBtn').addEventListener('click', function() {
-    const settingsPanel = document.getElementById('reportSettingsForm');
-    settingsPanel.classList.toggle('hidden');
-  });
-  
-  // 關閉設定面板
-  document.getElementById('closeSettingsBtn').addEventListener('click', function() {
-    document.getElementById('reportSettingsForm').classList.add('hidden');
-  });
-  
-  // 設定表單提交
-  document.getElementById('reportSettingsForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-    saveSettings();
-  });
-  
-  // 字體選擇
-  document.querySelectorAll('.font-option').forEach(option => {
-    option.addEventListener('click', function() {
-      document.querySelectorAll('.font-option').forEach(opt => opt.classList.remove('active'));
-      this.classList.add('active');
-      const selectedFont = this.dataset.font;
-      document.documentElement.style.setProperty('--report-font', selectedFont);
-    });
-  });
-  
-  // 字體大小滑桿
-  document.getElementById('fontSizeSlider').addEventListener('input', function() {
-    const size = this.value;
-    document.getElementById('fontSizeValue').textContent = size;
-    updateFontSizePreview(size);
-  });
-  
-  // 色調滑桿
-  document.getElementById('hueSlider').addEventListener('input', function() {
-    document.getElementById('hueValue').textContent = this.value;
-  });
-  
-  // 測驗表單提交
-  document.getElementById('form').addEventListener('submit', function(e) {
-    e.preventDefault();
-    submitQuiz();
-  });
-  
-  // 全部填3按鈕
-  document.getElementById('btnFillMid').addEventListener('click', function() {
-    document.querySelectorAll('input[type="range"]').forEach(slider => {
-      slider.value = 3;
-    });
-    const answered = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== "3").length;
-    document.getElementById("progress").textContent = `${answered}/30`;
-  });
-  
-  // AI分析按鈕
-  document.getElementById('btnAI').addEventListener('click', function() {
-    generateAIAnalysis();
-  });
-  
-  // 分享按鈕
-  document.getElementById('btnShare').addEventListener('click', function() {
-    shareResult();
-  });
-}
-
-function saveSettings() {
-  const selectedFont = document.querySelector('.font-option.active').dataset.font;
-  const fontSize = document.getElementById('fontSizeSlider').value;
-  
-  const settings = {
-    qrDataUrl: document.getElementById('qrCodePreview').src,
-    title: document.getElementById('contactTitle').value,
-    line1: document.getElementById('contactLine1').value,
-    line2: document.getElementById('contactLine2').value,
-    theme: document.getElementById('themeSelect').value,
-    hue: document.getElementById('hueSlider').value,
-    font: selectedFont,
-    fontSize: fontSize
-  };
-  
-  localStorage.setItem('reportContactSettings', JSON.stringify(settings));
-  updatePrintHeader();
-  alert('設定已儲存！');
-  document.getElementById('reportSettingsForm').classList.add('hidden');
-}
-
-function updatePrintHeader() {
-  const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
-  document.getElementById('print-qrcode-title').textContent = savedSettings.title || '掃碼預約一對一諮詢';
-  document.getElementById('print-qrcode-subtitle').textContent = savedSettings.line1 || 'Line ID: @immortalguiide';
-  const qrCodeImg = document.getElementById('print-qrcode-img');
-  if (savedSettings.qrDataUrl) {
-    qrCodeImg.src = savedSettings.qrDataUrl;
-  }
-}
-
-function submitQuiz() {
-  const scores = {青龍:0, 朱雀:0, 勾陳:0, 螣蛇:0, 白虎:0, 玄武:0};
-  
-  for (let i = 0; i < 30; i++) {
-    const slider = document.getElementById(`q${i}`);
-    if (slider) {
-      const question = BANK[i];
-      scores[question.b] += parseInt(slider.value);
-    }
-  }
-  
-  const summary = summarize(scores);
-  window.currentBeastType = summary.top;
-  
-  renderRadar(scores);
-  renderReport(summary, scores);
-  
-  const gender = document.querySelector('input[name="gender"]:checked').value;
-  localStorage.setItem("shen-shou-result", JSON.stringify({
-    scores: scores,
-    summary: summary,
-    gender: gender
-  }));
-  
-  document.getElementById("result").style.display = "grid";
-  document.getElementById("aiReport").style.display = "block";
-}
-
-function summarize(scores) {
-  const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
-  const top = entries[0];
-  const secondary = entries[1];
-  const dual = top[1] - secondary[1] <= 2 ? [top[0], secondary[0]] : null;
-  const total = Object.values(scores).reduce((sum, score) => sum + score, 0);
-  const variantIndex = total % 12;
-  const variants = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
-  
-  return {
-    top: top[0],
-    dual: dual,
-    ranking: entries,
-    variant: variants[variantIndex],
-    total: total,
-    scores: scores
-  };
-}
-
-let radarChart = null;
-
-function renderRadar(scores) {
-  const canvas = document.getElementById("radar");
-  if (radarChart) {
-    radarChart.destroy();
-  }
-  
-  radarChart = new Chart(canvas, {
-    type: "radar",
-    data: {
-      labels: Object.keys(scores),
-      datasets: [{
-        label: "六獸能量",
-        data: Object.values(scores),
-        backgroundColor: "rgba(182,130,43,0.15)",
-        borderColor: "#b6822b",
-        pointBackgroundColor: "#b6822b",
-        pointBorderColor: "#fff",
-        pointHoverBackgroundColor: "#fff",
-        pointHoverBorderColor: "#b6822b"
-      }]
-    },
-    options: {
-      scales: {
-        r: {
-          beginAtZero: true,
-          max: 25,
-          ticks: {
-            stepSize: 5
-          }
-        }
-      },
-      plugins: {
-        legend: {
-          display: false
-        }
-      },
-      maintainAspectRatio: false
-    }
-  });
-}
-
-function renderReport(summary, scores) {
-  document.getElementById("beastSVG").innerHTML = `
-    <div class="beast-text-container">
-      ${summary.top}
-    </div>
-  `;
-  
-  document.getElementById("mainBeastTitle").textContent = summary.dual ? 
-    `雙獸${summary.variant}型：${summary.top} × ${summary.dual[1]}` : 
-    `主${summary.variant}型：${summary.top}`;
-  
-  document.getElementById("dualHint").textContent = summary.dual ? 
-    `第二主導能量：${summary.dual[1]}` : "";
-  
-  document.getElementById("mainBeastSummary").textContent = 
-    `你的主型為 ${summary.top}${summary.variant}型，融合${summary.top}能量與${summary.variant}地支特質。`;
-  
-  const advice = generateAdvice(summary.top);
-  const adviceHTML = (title, items) => 
-    `<div class='border rounded p-2'><b>${title}</b><ul class='list-disc pl-5'>${items.map(item => `<li>${item}</li>`).join("")}</ul></div>`;
-  
-  document.getElementById("adviceCols").innerHTML = 
-    adviceHTML("職場建議", advice.職場) +
-    adviceHTML("感情建議", advice.感情) +
-    adviceHTML("養生建議", advice.養生);
-}
-
-function generateAdvice(mainBeast) {
-  const adviceBank = {
-    青龍: {
-      職場: ["創新領頭，勇於嘗試新方法","帶領團隊突破傳統框架","開拓新市場或業務領域"],
-      感情: ["保持關係中的新鮮感","共同探索新體驗","開放溝通創新想法"],
-      養生: ["戶外運動釋放能量","嘗試新的運動方式","保持生活多樣性"]
-    },
-    朱雀: {
-      職場: ["發揮表達與溝通優勢","激勵團隊士氣","建立廣泛人際網絡"],
-      感情: ["真誠表達情感需求","創造浪漫驚喜時刻","保持關係中的熱情"],
-      養生: ["藝術創作抒發情感","社交活動保持活力","表達性運動如舞蹈"]
-    },
-    勾陳: {
-      職場: ["建立穩定工作流程","確保任務按時完成","注重細節與品質"],
-      感情: ["建立信任與安全感","保持承諾與一致性","穩定表達關心"],
-      養生: ["規律作息保持平衡","均衡飲食與運動","建立健康生活習慣"]
-    },
-    螣蛇: {
-      職場: ["發揮洞察與協調能力","理解團隊成員需求","妥善處理人際關係"],
-      感情: ["深入理解伴侶感受","敏感體貼對方需求","建立深度情感連結"],
-      養生: ["冥想與內省練習","情緒管理與釋放","溫和調理身心"]
-    },
-    白虎: {
-      職場: ["果斷決策追求效率","設定明確目標","承擔領導責任"],
-      感情: ["直接表達愛與承諾","保護與支持伴侶","明確關係界線"],
-      養生: ["高強度運動釋壓","挑戰體能極限","培養紀律性"]
-    },
-    玄武: {
-      職場: ["策略規劃長遠發展","深入分析問題本質","獨立思考與判斷"],
-      感情: ["深度交流思想","理性分析關係","保持個人空間"],
-      養生: ["靜坐與閱讀","深度思考與反思","獨立運動如游泳"]
-    }
-  };
-  
-  return adviceBank[mainBeast] || adviceBank['青龍'];
-}
-
-function generateAIAnalysis() {
-  const saved = JSON.parse(localStorage.getItem("shen-shou-result") || "null");
-  if (!saved) {
-    alert("⚠️請先完成測驗。");
-    return;
-  }
-  
-  const loadingEl = document.getElementById("ai-loading");
-  const contentEl = document.getElementById("ai-analysis-content");
-  const btnAI = document.getElementById("btnAI");
-  const btnRetry = document.getElementById("btnRetry");
-  
-  loadingEl.style.display = "block";
-  contentEl.style.display = "none";
-  btnRetry.style.display = "none";
-  btnAI.disabled = true;
-  
-  simulateProgress();
-  
-  setTimeout(() => {
-    fillAIAnalysis(saved.summary.top);
-    loadingEl.style.display = "none";
-    contentEl.style.display = "block";
-    btnRetry.style.display = "inline-block";
-    btnAI.disabled = false;
-  }, 3000);
-}
-
-function fillAIAnalysis(beastType) {
-  const data = aiAnalysisData[beastType] || aiAnalysisData['青龍'];
-  document.getElementById("ai-personality").innerHTML = data.personality;
-  document.getElementById("ai-strengths").innerHTML = data.strengths;
-  document.getElementById("ai-career").innerHTML = data.career;
-  document.getElementById("ai-relationships").innerHTML = data.relationships;
-  document.getElementById("ai-growth").innerHTML = data.growth;
-  document.getElementById("ai-money").innerHTML = data.money;
-}
-
-function simulateProgress() {
-  const progressBar = document.getElementById("progress-bar");
-  const loadingStep = document.getElementById("loading-step");
-  const steps = [
-    {percent: 20, text: "分析人格特質..."},
-    {percent: 40, text: "解析能量分布..."},
-    {percent: 60, text: "生成發展建議..."},
-    {percent: 80, text: "計算五行金錢卦..."},
-    {percent: 95, text: "最終整合報告..."},
-    {percent: 100, text: "分析完成！"}
-  ];
-  
-  let currentStep = 0;
-  const interval = setInterval(() => {
-    if (currentStep < steps.length) {
-      progressBar.style.width = steps[currentStep].percent + "%";
-      loadingStep.textContent = steps[currentStep].text;
-      currentStep++;
-    } else {
-      clearInterval(interval);
-    }
-  }, 500);
-}
-
-function shareResult() {
-  html2canvas(document.getElementById("result")).then(canvas => {
-    const link = document.createElement("a");
-    link.download = "shenshou-result.png";
-    link.href = canvas.toDataURL();
-    link.click();
-  });
-}
-
-function printAnalysis() {
-  window.print();
-}
-
-window.currentBeastType = '';
-</script>
-  <script>
 // ========== 超人顯示資料 ==========
 const superheroData = {
   '青龍': {
@@ -1164,31 +680,331 @@ const superheroData = {
   }
 };
 
-// ========== 超人顯示函數 ==========
-function showSuperhero(beastType) {
-  const gender = document.querySelector('input[name="gender"]:checked').value;
-  const beastData = superheroData[beastType];
+// ========== 初始化應用 ==========
+document.addEventListener('DOMContentLoaded', function() {
+  initializeApp();
+});
+
+function initializeApp() {
+  document.getElementById('report-date').textContent = new Date().toLocaleDateString('zh-TW', { 
+    year: 'numeric', 
+    month: 'long', 
+    day: 'numeric', 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  });
+
+  initializeQuestions();
+  initializeSettings();
+  initializeEventListeners();
+}
+
+function initializeQuestions() {
+  const shuffledBANK = [...BANK].sort(() => 0.5 - Math.random());
+  const qWrap = document.getElementById("qWrap");
+  qWrap.innerHTML = '';
   
-  if (beastData) {
-    const genderData = beastData[gender] || beastData.male;
-    
-    document.getElementById("superhero-name").textContent = genderData.name;
-    document.getElementById("superhero-ability").textContent = genderData.ability;
-    document.getElementById("superhero-mission").textContent = genderData.mission;
-    document.getElementById("superhero-local").textContent = `🏮 台灣在地版：${genderData.localName} - ${genderData.description}`;
-    
-    // 設置圖片 - 如果圖片不存在就顯示預設圖片
-    const superheroImage = document.getElementById("superhero-image");
-    superheroImage.src = genderData.image;
-    superheroImage.onerror = function() {
-      this.src = 'https://via.placeholder.com/150x150.png?text=神獸圖片';
-    };
-    
-    document.getElementById("superheroReport").style.display = "block";
+  shuffledBANK.forEach((q, i) => {
+    qWrap.innerHTML += `
+      <li class="question-item">
+        <p class="font-medium mb-2">${i+1}. ${q.t}</p>
+        <div class="slider-container">
+          <input type='range' min='1' max='5' value='3' id='q${i}' class='w-full slider'>
+          <div class="slider-labels">
+            <span>非常不同意</span>
+            <span>不同意</span>
+            <span>普通</span>
+            <span>同意</span>
+            <span>非常同意</span>
+          </div>
+        </div>
+      </li>`;
+  });
+  
+  qWrap.innerHTML += '<div id="progress" class="text-right text-sm mt-4">0/30</div>';
+  
+  document.querySelectorAll('input[type="range"]').forEach(slider => {
+    slider.addEventListener('input', () => {
+      const answered = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== "3").length;
+      document.getElementById("progress").textContent = `${answered}/30`;
+    });
+  });
+}
+
+function initializeSettings() {
+  const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
+  
+  document.getElementById('contactTitle').value = savedSettings.title || '掃碼預約一對一諮詢';
+  document.getElementById('contactLine1').value = savedSettings.line1 || 'Line ID: @immortalguiide';
+  document.getElementById('contactLine2').value = savedSettings.line2 || '專業諮詢預約';
+  document.getElementById('themeSelect').value = savedSettings.theme || 'warm';
+  document.getElementById('hueSlider').value = savedSettings.hue || 40;
+  document.getElementById('hueValue').textContent = savedSettings.hue || 40;
+  
+  const savedFont = savedSettings.font || "'Noto Sans TC', sans-serif";
+  document.documentElement.style.setProperty('--report-font', savedFont);
+  
+  const savedFontSize = savedSettings.fontSize || 14;
+  document.getElementById('fontSizeSlider').value = savedFontSize;
+  document.getElementById('fontSizeValue').textContent = savedFontSize;
+  updateFontSizePreview(savedFontSize);
+  
+  document.querySelectorAll('.font-option').forEach(option => {
+    if (option.dataset.font === savedFont) {
+      option.classList.add('active');
+    } else {
+      option.classList.remove('active');
+    }
+  });
+  
+  const qrCodePreview = document.getElementById('qrCodePreview');
+  if (savedSettings.qrDataUrl) {
+    qrCodePreview.src = savedSettings.qrDataUrl;
+  }
+  
+  updatePrintHeader();
+}
+
+function updateFontSizePreview(size) {
+  const preview = document.getElementById('fontSizePreview');
+  preview.style.fontSize = size + 'px';
+  document.documentElement.style.setProperty('--report-font-size', size + 'px');
+}
+
+function initializeEventListeners() {
+  document.getElementById('toggleSettingsBtn').addEventListener('click', function() {
+    const settingsPanel = document.getElementById('reportSettingsForm');
+    settingsPanel.classList.toggle('hidden');
+  });
+  
+  document.getElementById('closeSettingsBtn').addEventListener('click', function() {
+    document.getElementById('reportSettingsForm').classList.add('hidden');
+  });
+  
+  document.getElementById('reportSettingsForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    saveSettings();
+  });
+  
+  document.querySelectorAll('.font-option').forEach(option => {
+    option.addEventListener('click', function() {
+      document.querySelectorAll('.font-option').forEach(opt => opt.classList.remove('active'));
+      this.classList.add('active');
+      const selectedFont = this.dataset.font;
+      document.documentElement.style.setProperty('--report-font', selectedFont);
+    });
+  });
+  
+  document.getElementById('fontSizeSlider').addEventListener('input', function() {
+    const size = this.value;
+    document.getElementById('fontSizeValue').textContent = size;
+    updateFontSizePreview(size);
+  });
+  
+  document.getElementById('hueSlider').addEventListener('input', function() {
+    document.getElementById('hueValue').textContent = this.value;
+  });
+  
+  document.getElementById('form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    submitQuiz();
+  });
+  
+  document.getElementById('btnFillMid').addEventListener('click', function() {
+    document.querySelectorAll('input[type="range"]').forEach(slider => {
+      slider.value = 3;
+    });
+    const answered = Array.from(document.querySelectorAll('input[type="range"]')).filter(s => s.value !== "3").length;
+    document.getElementById("progress").textContent = `${answered}/30`;
+  });
+  
+  // AI分析按鈕 - 使用真正的API
+  document.getElementById('btnAI').addEventListener('click', function() {
+    generateRealAIAnalysis();
+  });
+  
+  document.getElementById('btnRetry').addEventListener('click', function() {
+    generateRealAIAnalysis();
+  });
+  
+  document.getElementById('btnShare').addEventListener('click', function() {
+    shareResult();
+  });
+}
+
+function saveSettings() {
+  const selectedFont = document.querySelector('.font-option.active').dataset.font;
+  const fontSize = document.getElementById('fontSizeSlider').value;
+  
+  const settings = {
+    qrDataUrl: document.getElementById('qrCodePreview').src,
+    title: document.getElementById('contactTitle').value,
+    line1: document.getElementById('contactLine1').value,
+    line2: document.getElementById('contactLine2').value,
+    theme: document.getElementById('themeSelect').value,
+    hue: document.getElementById('hueSlider').value,
+    font: selectedFont,
+    fontSize: fontSize
+  };
+  
+  localStorage.setItem('reportContactSettings', JSON.stringify(settings));
+  updatePrintHeader();
+  alert('設定已儲存！');
+  document.getElementById('reportSettingsForm').classList.add('hidden');
+}
+
+function updatePrintHeader() {
+  const savedSettings = JSON.parse(localStorage.getItem('reportContactSettings') || '{}');
+  document.getElementById('print-qrcode-title').textContent = savedSettings.title || '掃碼預約一對一諮詢';
+  document.getElementById('print-qrcode-subtitle').textContent = savedSettings.line1 || 'Line ID: @immortalguiide';
+  const qrCodeImg = document.getElementById('print-qrcode-img');
+  if (savedSettings.qrDataUrl) {
+    qrCodeImg.src = savedSettings.qrDataUrl;
   }
 }
 
-// ========== 修改 submitQuiz 函數，加入超人顯示 ==========
+// ========== 真正的AI分析功能 ==========
+async function generateRealAIAnalysis() {
+  const saved = JSON.parse(localStorage.getItem("shen-shou-result") || "null");
+  if (!saved) {
+    alert("⚠️請先完成測驗。");
+    return;
+  }
+
+  const loadingEl = document.getElementById("ai-loading");
+  const contentEl = document.getElementById("ai-analysis-content");
+  const btnAI = document.getElementById("btnAI");
+  const btnRetry = document.getElementById("btnRetry");
+  
+  loadingEl.style.display = "block";
+  contentEl.style.display = "none";
+  btnRetry.style.display = "none";
+  btnAI.disabled = true;
+
+  try {
+    simulateRealProgress();
+    
+    const analysisResult = await callExistingVercelAPI(saved);
+    displayRealAIAnalysis(analysisResult);
+    
+  } catch (error) {
+    console.error('AI分析失敗:', error);
+    showAIFallbackMessage();
+  } finally {
+    loadingEl.style.display = "none";
+    contentEl.style.display = "block";
+    btnRetry.style.display = "inline-block";
+    btnAI.disabled = false;
+  }
+}
+
+// ========== 調用您現有的 Vercel API ==========
+async function callExistingVercelAPI(userData) {
+  const API_URL = '/api/ai';
+  
+  const requestData = {
+    beastType: userData.summary.top,
+    scores: userData.scores,
+    gender: userData.gender,
+    variant: userData.summary.variant,
+  };
+
+  console.log('發送AI分析請求:', requestData);
+
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestData)
+  });
+
+  if (!response.ok) {
+    throw new Error(`API請求失敗: ${response.status}`);
+  }
+
+  const result = await response.json();
+  console.log('AI分析響應:', result);
+  return result;
+}
+
+// ========== 顯示真正的AI分析結果 ==========
+function displayRealAIAnalysis(analysisResult) {
+  document.getElementById("ai-personality").innerHTML = 
+    formatAIContent(analysisResult.personality || analysisResult.personality_analysis);
+  document.getElementById("ai-strengths").innerHTML = 
+    formatAIContent(analysisResult.strengths || analysisResult.strengths_analysis);
+  document.getElementById("ai-career").innerHTML = 
+    formatAIContent(analysisResult.career || analysisResult.career_advice);
+  document.getElementById("ai-relationships").innerHTML = 
+    formatAIContent(analysisResult.relationships || analysisResult.relationship_advice);
+  document.getElementById("ai-growth").innerHTML = 
+    formatAIContent(analysisResult.growth || analysisResult.growth_recommendations);
+  document.getElementById("ai-money").innerHTML = 
+    formatAIContent(analysisResult.money || analysisResult.money_insights);
+}
+
+function formatAIContent(content) {
+  if (typeof content === 'string') {
+    return content
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>')
+      .replace(/- (.*?)(?=\n|$)/g, '<li>$1</li>')
+      .replace(/(?:\n|^)([^<].*?)(?=\n|$)/g, '<p>$1</p>')
+      .replace(/<p><li>/g, '<li>')
+      .replace(/<\/li><\/p>/g, '</li>');
+  }
+  return content;
+}
+
+// ========== 錯誤處理 ==========
+function showAIFallbackMessage() {
+  const saved = JSON.parse(localStorage.getItem("shen-shou-result") || "null");
+  if (!saved) return;
+
+  document.getElementById("ai-personality").innerHTML = 
+    '<div class="text-amber-600 font-semibold">AI分析暫時不可用，已為您提供基礎分析報告</div>' + 
+    '<div class="mt-2">' + getBasicAnalysis(saved.summary.top) + '</div>';
+}
+
+function getBasicAnalysis(beastType) {
+  const basicAnalysis = {
+    '青龍': '您具有創新思維和豐富的想像力，適合從事創意相關工作。',
+    '朱雀': '您擅長溝通表達，具有很強的感染力，適合人際互動相關工作。',
+    '勾陳': '您重視穩定和安全，做事有條理，適合需要細心和耐心的工作。',
+    '螣蛇': '您洞察力強，善於協調人際關係，適合需要溝通協調的工作。',
+    '白虎': '您行動力強，目標導向明確，適合需要決斷力和執行力的工作。',
+    '玄武': '您思考深入，具有很好的分析能力，適合研究和分析相關工作。'
+  };
+  return basicAnalysis[beastType] || '暫無分析數據';
+}
+
+function simulateRealProgress() {
+  const progressBar = document.getElementById("progress-bar");
+  const loadingStep = document.getElementById("loading-step");
+  
+  const steps = [
+    {percent: 10, text: "連線AI分析伺服器..."},
+    {percent: 25, text: "分析人格特質數據..."},
+    {percent: 40, text: "生成個人化洞察..."},
+    {percent: 60, text: "計算最佳發展建議..."},
+    {percent: 75, text: "生成金錢卦象解析..."},
+    {percent: 90, text: "整合分析報告..."},
+    {percent: 100, text: "分析完成！"}
+  ];
+  
+  let currentStep = 0;
+  const interval = setInterval(() => {
+    if (currentStep < steps.length) {
+      progressBar.style.width = steps[currentStep].percent + "%";
+      loadingStep.textContent = steps[currentStep].text;
+      currentStep++;
+    } else {
+      clearInterval(interval);
+    }
+  }, 800);
+}
+
 function submitQuiz() {
   const scores = {青龍:0, 朱雀:0, 勾陳:0, 螣蛇:0, 白虎:0, 玄武:0};
   
@@ -1216,9 +1032,171 @@ function submitQuiz() {
   document.getElementById("result").style.display = "grid";
   document.getElementById("aiReport").style.display = "block";
   
-  // 顯示超人報告
   showSuperhero(summary.top);
 }
+
+function summarize(scores) {
+  const entries = Object.entries(scores).sort((a, b) => b[1] - a[1]);
+  const top = entries[0];
+  const secondary = entries[1];
+  const dual = top[1] - secondary[1] <= 2 ? [top[0], secondary[0]] : null;
+  const total = Object.values(scores).reduce((sum, score) => sum + score, 0);
+  const variantIndex = total % 12;
+  const variants = ["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"];
+  
+  return {
+    top: top[0],
+    dual: dual,
+    ranking: entries,
+    variant: variants[variantIndex],
+    total: total,
+    scores: scores
+  };
+}
+
+let radarChart = null;
+
+function renderRadar(scores) {
+  const canvas = document.getElementById("radar");
+  if (radarChart) {
+    radarChart.destroy();
+  }
+  
+  radarChart = new Chart(canvas, {
+    type: "radar",
+    data: {
+      labels: Object.keys(scores),
+      datasets: [{
+        label: "六獸能量",
+        data: Object.values(scores),
+        backgroundColor: "rgba(182,130,43,0.15)",
+        borderColor: "#b6822b",
+        pointBackgroundColor: "#b6822b",
+        pointBorderColor: "#fff",
+        pointHoverBackgroundColor: "#fff",
+        pointHoverBorderColor: "#b6822b"
+      }]
+    },
+    options: {
+      scales: {
+        r: {
+          beginAtZero: true,
+          max: 25,
+          ticks: {
+            stepSize: 5
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: false
+        }
+      },
+      maintainAspectRatio: false
+    }
+  });
+}
+
+function renderReport(summary, scores) {
+  document.getElementById("beastSVG").innerHTML = `
+    <div class="beast-text-container">
+      ${summary.top}
+    </div>
+  `;
+  
+  document.getElementById("mainBeastTitle").textContent = summary.dual ? 
+    `雙獸${summary.variant}型：${summary.top} × ${summary.dual[1]}` : 
+    `主${summary.variant}型：${summary.top}`;
+  
+  document.getElementById("dualHint").textContent = summary.dual ? 
+    `第二主導能量：${summary.dual[1]}` : "";
+  
+  document.getElementById("mainBeastSummary").textContent = 
+    `你的主型為 ${summary.top}${summary.variant}型，融合${summary.top}能量與${summary.variant}地支特質。`;
+  
+  const advice = generateAdvice(summary.top);
+  const adviceHTML = (title, items) => 
+    `<div class='border rounded p-2'><b>${title}</b><ul class='list-disc pl-5'>${items.map(item => `<li>${item}</li>`).join("")}</ul></div>`;
+  
+  document.getElementById("adviceCols").innerHTML = 
+    adviceHTML("職場建議", advice.職場) +
+    adviceHTML("感情建議", advice.感情) +
+    adviceHTML("養生建議", advice.養生);
+}
+
+function generateAdvice(mainBeast) {
+  const adviceBank = {
+    青龍: {
+      職場: ["創新領頭，勇於嘗試新方法","帶領團隊突破傳統框架","開拓新市場或業務領域"],
+      感情: ["保持關係中的新鮮感","共同探索新體驗","開放溝通創新想法"],
+      養生: ["戶外運動釋放能量","嘗試新的運動方式","保持生活多樣性"]
+    },
+    朱雀: {
+      職場: ["發揮表達與溝通優勢","激勵團隊士氣","建立廣泛人際網絡"],
+      感情: ["真誠表達情感需求","創造浪漫驚喜時刻","保持關係中的熱情"],
+      養生: ["藝術創作抒發情感","社交活動保持活力","表達性運動如舞蹈"]
+    },
+    勾陳: {
+      職場: ["建立穩定工作流程","確保任務按時完成","注重細節與品質"],
+      感情: ["建立信任與安全感","保持承諾與一致性","穩定表達關心"],
+      養生: ["規律作息保持平衡","均衡飲食與運動","建立健康生活習慣"]
+    },
+    螣蛇: {
+      職場: ["發揮洞察與協調能力","理解團隊成員需求","妥善處理人際關係"],
+      感情: ["深入理解伴侶感受","敏感體貼對方需求","建立深度情感連結"],
+      養生: ["冥想與內省練習","情緒管理與釋放","溫和調理身心"]
+    },
+    白虎: {
+      職場: ["果斷決策追求效率","設定明確目標","承擔領導責任"],
+      感情: ["直接表達愛與承諾","保護與支持伴侶","明確關係界線"],
+      養生: ["高強度運動釋壓","挑戰體能極限","培養紀律性"]
+    },
+    玄武: {
+      職場: ["策略規劃長遠發展","深入分析問題本質","獨立思考與判斷"],
+      感情: ["深度交流思想","理性分析關係","保持個人空間"],
+      養生: ["靜坐與閱讀","深度思考與反思","獨立運動如游泳"]
+    }
+  };
+  
+  return adviceBank[mainBeast] || adviceBank['青龍'];
+}
+
+function showSuperhero(beastType) {
+  const gender = document.querySelector('input[name="gender"]:checked').value;
+  const beastData = superheroData[beastType];
+  
+  if (beastData) {
+    const genderData = beastData[gender] || beastData.male;
+    
+    document.getElementById("superhero-name").textContent = genderData.name;
+    document.getElementById("superhero-ability").textContent = genderData.ability;
+    document.getElementById("superhero-mission").textContent = genderData.mission;
+    document.getElementById("superhero-local").textContent = `🏮 台灣在地版：${genderData.localName} - ${genderData.description}`;
+    
+    const superheroImage = document.getElementById("superhero-image");
+    superheroImage.src = genderData.image;
+    superheroImage.onerror = function() {
+      this.src = 'https://via.placeholder.com/150x150.png?text=神獸圖片';
+    };
+    
+    document.getElementById("superheroReport").style.display = "block";
+  }
+}
+
+function shareResult() {
+  html2canvas(document.getElementById("result")).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "shenshou-result.png";
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+}
+
+function printAnalysis() {
+  window.print();
+}
+
+window.currentBeastType = '';
 </script>
 </body>
 </html>
